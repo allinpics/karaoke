@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎤 Karaoke Night</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #18181f;
+    --border: #2e2e45;
+    --accent: #f0c040;
+    --text: #e8e8f0;
+    --muted: #aaaacc;
+    --header-bg: #13131a;
+    --section-title: #f0c040;
+    --footer-text: #ddddee;
+  }
+  body.light {
+    --bg: #f4f4f0;
+    --card: #ffffff;
+    --border: #aaaacc;
+    --accent: #8a6000;
+    --text: #111120;
+    --muted: #444466;
+    --header-bg: #e8e8e0;
+    --section-title: #6a4c00;
+    --footer-text: #222233;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  header {
+    text-align: center;
+    padding: 50px 20px 24px;
+    background: var(--header-bg);
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 6.5rem);
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 8px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .top-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--header-bg);
+    flex-wrap: wrap;
+  }
+  .top-controls input {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 8px;
+    width: 280px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .top-controls input:focus { border-color: var(--accent); }
+  .top-controls input::placeholder { color: var(--muted); font-weight: 500; }
+  .toggle-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: border-color 0.2s;
+    white-space: nowrap;
+  }
+  .toggle-btn:hover { border-color: var(--accent); }
+  .yt-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: 2px solid var(--border);
+    outline-offset: 2px;
+  }
+  .yt-btn:hover {
+    border-color: var(--accent);
+    outline-color: var(--accent);
+  }
+  .yt-btn:focus {
+    border-color: var(--accent);
+    outline-color: var(--accent);
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+  }
+  .section { margin-bottom: 40px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s;
+  }
+  .section-header:hover { border-color: var(--accent); }
+  .section-icon { font-size: 1.4rem; }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.05em;
+    color: var(--section-title);
+    flex: 1;
+  }
+  .collapse-indicator {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-header:hover .collapse-indicator { color: var(--accent); }
+  .arrow { font-size: 1rem; transition: transform 0.25s; }
+  .section-header.collapsed .arrow { transform: rotate(-90deg); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 2px;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    max-height: 5000px;
+    opacity: 1;
+  }
+  .grid.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    padding-top: 0;
+    pointer-events: none;
+  }
+  .song-card {
+    display: block;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    transition: border-color 0.2s, transform 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .song-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .song-card.hidden { display: none; }
+  .song-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  footer {
+    text-align: center;
+    color: var(--footer-text);
+    font-size: 0.88rem;
+    padding: 24px;
+    border-top: 2px solid var(--border);
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body class="light">
+
+<header>
+  <h1>🎤 Karaoke Night</h1>
+  <p class="subtitle">Your personal song finder</p>
+</header>
+
+<div class="top-controls">
+  <input type="text" id="searchInput" placeholder="Filter song list..." oninput="filterSongs(this.value)">
+  <input type="text" id="ytInput" placeholder="Find on YouTube..." onkeydown="if(event.key==='Enter') goYT()">
+  <button class="yt-btn" onclick="goYT()">▶ YouTube</button>
+  <button class="toggle-btn" onclick="toggleMode()">🌙 Dark Mode</button>
+</div>
+
+<div class="container">
+
+  <div class="section">
+    <div class="section-header collapsed" onclick="toggleSection('jt')">
+      <span class="section-icon">🎸</span>
+      <span class="section-title">James Taylor</span>
+      <span class="collapse-indicator"><span class="arrow">▼</span> <span class="hide-show">Show</span></span>
+    </div>
+    <div class="grid collapsed" id="grid-jt"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header collapsed" onclick="toggleSection('ps')">
+      <span class="section-icon">🎵</span>
+      <span class="section-title">Paul Simon</span>
+      <span class="collapse-indicator"><span class="arrow">▼</span> <span class="hide-show">Show</span></span>
+    </div>
+    <div class="grid collapsed" id="grid-ps"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header collapsed" onclick="toggleSection('protest')">
+      <span class="section-icon">✊</span>
+      <span class="section-title">Civil Rights &amp; Anti-War</span>
+      <span class="collapse-indicator"><span class="arrow">▼</span> <span class="hide-show">Show</span></span>
+    </div>
+    <div class="grid collapsed" id="grid-protest"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header collapsed" onclick="toggleSection('other')">
+      <span class="section-icon">🎶</span>
+      <span class="section-title">All Other Songs</span>
+      <span class="collapse-indicator"><span class="arrow">▼</span> <span class="hide-show">Show</span></span>
+    </div>
+    <div class="grid collapsed" id="grid-other"></div>
+  </div>
+
+</div>
+
+<footer>Click any song card to search YouTube &nbsp;·&nbsp; Filter box searches your list &nbsp;·&nbsp; Find box goes straight to YouTube</footer>
+
+<script>
+function ytSearch(q) {
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent('karaoke ' + q);
+}
+
+function goYT() {
+  var val = document.getElementById('ytInput').value;
+  if (val.trim()) {
+    window.location.href = 'https://www.youtube.com/results?search_query=karaoke+' + encodeURIComponent(val);
+  }
+}
+
+function makeCard(title) {
+  const card = document.createElement('a');
+  card.className = 'song-card';
+  card.dataset.title = title.toLowerCase();
+  card.href = ytSearch(title);
+  card.target = '_self';
+  const t = document.createElement('div');
+  t.className = 'song-title';
+  t.textContent = title;
+  card.appendChild(t);
+  return card;
+}
+
+// ---- JAMES TAYLOR ----
+const jtSongs = [
+  'Fire and Rain',
+  'Mexico',
+  "Don't Let Me Be Lonely Tonight",
+  'Handyman',
+  'Damn This Traffic Jam',
+  'Carolina in My Mind',
+  'Shower the People',
+  "You've Got a Friend",
+  'How Sweet It Is',
+  'Happy Birthday',
+];
+
+// ---- PAUL SIMON ----
+const psSongs = [
+  'Kodachrome',
+  'Me and Julio Down by the Schoolyard',
+  'You Can Call Me Al',
+  'Slip Slidin Away',
+  '50 Ways to Leave Your Lover',
+  'Graceland',
+  'Bridge Over Troubled Water',
+  'Still Crazy After All These Years',
+  'Mother and Child Reunion',
+  'The Boxer',
+];
+
+// ---- CIVIL RIGHTS & ANTI-WAR ----
+const protestSongs = [
+  'Waiting on the World to Change',
+  'Ohio',
+  'Fortunate Son',
+  'War Pigs',
+  'In the Ghetto',
+  'We Shall Overcome',
+  'A Change Is Gonna Come',
+  "Blowin' in the Wind",
+  "The Times They Are A-Changin'",
+  'Mississippi Goddam',
+  "Say It Loud I'm Black and I'm Proud",
+  'People Get Ready',
+  'Respect',
+  "What's Going On",
+  'Give Peace a Chance',
+  'War',
+  "For What It's Worth",
+  'Where Have All the Flowers Gone',
+  'Masters of War',
+  'Ball of Confusion',
+  'When We Stand Together',
+  'Glory',
+  'Alright',
+  'This Is America',
+  'American Skin (41 Shots)',
+];
+
+// ---- ALL OTHER SONGS ----
+const otherSongs = [
+  "Hello It's Me",
+  "Lyin' Eyes",
+  'All Right Now',
+  'Kryptonite',
+  'Ride Captain Ride',
+  'Suspicious Minds',
+  'Shine',
+  'Sloop John B',
+  'Take the Money and Run',
+  'Against the Wind',
+  'Young Turks',
+  "Tonight's the Night",
+  'First Cut Is the Deepest',
+  'Maggie May',
+  'Forever Young',
+  'Hope It Gives You Hell',
+  'Rhinestone Cowboy',
+  'It Never Rains in Southern California',
+  'Cool Change',
+  'Desperado',
+  'Ventura Highway',
+  'Tin Man',
+  'Sound of Silence',
+  'Dream On',
+  "Free Fallin'",
+  'Welcome Back My Friend',
+  "You're in My Heart",
+  'Diamond Girl',
+  'Love Is the Answer',
+  'Turn the Page',
+  'I Took a Pill in Ibiza',
+  'Sweet Caroline',
+  'All I Wanna Do',
+  'Southern Cross',
+  'Codeine',
+  "Ridin' Solo",
+  '50 Ways to Say Goodbye',
+  "Don't You Worry Child",
+  'Snow Hey Oh',
+  'Baker Street',
+  'Smoke from a Distant Fire',
+  'Two Princes',
+  'Get Closer',
+  'Summer Breeze',
+  'Castles in the Air',
+  'Part Time Lover',
+  "Fool If You Think It's Over",
+  'Sex and Candy',
+  'Everything You Want',
+  'Sister Golden Hair',
+  'Come Monday',
+  'Margaritaville',
+  'Changes in Latitudes',
+  'The Heart of the Matter',
+  'Stay',
+  'Brandy',
+  'Take It Easy',
+  'Tiny Dancer',
+  'House of the Rising Sun',
+  "I'd Really Love to See You Tonight",
+  "We've Got Tonight",
+  'Sundown',
+  'Wildfire',
+  'If You Could Read My Mind',
+  'Layla',
+  'Lola',
+  'Money for Nothing',
+  'West End Girls',
+  'Sultans of Swing',
+  "I Ain't Missing You at All",
+  "Feel Like Makin' Love",
+  'Please Come to Boston',
+  'I Want You to Want Me',
+  'Centerfold',
+  "I'm on Fire",
+  "Girl You'll Be a Woman Soon",
+  'I Am a Man of Constant Sorrow',
+];
+
+// Populate grids
+const jtGrid = document.getElementById('grid-jt');
+jtSongs.forEach(song => jtGrid.appendChild(makeCard(song)));
+
+const psGrid = document.getElementById('grid-ps');
+psSongs.forEach(song => psGrid.appendChild(makeCard(song)));
+
+const protestGrid = document.getElementById('grid-protest');
+protestSongs.forEach(song => protestGrid.appendChild(makeCard(song)));
+
+const otherGrid = document.getElementById('grid-other');
+otherSongs.forEach(song => otherGrid.appendChild(makeCard(song)));
+
+// ---- SECTION TOGGLE ----
+function toggleSection(id) {
+  const grid = document.getElementById('grid-' + id);
+  const header = grid.previousElementSibling;
+  const isCollapsed = grid.classList.toggle('collapsed');
+  header.classList.toggle('collapsed', isCollapsed);
+  header.querySelector('.hide-show').textContent = isCollapsed ? 'Show' : 'Hide';
+  saveState();
+}
+
+// ---- FILTER ----
+function filterSongs(query) {
+  query = query.toLowerCase();
+  document.querySelectorAll('.song-card').forEach(card => {
+    card.classList.toggle('hidden', query.length > 0 && !card.dataset.title.includes(query));
+  });
+  if (query.length > 0) {
+    ['jt','ps','protest','other'].forEach(id => {
+      const grid = document.getElementById('grid-' + id);
+      const header = grid.previousElementSibling;
+      grid.classList.remove('collapsed');
+      header.classList.remove('collapsed');
+      header.querySelector('.hide-show').textContent = 'Hide';
+    });
+  }
+  saveState();
+}
+
+// ---- DARK/LIGHT TOGGLE ----
+let isDark = false;
+function toggleMode() {
+  isDark = !isDark;
+  document.body.classList.toggle('light', !isDark);
+  document.querySelector('.toggle-btn').textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+  saveState();
+}
+
+// ---- SESSION STATE ----
+function saveState() {
+  const open = ['jt','ps','protest','other'].map(id =>
+    !document.getElementById('grid-' + id).classList.contains('collapsed')
+  );
+  sessionStorage.setItem('karaokeOpen', JSON.stringify(open));
+  sessionStorage.setItem('karaokeDark', isDark);
+  sessionStorage.setItem('karaokeFilter', document.getElementById('searchInput').value);
+}
+
+function restoreState() {
+  const savedDark = sessionStorage.getItem('karaokeDark');
+  if (savedDark === 'true') {
+    isDark = true;
+    document.body.classList.remove('light');
+    document.querySelector('.toggle-btn').textContent = '☀️ Light Mode';
+  }
+
+  const savedFilter = sessionStorage.getItem('karaokeFilter');
+  if (savedFilter) {
+    document.getElementById('searchInput').value = savedFilter;
+    filterSongs(savedFilter);
+  }
+
+  const savedOpen = sessionStorage.getItem('karaokeOpen');
+  if (savedOpen) {
+    const open = JSON.parse(savedOpen);
+    ['jt','ps','protest','other'].forEach((id, i) => {
+      const grid = document.getElementById('grid-' + id);
+      const header = grid.previousElementSibling;
+      if (open[i]) {
+        grid.classList.remove('collapsed');
+        header.classList.remove('collapsed');
+        header.querySelector('.hide-show').textContent = 'Hide';
+      } else {
+        grid.classList.add('collapsed');
+        header.classList.add('collapsed');
+        header.querySelector('.hide-show').textContent = 'Show';
+      }
+    });
+  }
+
+  const savedScroll = sessionStorage.getItem('karaokeScroll');
+  if (savedScroll) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, parseInt(savedScroll));
+      });
+    });
+  }
+}
+
+window.addEventListener('scroll', () => {
+  sessionStorage.setItem('karaokeScroll', window.scrollY);
+});
+
+window.addEventListener('beforeunload', () => {
+  sessionStorage.setItem('karaokeScroll', window.scrollY);
+});
+
+window.addEventListener('DOMContentLoaded', restoreState);
+</script>
+</body>
+</html>
