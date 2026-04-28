@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- allinpics.com | Landing Pad -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>allinpics</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #18181f;
+    --border: #5a5040;
+    --accent: #f0c040;
+    --text: #e8e8f0;
+    --muted: #9a9080;
+  }
+  body.light {
+    --bg: #f4f4f0;
+    --card: #ffffff;
+    --border: #c8a870;
+    --accent: #8a6000;
+    --text: #111120;
+    --muted: #7a6a50;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 6rem);
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+    text-align: center;
+  }
+  .tagline {
+    color: var(--muted);
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    margin-top: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 300;
+    text-align: center;
+  }
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 48px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .link-card {
+    display: block;
+    padding: 18px 24px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .link-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .link-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.07em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .link-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+  footer {
+    margin-top: 48px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+  .theme-btn {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body class="light">
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+
+  <h1>allinpics</h1>
+  <p class="tagline">Apps for friends &amp; family</p>
+
+  <div class="links">
+    <a class="link-card" href="karaoke_night/">
+      <div class="link-title">🎤 Karaoke Night</div>
+      <div class="link-desc">Your personal song finder — 100% No Judgement Zone</div>
+    </a>
+  </div>
+
+  <footer>allinpics.com</footer>
+
+<script>
+  function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('light')) {
+      body.classList.remove('light');
+      btn.textContent = '☀️ Light';
+    } else {
+      body.classList.add('light');
+      btn.textContent = '🌙 Dark';
+    }
+  }
+</script>
+</body>
+</html>
