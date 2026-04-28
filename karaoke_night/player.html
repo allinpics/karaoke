@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<!-- Karaoke Night | R01V01L04i (1777386302 EDT-0400) -->
+<!-- Session file format: CSV — see sample.csv for template -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎤 Karaoke Night</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* --- theme colors --- */
+    --bg: #0a0a0f;
+    --card: #18181f;
+    --border: #5a5040;
+    --accent: #f0c040;
+    --text: #e8e8f0;
+    --muted: #9a9080;
+    --header-bg: #13131a;
+    --section-title: #f0c040;
+    --footer-text: #ddddee;
+
+    /* --- sizing formula: singer 100%, cat 85%, song 75% --- */
+    --sz-singer: 1.2rem;
+    --sz-cat:    calc(var(--sz-singer) * 0.85);
+    --sz-song:   calc(var(--sz-singer) * 0.75);
+
+    /* --- cat card subtle shade --- */
+    --cat-bg: #1e1e2a;
+
+    /* --- spacing formula: all padding/gap derived from base --- */
+    --base: 1rem;
+    --pad-singer: calc(var(--base) * 0.45) calc(var(--base) * 0.75);
+    --pad-cat:    calc(var(--base) * 0.35) calc(var(--base) * 0.6);
+    --pad-song:   calc(var(--sz-song) * 0.5) calc(var(--sz-song) * 0.5);
+    --gap-grid:   calc(var(--base) * 0.4);
+    --gap-section:calc(var(--base) * 0.5);
+    --gap-singer: calc(var(--base) * 0.75);
+  }
+  body.light {
+    --bg: #f4f4f0;
+    --card: #ffffff;
+    --border: #c8a870;
+    --accent: #8a6000;
+    --text: #111120;
+    --muted: #7a6a50;
+    --header-bg: #e8e8e0;
+    --section-title: #6a4c00;
+    --footer-text: #4a3a20;
+    --cat-bg: #eeeee6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* --- sticky header --- */
+  header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: calc(var(--base) * 0.5) calc(var(--base) * 1);
+    background: var(--header-bg);
+    flex-shrink: 0;
+  }
+  .header-unit {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.4);
+    width: fit-content;
+    margin: 0 auto;
+  }
+  .header-mic {
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    line-height: 1;
+  }
+  .header-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.8rem);
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: clamp(0.5rem, 1vw, 0.7rem);
+    margin-top: calc(var(--base) * 0.15);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* --- sticky controls bar --- */
+  /* --- shared control bar heights --- */
+  :root { --ctrl-h: 2.2rem; --ribbon-h: 1.6rem; }
+
+  .top-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: calc(var(--base) * 0.6);
+    padding: calc(var(--base) * 0.4) calc(var(--base) * 1);
+    background: var(--header-bg);
+    border-bottom: 2px solid var(--border);
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  /* --- tool ribbon --- */
+  .ribbon {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 calc(var(--base) * 1);
+    background: var(--card);
+    border-bottom: 2px solid var(--border);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+  }
+  .ribbon-menu {
+    position: relative;
+  }
+  .ribbon-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0 calc(var(--base) * 0.7);
+    height: var(--ribbon-h);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+    border-radius: 4px;
+  }
+  .ribbon-btn:hover,
+  .ribbon-btn.open { background: var(--header-bg); color: var(--accent); }
+  .ribbon-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0 6px 6px 6px;
+    width: max-content;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 200;
+    padding: 4px 0;
+  }
+  .ribbon-dropdown.open { display: block; }
+  .ribbon-item {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 6px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+  }
+  .ribbon-item:hover { background: var(--header-bg); color: var(--accent); }
+  .ribbon-item.disabled { color: var(--muted); cursor: default; }
+  .ribbon-item.disabled:hover { background: none; color: var(--muted); }
+  .ribbon-sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0;
+  }
+
+  /* Flyout submenu */
+  .ribbon-flyout { position: relative; }
+  .ribbon-submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    min-width: 140px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 300;
+    padding: 4px 0;
+  }
+  .ribbon-flyout:hover .ribbon-submenu { display: block; }
+
+  /* --- modals --- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    max-width: 340px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .modal-body {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .modal-ok {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .modal-ok:hover { opacity: 0.85; }
+  .input-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    outline: none;
+  }
+  .input-wrap input {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: calc(var(--base) * 0.3) calc(var(--base) * 2) calc(var(--base) * 0.3) calc(var(--base) * 0.75);
+    border-radius: 6px;
+    width: 240px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-wrap input:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
+  .input-wrap input:disabled { opacity: 0.45; cursor: not-allowed; }
+  .input-wrap input::placeholder { color: var(--muted); font-weight: 500; }
+  .clear-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    display: none;
+  }
+  .clear-btn:hover { color: var(--accent); }
+  .clear-btn.visible { display: block; }
+  /* yt go button sits left of the clear btn */
+  .yt-go-btn {
+    position: absolute;
+    right: 26px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    display: none;
+  }
+  .yt-go-btn:hover { color: var(--accent); }
+  .yt-go-btn.visible { display: block; }
+  .toggle-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: calc(var(--base) * 0.3) calc(var(--base) * 0.75);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: border-color 0.2s;
+    white-space: nowrap;
+  }
+  .toggle-btn:hover { border-color: var(--accent); }
+
+  /* --- scrolling content area --- */
+  .container {
+    flex: 1;
+    overflow-y: auto;
+    padding: calc(var(--base) * 0.6) calc(var(--base) * 1) calc(var(--base) * 0.6);
+  }
+
+  /* --- singer block --- */
+  .singer-block { margin-bottom: var(--gap-singer); }
+  .singer-header {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.4);
+    padding: var(--pad-singer);
+    background: var(--accent);
+    border-radius: 7px;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s;
+  }
+  .singer-header:hover { opacity: 0.88; }
+  .singer-icon { font-size: var(--sz-cat); }
+  .edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 4px;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+    color: var(--bg);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .singer-header:hover .edit-btn,
+  .section-header:hover .edit-btn { opacity: 0.9; }
+  .edit-btn:hover { opacity: 1 !important; }
+
+  /* Pencil context menu */
+  .pencil-menu {
+    position: fixed;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    z-index: 500;
+    min-width: 160px;
+    padding: 4px 0;
+    display: none;
+  }
+  .pencil-menu.open { display: block; }
+  .pencil-menu-item {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 7px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .pencil-menu-item:hover { background: var(--border); }
+  .pencil-menu-item.danger { color: #e05050; }
+  .pencil-menu hr { border: none; border-top: 1px solid var(--border); margin: 3px 0; }
+  .edit-input {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-bottom: 2px solid var(--bg);
+    color: var(--bg);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: inherit;
+    letter-spacing: inherit;
+    outline: none;
+    min-width: 80px;
+    max-width: 300px;
+    display: inline-block;
+  }
+  /* Category header edit input */
+  .section-header .edit-input {
+    border-bottom-color: var(--accent);
+    color: var(--section-title);
+    background: transparent;
+  }
+  /* Song card edit btn and input */
+  .song-card .edit-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--accent);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: inherit;
+    font-weight: 600;
+    outline: none;
+    width: calc(100% - 24px);
+    display: inline-block;
+  }
+  .singer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: var(--sz-singer);
+    letter-spacing: 0.07em;
+    color: var(--bg);
+    flex: 1;
+    line-height: 1;
+  }
+  .singer-collapse-indicator {
+    font-size: var(--sz-song);
+    font-weight: 600;
+    color: var(--bg);
+    opacity: 0.75;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .singer-arrow { font-size: var(--sz-song); transition: transform 0.25s; }
+  .singer-header.collapsed .singer-arrow { transform: rotate(-90deg); }
+  .singer-body {
+    padding: calc(var(--base) * 0.4) 0 0 calc(var(--base) * 0.6);
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.3s ease;
+    max-height: 20000px;
+    opacity: 1;
+  }
+  .singer-body.collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* --- category section --- */
+  .section { margin-bottom: var(--gap-section); }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.35);
+    padding: var(--pad-cat);
+    background: var(--cat-bg);
+    border: 3px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s;
+  }
+  .section-header:hover { border-color: var(--accent); }
+  .section-icon { font-size: var(--sz-song); }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: var(--sz-cat);
+    letter-spacing: 0.05em;
+    color: var(--section-title);
+    flex: 1;
+  }
+  .collapse-indicator {
+    color: var(--muted);
+    font-size: var(--sz-song);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .section-header:hover .collapse-indicator { color: var(--accent); }
+  .arrow { font-size: var(--sz-song); transition: transform 0.25s; }
+  .section-header.collapsed .arrow { transform: rotate(-90deg); }
+
+  /* --- song grid --- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+    gap: var(--gap-grid);
+    margin-top: var(--gap-grid);
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    max-height: 5000px;
+    opacity: 1;
+  }
+  .grid.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    pointer-events: none;
+  }
+  .song-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: var(--pad-song);
+    transition: border-color 0.2s, transform 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .song-card:hover {
+    border-color: var(--accent);
+  }
+  .song-card.hidden { display: none; }
+  .song-title {
+    font-size: var(--sz-song);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.25;
+    flex: 1;
+  }
+  .song-card .edit-btn {
+    flex-shrink: 0;
+    display: inline-block;
+    color: var(--muted);
+    font-size: 0.75rem;
+    opacity: 0.5;
+    padding: 0;
+    margin-top: 1px;
+  }
+  .song-card { position: relative; }
+  .song-card:hover .edit-btn { opacity: 0.9; }
+  /* New entry panel */
+  .new-entry-panel {
+    padding: calc(var(--base) * 0.75) calc(var(--base) * 1);
+    border-bottom: 1px solid var(--border);
+    background: var(--header-bg);
+  }
+  .new-entry-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .new-entry-row:last-child { margin-bottom: 0; }
+  .new-entry-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    width: 64px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .new-entry-input,
+  select.new-entry-input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    padding: 5px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .new-entry-input:focus,
+  select.new-entry-input:focus { border-color: var(--accent); }
+  .new-entry-input::placeholder { color: var(--muted); }
+  .no-session {
+    text-align: center;
+    color: var(--muted);
+    font-size: 1rem;
+    padding: calc(var(--base) * 3) calc(var(--base) * 1);
+  }
+  .welcome-panel {
+    text-align: center;
+    padding: calc(var(--base) * 2.5) calc(var(--base) * 2);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .welcome-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: calc(var(--base) * 0.6);
+  }
+  .welcome-steps {
+    list-style: none;
+    padding: 0;
+    margin: calc(var(--base) * 1) 0 0;
+    text-align: left;
+    display: inline-block;
+  }
+  .welcome-steps li {
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: calc(var(--base) * 0.3) 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .welcome-steps li .step-num {
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 1.2rem;
+  }
+
+  /* --- sticky footer --- */
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: var(--footer-text);
+    font-size: 0.78rem;
+    padding: calc(var(--base) * 0.4) calc(var(--base) * 1.5);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    background: var(--header-bg);
+    flex-shrink: 0;
+  }
+  .mode-toggle {
+    position: absolute;
+    left: calc(var(--base) * 0.75);
+    background: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--bg);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .mode-toggle:hover { opacity: 0.8; }
+
+  .search-mode-btn {
+    background: var(--border);
+    border: 2px solid var(--border);
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 6px 10px;
+    line-height: 1;
+    transition: all 0.15s;
+    position: relative;
+    top: 0;
+  }
+  #btnMic {
+    border-radius: 6px 0 0 6px;
+    border-right: none;
+  }
+  #btnNote {
+    border-radius: 0 6px 6px 0;
+  }
+  .search-mode-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .search-mode-btn.active {
+    background: #ffffff;
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 6px rgba(240,192,64,0.5);
+    top: 1px;
+  }
+  body:not(.light) .search-mode-btn.active {
+    background: #fff8d0;
+    color: #8a6000;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), 0 0 8px rgba(240,192,64,0.5);
+  }
+</style>
+</head>
+<body class="light">
+
+<header>
+  <div class="header-unit">
+    <span class="header-mic">🎤</span>
+    <div class="header-text">
+      <h1>Karaoke Night</h1>
+      <p class="subtitle">Your personal song finder</p>
+    </div>
+  </div>
+</header>
+
+<div class="top-controls">
+  <div class="input-wrap" id="searchWrap">
+    <input type="text" id="searchInput" placeholder="Filter song list..." oninput="filterSongs(this.value)" disabled>
+    <button class="clear-btn" id="clearSearch" onclick="clearFilter()" title="Clear filter">✕</button>
+  </div>
+  <div class="input-wrap">
+    <input type="text" id="ytInput" placeholder="Find on YouTube..." onkeydown="if(event.key==='Enter') goYT()" oninput="toggleYTClear()">
+    <button class="yt-go-btn" id="ytGoBtn" onclick="goYT()" title="Search YouTube">▶</button>
+    <button class="clear-btn" id="clearYT" onclick="clearYT()" title="Clear">✕</button>
+  </div>
+  <div style="display:inline-flex"><button class="search-mode-btn active" id="btnMic" onclick="setSearchMode('karaoke')" title="Karaoke Mode">🎤</button><button class="search-mode-btn" id="btnNote" onclick="setSearchMode('music')" title="Music Video Mode">🎵</button></div>
+</div>
+
+<!-- Tool ribbon — stub menus, functionality wired in r01v01l03 -->
+<div class="ribbon">
+
+  <div class="ribbon-menu">
+    <button class="ribbon-btn" id="rbSession" onclick="toggleRibbon('rbSession','ddSession')">Session</button>
+    <div class="ribbon-dropdown" id="ddSession">
+      <button class="ribbon-item" onclick="ribbonOpen()">Open</button>
+      <button class="ribbon-item" id="ribbonNewBtn" onclick="ribbonNew()">New</button>
+      <button class="ribbon-item disabled" id="ribbonAddBtn" onclick="ribbonAdd()">Add</button>
+      <button class="ribbon-item disabled" id="ribbonReopenBtn" onclick="ribbonReopen()">Reopen</button>
+      <button class="ribbon-item disabled" id="ribbonSaveAsBtn" onclick="ribbonSaveAs()">Save As...</button>
+      <button class="ribbon-item disabled" id="ribbonCloseBtn" onclick="ribbonClose()">Close</button>
+      <hr class="ribbon-sep">
+      <button class="ribbon-item" onclick="sampleLoad()">Open Sample</button>
+      <hr class="ribbon-sep">
+      <div class="ribbon-flyout">
+        <button class="ribbon-item">Download ›</button>
+        <div class="ribbon-submenu">
+          <button class="ribbon-item" onclick="downloadFile('cfg/sample.csv','sample.csv')">Sample Session</button>
+          <button class="ribbon-item" onclick="downloadFile('cfg/new.csv','new_session.csv')">Blank Session</button>
+        </div>
+      </div>
+      <hr class="ribbon-sep">
+      <button class="ribbon-item" onclick="ribbonExit()">Exit</button>
+    </div>
+  </div>
+
+  <div class="ribbon-menu">
+    <button class="ribbon-btn" id="rbSinger" onclick="toggleRibbon('rbSinger','ddSinger')">Singer</button>
+    <div class="ribbon-dropdown" id="ddSinger">
+      <button class="ribbon-item disabled" id="ribbonDropBtn" onclick="ribbonDrop()">Drop Singer(s)</button>
+      <button class="ribbon-item disabled" id="ribbonUndropBtn" onclick="ribbonUndrop()">Undrop Singer(s)</button>
+    </div>
+  </div>
+
+  <div class="ribbon-menu">
+    <button class="ribbon-btn disabled" id="rbView" onclick="toggleRibbon('rbView','ddView')">View</button>
+    <div class="ribbon-dropdown" id="ddView">
+      <div class="ribbon-flyout">
+        <button class="ribbon-item disabled" id="viewSingersBtn">Singers ›</button>
+        <div class="ribbon-submenu">
+          <button class="ribbon-item" onclick="viewExpand('singers')">Expand All</button>
+          <button class="ribbon-item" onclick="viewCollapse('singers')">Collapse All</button>
+        </div>
+      </div>
+      <div class="ribbon-flyout">
+        <button class="ribbon-item disabled" id="viewCatsBtn">Categories ›</button>
+        <div class="ribbon-submenu">
+          <button class="ribbon-item" onclick="viewExpand('cats')">Expand All</button>
+          <button class="ribbon-item" onclick="viewCollapse('cats')">Collapse All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ribbon-menu">
+    <button class="ribbon-btn" id="rbHelp" onclick="toggleRibbon('rbHelp','ddHelp')">Help</button>
+    <div class="ribbon-dropdown" id="ddHelp">
+      <button class="ribbon-item" onclick="openDoc('docs/user-guide.html')">User Guide</button>
+      <button class="ribbon-item" onclick="openDoc('docs/virtual-karaoke-guide.html')">Virtual Setup</button>
+      <button class="ribbon-item" onclick="openModal('modalAbout')">About</button>
+    </div>
+  </div>
+
+  <div class="ribbon-menu" style="margin-left:auto;">
+    <button class="ribbon-btn" id="modeBtn" onclick="toggleMode()" title="Toggle dark / light mode">🌙</button>
+  </div>
+
+</div>
+
+<!-- New session entry panel -->
+<div id="newEntryPanel" style="display:none;" class="new-entry-panel">
+  <div class="new-entry-row" id="newSingerRow">
+    <span class="new-entry-label">Singer</span>
+    <input class="new-entry-input" id="newSingerInput" placeholder="Add singer or select existing..." autocomplete="off" list="singerSuggestions">
+    <datalist id="singerSuggestions"></datalist>
+  </div>
+  <div class="new-entry-row" id="newCatRow" style="display:none;">
+    <span class="new-entry-label">Category</span>
+    <input class="new-entry-input" id="newCatInput" placeholder="Add category or select existing..." autocomplete="off" list="catSuggestions">
+    <datalist id="catSuggestions"></datalist>
+  </div>
+  <div class="new-entry-row" id="newSongRow" style="display:none;">
+    <span class="new-entry-label">Song</span>
+    <input class="new-entry-input" id="newSongInput" placeholder="Song title... (Enter=add, blank Enter=back)" autocomplete="off">
+  </div>
+</div>
+
+<div class="container" id="main-container">
+  <div class="welcome-panel" id="welcomePanel">
+    <div class="welcome-title">Welcome to Karaoke Night 🎤</div>
+    <p style="color:var(--muted);font-size:0.9rem;">Your personal song finder — load a session or build one right here.</p>
+    <ol class="welcome-steps">
+      <li><span class="step-num">1.</span> <strong>Session → Open</strong> to load a .csv session file, or <strong>Session → New</strong> to build one in-app</li>
+      <li><span class="step-num">2.</span> Expand a Singer, then a Category to browse songs — tap a card to search YouTube</li>
+      <li><span class="step-num">3.</span> Use <strong>Filter</strong> to search within your session, or <strong>Find on YouTube</strong> for any song</li>
+      <li><span class="step-num">4.</span> 🎤 <strong>Karaoke Mode</strong> searches for backing tracks &nbsp;·&nbsp; 🎵 <strong>Music Video Mode</strong> finds the original recording</li>
+      <li><span class="step-num">5.</span> Use <strong>Singer</strong> and <strong>View</strong> menus to manage singers and expand/collapse your list</li>
+    </ol>
+  </div>
+</div>
+
+<!-- Undrop singers modal -->
+<div class="modal-overlay" id="modalUndrop">
+  <div class="modal-box">
+    <div class="modal-title">Undrop Singers</div>
+    <div class="modal-body" style="text-align:left;">
+      <p style="margin-bottom:10px;font-size:0.85rem;">Check singers to bring back into the session:</p>
+      <div id="undropList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="modal-ok" onclick="applyUndrop()">Apply</button>
+      <button class="modal-ok" style="background:var(--muted);" onclick="closeModal('modalUndrop')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Drop singers modal -->
+<div class="modal-overlay" id="modalDrop">
+  <div class="modal-box">
+    <div class="modal-title">Drop Singers</div>
+    <div class="modal-body" style="text-align:left;">
+      <p style="margin-bottom:10px;font-size:0.85rem;">Uncheck singers to remove from the current session:</p>
+      <div id="dropList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="modal-ok" onclick="applyDrop()">Apply</button>
+      <button class="modal-ok" style="background:var(--muted);" onclick="closeModal('modalDrop')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pencil context menu -->
+<div class="pencil-menu" id="pencilMenu">
+  <button class="pencil-menu-item" id="pmRename">✏️ Rename</button>
+  <button class="pencil-menu-item danger" id="pmDelete">🗑️ Delete</button>
+  <hr>
+  <button class="pencil-menu-item" id="pmAddAbove">＋ Add Above</button>
+  <button class="pencil-menu-item" id="pmAddBelow">＋ Add Below</button>
+</div>
+
+<!-- Save As modal -->
+<div class="modal-overlay" id="modalSaveAs">
+  <div class="modal-box">
+    <div class="modal-title">Save Session As</div>
+    <div class="modal-body" style="text-align:left;">
+      <p style="margin-bottom:10px;font-size:0.85rem;">Enter a filename for your session:</p>
+      <input class="new-entry-input" id="saveAsFilename" style="width:100%;" placeholder="session_name" autocomplete="off">
+      <p style="margin-top:6px;font-size:0.78rem;color:var(--muted);">.csv will be added automatically</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:4px;">
+      <button class="modal-ok" onclick="saveAsConfirm()">Save</button>
+      <button class="modal-ok" style="background:var(--muted);" onclick="closeModal('modalSaveAs')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- About modal -->
+<div class="modal-overlay" id="modalAbout">
+  <div class="modal-box">
+    <div class="modal-title">🎤 Karaoke Night</div>
+    <div class="modal-body">
+      Open a session file to get started. Filter your song list, find tracks on YouTube, and switch between Karaoke and Music Video search modes.<br><br>
+      <strong>Build:</strong> <span id="aboutRVL"></span><br>
+      <span id="aboutBuild" onclick="toggleBuildDate()" style="cursor:pointer;text-decoration:underline dotted;font-size:0.9em;" title="Click to toggle date"></span>
+    </div>
+    <button class="modal-ok" onclick="closeModal('modalAbout')">OK</button>
+  </div>
+</div>
+
+<footer>
+  Tap a song card to search YouTube &nbsp;·&nbsp; Filter searches your session &nbsp;·&nbsp; Find on YouTube for any song &nbsp;·&nbsp; ✏️ to rename &nbsp;·&nbsp; 🗑️ to delete
+</footer>
+
+<input type="file" id="fileInput" accept=".csv" multiple style="display:none" onchange="handleFile(this)">
+<input type="file" id="fileInputAdd" accept=".csv" multiple style="display:none" onchange="handleFileAdd(this)">
+<input type="file" id="fileInputReopen" accept=".csv" multiple style="display:none" onchange="handleFileReopen(this)">
+
+<script>
+// ---- BUILD TAG — single source of truth for version display ----
+const BUILD = 'R01V01L04i (1777386302 EDT-0400)';
+
+// ---- YOUTUBE ----
+// ---- MODALS ----
+function openModal(id) {
+  closeAllRibbons();
+  if (id === 'modalAbout') {
+    buildDateShowing = false;
+    const rvlMatch = BUILD.match(/^(R\w+)\s/);
+    const epochMatch = BUILD.match(/\((\d+)\s+(\w+)([+-]\d{4})\)/);
+    // Line 1: RVL tag only
+    document.getElementById('aboutRVL').textContent = rvlMatch ? rvlMatch[1] : BUILD;
+    // Line 2: epoch portion clickable, defaults to epoch
+    if (epochMatch) {
+      const epochStr = '(' + epochMatch[1] + ' ' + epochMatch[2] + epochMatch[3] + ')';
+      document.getElementById('aboutBuild').textContent = epochStr;
+      // Pre-compute readable date
+      const epoch = parseInt(epochMatch[1]);
+      const tzLabel = epochMatch[2];
+      const tzOffset = epochMatch[3];
+      const sign = tzOffset[0] === '-' ? -1 : 1;
+      const offsetMins = sign * (parseInt(tzOffset.slice(1,3)) * 60 + parseInt(tzOffset.slice(3)));
+      const localMs = epoch * 1000 + offsetMins * 60000;
+      const d = new Date(localMs);
+      const pad = n => String(n).padStart(2,'0');
+      const dateStr = DAYS[d.getUTCDay()] + ' ' + MONTHS[d.getUTCMonth()] + ' ' +
+        String(d.getUTCDate()).padStart(2,' ') + ' ' +
+        pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ':' + pad(d.getUTCSeconds()) +
+        ' ' + tzLabel + ' ' + d.getUTCFullYear();
+      document.getElementById('aboutBuild').dataset.epoch = epochStr;
+      document.getElementById('aboutBuild').dataset.readable = dateStr;
+    }
+  }
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+// Close modal on overlay click
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('open');
+  }
+});
+
+// ---- TOOL RIBBON ----
+function closeAllRibbons() {
+  document.querySelectorAll('.ribbon-btn').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.ribbon-dropdown').forEach(d => d.classList.remove('open'));
+}
+function toggleRibbon(btnId, ddId) {
+  const btn = document.getElementById(btnId);
+  if (btn && btn.classList.contains('disabled')) return;
+  const isOpen = document.getElementById(ddId).classList.contains('open');
+  closeAllRibbons();
+  if (!isOpen) {
+    btn.classList.add('open');
+    document.getElementById(ddId).classList.add('open');
+  }
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ribbon-menu')) closeAllRibbons();
+});
+
+// ---- YOUTUBE SEARCH MODE ----
+// 'karaoke' = prefix search with 'karaoke ' (default)
+// 'music'   = search without prefix (music video mode)
+let searchMode = 'karaoke';
+
+function setSearchMode(mode) {
+  searchMode = mode;
+  document.getElementById('btnMic').classList.toggle('active', mode === 'karaoke');
+  document.getElementById('btnNote').classList.toggle('active', mode === 'music');
+}
+
+function ytSearch(q) {
+  const query = searchMode === 'karaoke' ? 'karaoke ' + q : q + ' music video';
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query);
+}
+function goYT() {
+  var val = document.getElementById('ytInput').value;
+  if (val.trim()) {
+    sessionStorage.setItem('karaokeYT', val);
+    window.location.href = ytSearch(val);
+  }
+}
+function toggleYTClear() {
+  const val = document.getElementById('ytInput').value;
+  const hasText = val.length > 0;
+  document.getElementById('clearYT').classList.toggle('visible', hasText);
+  document.getElementById('ytGoBtn').classList.toggle('visible', hasText);
+}
+function clearYT() {
+  document.getElementById('ytInput').value = '';
+  document.getElementById('clearYT').classList.remove('visible');
+  document.getElementById('ytGoBtn').classList.remove('visible');
+  document.getElementById('ytInput').focus();
+}
+
+// ---- SONG CARD ----
+function makeCard(title, si, ci, soi) {
+  const card = document.createElement('a');
+  card.className = 'song-card';
+  card.dataset.title = title.toLowerCase();
+  card.href = '#';
+  card.target = '_self';
+  card.onclick = function(e) {
+    if (e.target.closest('.edit-btn') || e.target.closest('.edit-input')) return;
+    e.preventDefault();
+    const c = document.getElementById('main-container');
+    if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+    saveState();
+    window.location.href = ytSearch(title);
+  };
+  const editBtn = document.createElement('button');
+  editBtn.className = 'edit-btn';
+  editBtn.title = 'Edit song';
+  editBtn.textContent = '✏️';
+  editBtn.onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    showPencilMenu(e, 'song', si, ci, soi);
+  };
+  const t = document.createElement('div');
+  t.className = 'song-title';
+  t.textContent = title;
+  card.appendChild(editBtn);
+  card.appendChild(t);
+  return card;
+}
+
+// Save/restore open state by singer name (survives DOM rebuild)
+function getOpenState() {
+  const state = { singers: {}, cats: {} };
+  document.querySelectorAll('.singer-body').forEach(body => {
+    const title = body.previousElementSibling.querySelector('.singer-title');
+    if (title) state.singers[title.textContent.trim()] = !body.classList.contains('collapsed');
+  });
+  document.querySelectorAll('.grid').forEach(grid => {
+    const header = grid.previousElementSibling;
+    const title = header && header.querySelector('.section-title');
+    if (title) state.cats[title.textContent.trim()] = !grid.classList.contains('collapsed');
+  });
+  return state;
+}
+function restoreOpenState(state) {
+  if (!state) return;
+  document.querySelectorAll('.singer-body').forEach(body => {
+    const header = body.previousElementSibling;
+    const title = header.querySelector('.singer-title');
+    if (!title) return;
+    const name = title.textContent.trim();
+    if (state.singers && state.singers[name]) {
+      body.classList.remove('collapsed');
+      header.classList.remove('collapsed');
+      if (header.querySelector('.singer-hide-show')) header.querySelector('.singer-hide-show').textContent = 'Hide';
+    }
+  });
+  document.querySelectorAll('.grid').forEach(grid => {
+    const header = grid.previousElementSibling;
+    const title = header && header.querySelector('.section-title');
+    if (!title) return;
+    const name = title.textContent.trim();
+    if (state.cats && state.cats[name]) {
+      grid.classList.remove('collapsed');
+      header.classList.remove('collapsed');
+      if (header.querySelector('.hide-show')) header.querySelector('.hide-show').textContent = 'Hide';
+    }
+  });
+}
+
+// ---- VIEW MENU ----
+function viewExpand(type) {
+  closeAllRibbons();
+  if (type === 'singers') {
+    document.querySelectorAll('.singer-body').forEach(body => {
+      if (body.classList.contains('collapsed')) {
+        const header = body.previousElementSibling;
+        body.classList.remove('collapsed');
+        header.classList.remove('collapsed');
+        if (header.querySelector('.singer-hide-show')) header.querySelector('.singer-hide-show').textContent = 'Hide';
+      }
+    });
+  } else if (type === 'cats') {
+    document.querySelectorAll('.grid').forEach(grid => {
+      if (grid.classList.contains('collapsed')) {
+        const header = grid.previousElementSibling;
+        grid.classList.remove('collapsed');
+        header.classList.remove('collapsed');
+        if (header.querySelector('.hide-show')) header.querySelector('.hide-show').textContent = 'Hide';
+      }
+    });
+  }
+  saveState();
+  updateViewMenuState();
+}
+
+function viewCollapse(type) {
+  closeAllRibbons();
+  if (type === 'singers') {
+    // Collapse singers AND their categories
+    document.querySelectorAll('.singer-body').forEach(body => {
+      if (!body.classList.contains('collapsed')) {
+        const header = body.previousElementSibling;
+        body.classList.add('collapsed');
+        header.classList.add('collapsed');
+        if (header.querySelector('.singer-hide-show')) header.querySelector('.singer-hide-show').textContent = 'Show';
+      }
+    });
+    document.querySelectorAll('.grid').forEach(grid => {
+      if (!grid.classList.contains('collapsed')) {
+        const header = grid.previousElementSibling;
+        grid.classList.add('collapsed');
+        header.classList.add('collapsed');
+        if (header.querySelector('.hide-show')) header.querySelector('.hide-show').textContent = 'Show';
+      }
+    });
+  } else if (type === 'cats') {
+    document.querySelectorAll('.grid').forEach(grid => {
+      if (!grid.classList.contains('collapsed')) {
+        const header = grid.previousElementSibling;
+        grid.classList.add('collapsed');
+        header.classList.add('collapsed');
+        if (header.querySelector('.hide-show')) header.querySelector('.hide-show').textContent = 'Show';
+      }
+    });
+  }
+  saveState();
+  updateViewMenuState();
+}
+
+// Update View menu items based on current DOM context
+function updateViewMenuState() {
+  const hasSingers = document.querySelectorAll('.singer-body').length > 0;
+  const hasExpandedSinger = document.querySelectorAll('.singer-body:not(.collapsed)').length > 0;
+  const sb = document.getElementById('viewSingersBtn');
+  const cb = document.getElementById('viewCatsBtn');
+  if (sb) sb.classList.toggle('disabled', !hasSingers);
+  if (cb) cb.classList.toggle('disabled', !hasExpandedSinger);
+}
+
+// ---- PENCIL CONTEXT MENU ----
+let _pm = null; // current menu context: {type, si, ci, soi}
+
+function showPencilMenu(e, type, si, ci, soi) {
+  e.preventDefault();
+  e.stopPropagation();
+  _pm = { type, si, ci: ci !== undefined ? ci : -1, soi: soi !== undefined ? soi : -1 };
+  const label = type === 'singer' ? 'Singer' : type === 'cat' ? 'Category' : 'Song';
+  const aboveLabel = type === 'song' ? 'Before' : 'Above';
+  const belowLabel = type === 'song' ? 'After'  : 'Below';
+  document.getElementById('pmRename').textContent   = '✏️ Rename ' + label;
+  document.getElementById('pmDelete').textContent   = '🗑️ Delete ' + label;
+  document.getElementById('pmAddAbove').textContent = '＋ Add ' + label + ' ' + aboveLabel;
+  document.getElementById('pmAddBelow').textContent = '＋ Add ' + label + ' ' + belowLabel;
+  const menu = document.getElementById('pencilMenu');
+  menu.classList.add('open');
+  // Position near click
+  const x = Math.min(e.clientX, window.innerWidth - 180);
+  const y = Math.min(e.clientY + 4, window.innerHeight - 160);
+  menu.style.left = x + 'px';
+  menu.style.top  = y + 'px';
+}
+
+function closePencilMenu() {
+  document.getElementById('pencilMenu').classList.remove('open');
+  _pm = null;
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#pencilMenu') && !e.target.closest('.edit-btn')) closePencilMenu();
+});
+
+// Rename
+document.getElementById('pmRename').onclick = function() {
+  if (!_pm) return;
+  const { type, si, ci, soi } = _pm;
+  closePencilMenu();
+  if (type === 'singer') startInlineRename('stitle-singer' + si, 'singer', si, -1);
+  else if (type === 'cat') startInlineRename('ctitle-singer' + si + '-cat' + ci, 'cat', si, ci);
+  else startInlineSongRename(si, ci, soi);
+};
+
+// Delete
+document.getElementById('pmDelete').onclick = function() {
+  if (!_pm) return;
+  const { type, si, ci, soi } = _pm;
+  closePencilMenu();
+  markDirty();
+  const openState = getOpenState();
+  if (type === 'singer') currentSingers.splice(si, 1);
+  else if (type === 'cat') currentSingers[si].cats.splice(ci, 1);
+  else currentSingers[si].cats[ci].songs.splice(soi, 1);
+  buildDOM(currentSingers);
+  restoreOpenState(openState);
+};
+
+// Add Above / Before
+document.getElementById('pmAddAbove').onclick = function() {
+  if (!_pm) return;
+  const { type, si, ci, soi } = _pm;
+  closePencilMenu();
+  promptInlineAdd(type, si, ci, soi, 'above');
+};
+
+// Add Below / After
+document.getElementById('pmAddBelow').onclick = function() {
+  if (!_pm) return;
+  const { type, si, ci, soi } = _pm;
+  closePencilMenu();
+  promptInlineAdd(type, si, ci, soi, 'below');
+};
+
+function promptInlineAdd(type, si, ci, soi, direction) {
+  const openState = getOpenState();
+
+  function insertAndRefresh(insertIdx) {
+    if (type === 'singer') currentSingers.splice(insertIdx, 0, { name: '', cats: [] });
+    else if (type === 'cat') currentSingers[si].cats.splice(insertIdx, 0, { name: '', songs: [] });
+    else currentSingers[si].cats[ci].songs.splice(insertIdx, 0, '');
+  }
+
+  const insertIdx = direction === 'above'
+    ? (type === 'singer' ? si : type === 'cat' ? ci : soi)
+    : (type === 'singer' ? si + 1 : type === 'cat' ? ci + 1 : soi + 1);
+
+  // Find target element by actual DOM IDs
+  let targetEl = null;
+  if (type === 'singer') {
+    const singerId = 'singer' + si;
+    const body = document.getElementById('body-' + singerId);
+    targetEl = direction === 'above' ? body && body.previousElementSibling : body;
+  } else if (type === 'cat') {
+    const catId = 'singer' + si + '-cat' + ci;
+    const grid = document.getElementById('grid-' + catId);
+    targetEl = direction === 'above' ? grid && grid.previousElementSibling : grid;
+  } else {
+    const catId = 'singer' + si + '-cat' + ci;
+    const grid = document.getElementById('grid-' + catId);
+    if (grid) {
+      const cards = grid.querySelectorAll('.song-card');
+      targetEl = direction === 'above' ? cards[soi] : (cards[soi] ? cards[soi] : null);
+    }
+  }
+  if (!targetEl) return;
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'padding:4px 8px;';
+  const input = document.createElement('input');
+  input.className = 'new-entry-input';
+  input.placeholder = 'Name... (Enter=add, blank=done)';
+  input.style.cssText = 'width:100%;font-size:0.85rem;';
+  wrap.appendChild(input);
+
+  if (direction === 'above') targetEl.parentNode.insertBefore(wrap, targetEl);
+  else targetEl.parentNode.insertBefore(wrap, targetEl.nextSibling);
+  input.focus();
+
+  input.onkeydown = function(ev) {
+    if (ev.key !== 'Enter') return;
+    ev.preventDefault();
+    const name = input.value.trim();
+    wrap.remove();
+    if (!name) return;
+    markDirty();
+    if (type === 'singer') currentSingers.splice(insertIdx, 0, { name, cats: [] });
+    else if (type === 'cat') currentSingers[si].cats.splice(insertIdx, 0, { name, songs: [] });
+    else currentSingers[si].cats[ci].songs.splice(insertIdx, 0, name);
+    buildDOM(currentSingers);
+    restoreOpenState(openState);
+    // Re-prompt below new item for continued entry
+    const newIdx = insertIdx;
+    setTimeout(() => promptInlineAdd(type,
+      type === 'singer' ? newIdx : si,
+      type === 'cat' ? newIdx : ci,
+      type === 'song' ? newIdx : soi,
+      'below'), 50);
+  };
+}
+
+function startInlineRename(spanId, type, si, ci) {
+  const span = document.getElementById(spanId);
+  if (!span || span.querySelector('input')) return;
+  const old = span.textContent.trim();
+  span.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'edit-input';
+  input.value = old;
+  span.appendChild(input);
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  const commit = () => {
+    const val = input.value.trim() || old;
+    if (val !== old) markDirty();
+    span.textContent = val;
+    if (type === 'singer') currentSingers[si].name = val;
+    else if (type === 'cat') currentSingers[si].cats[ci].name = val;
+  };
+  input.onblur = commit;
+  input.onkeydown = ev => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') input.blur();
+    if (ev.key === 'Escape') { input.value = old; input.blur(); }
+  };
+}
+
+function startInlineSongRename(si, ci, soi) {
+  const catId = 'singer' + si + '-cat' + ci;
+  const grid = document.getElementById('grid-' + catId);
+  if (!grid) return;
+  const cards = grid.querySelectorAll('.song-card');
+  const card = cards[soi];
+  if (!card) return;
+  const titleEl = card.querySelector('.song-title');
+  if (!titleEl || titleEl.querySelector('input')) return;
+  const old = titleEl.textContent.trim();
+  titleEl.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'edit-input';
+  input.value = old;
+  titleEl.appendChild(input);
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  const commit = () => {
+    const val = input.value.trim() || old;
+    if (val !== old) markDirty();
+    titleEl.textContent = val;
+    if (currentSingers[si] && currentSingers[si].cats[ci]) currentSingers[si].cats[ci].songs[soi] = val;
+    card.onclick = function(ev) {
+      if (ev.target.closest('.edit-btn')) return;
+      ev.preventDefault();
+      const c = document.getElementById('main-container');
+      if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+      saveState();
+      window.location.href = ytSearch(val);
+    };
+  };
+  input.onblur = commit;
+  input.onkeydown = ev => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') input.blur();
+    if (ev.key === 'Escape') { input.value = old; input.blur(); }
+  };
+}
+
+// ---- INLINE EDIT ----
+function startEdit(e, spanId, type, si, ci) {
+  e.preventDefault();
+  e.stopPropagation();
+  const span = document.getElementById(spanId);
+  if (!span || span.querySelector('input')) return;
+  const btn = e.currentTarget;
+  const oldName = span.textContent.trim();
+  span.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'edit-input';
+  input.type = 'text';
+  input.value = oldName;
+  span.appendChild(input);
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  // Switch pencil to trash
+  btn.textContent = '🗑️';
+  btn.title = type === 'singer' ? 'Delete singer' : 'Delete category';
+  let deleting = false;
+  btn.onmousedown = function(ev) { ev.preventDefault(); deleting = true; };
+  btn.onclick = function(ev) {
+    ev.preventDefault(); ev.stopPropagation();
+    deleting = true;
+    input.onblur = null; // prevent commit
+    if (type === 'singer') currentSingers.splice(si, 1);
+    else if (type === 'cat') currentSingers[si].cats.splice(ci, 1);
+    const openState = getOpenState();
+    buildDOM(currentSingers);
+    restoreOpenState(openState);
+  };
+  const restore = () => {
+    btn.textContent = '✏️';
+    btn.onmousedown = null;
+    btn.title = type === 'singer' ? 'Rename singer' : 'Rename category';
+    btn.onclick = function(ev) { startEdit(ev, spanId, type, si, ci); };
+  };
+  const commit = () => {
+    if (deleting) return;
+    const newName = input.value.trim() || oldName;
+    span.textContent = newName;
+    if (type === 'singer') currentSingers[si].name = newName;
+    if (type === 'cat') currentSingers[si].cats[ci].name = newName;
+    restore();
+  };
+  input.onblur = commit;
+  input.onkeydown = (ev) => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') { input.blur(); }
+    if (ev.key === 'Escape') { input.value = oldName; span.textContent = oldName; restore(); }
+  };
+}
+
+function startEditSong(e, card, titleEl, si, ci, soi) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (titleEl.querySelector('input')) return;
+  const btn = e.currentTarget;
+  const oldTitle = titleEl.textContent.trim();
+  titleEl.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'edit-input';
+  input.type = 'text';
+  input.value = oldTitle;
+  titleEl.appendChild(input);
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  // Switch pencil to trash
+  btn.textContent = '🗑️';
+  btn.title = 'Delete song';
+  let deleting = false;
+  btn.onmousedown = function(ev) { ev.preventDefault(); deleting = true; };
+  btn.onclick = function(ev) {
+    ev.preventDefault(); ev.stopPropagation();
+    deleting = true;
+    input.onblur = null;
+    if (currentSingers[si] && currentSingers[si].cats[ci]) {
+      currentSingers[si].cats[ci].songs.splice(soi, 1);
+    }
+    const openState = getOpenState();
+    buildDOM(currentSingers);
+    restoreOpenState(openState);
+  };
+  const restore = () => {
+    btn.textContent = '✏️';
+    btn.onmousedown = null;
+    btn.title = 'Rename song';
+    btn.onclick = function(ev) { startEditSong(ev, card, titleEl, si, ci, soi); };
+  };
+  const commit = () => {
+    if (deleting) return;
+    const newTitle = input.value.trim() || oldTitle;
+    titleEl.textContent = newTitle;
+    card.dataset.title = newTitle.toLowerCase();
+    if (currentSingers[si] && currentSingers[si].cats[ci]) {
+      currentSingers[si].cats[ci].songs[soi] = newTitle;
+    }
+    card.onclick = function(ev) {
+      if (ev.target.closest('.edit-btn') || ev.target.closest('.edit-input')) return;
+      ev.preventDefault();
+      const c = document.getElementById('main-container');
+      if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+      saveState();
+      window.location.href = ytSearch(newTitle);
+    };
+    restore();
+  };
+  input.onblur = commit;
+  input.onkeydown = (ev) => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') { input.blur(); }
+    if (ev.key === 'Escape') { input.value = oldTitle; titleEl.textContent = oldTitle; restore(); }
+  };
+}
+
+// ---- COLLAPSE STATE SNAPSHOT (for filter) ----
+let collapseSnapshot = null;
+let currentSingers = [];
+let droppedSingers = [];
+let sessionDirty = false;
+
+function takeSnapshot() {
+  const snapshot = {};
+  document.querySelectorAll('.singer-body').forEach(body => {
+    snapshot[body.id] = body.classList.contains('collapsed');
+  });
+  document.querySelectorAll('.grid').forEach(grid => {
+    snapshot[grid.id] = grid.classList.contains('collapsed');
+  });
+  return snapshot;
+}
+
+function restoreSnapshot(snapshot) {
+  document.querySelectorAll('.singer-body').forEach(body => {
+    const collapsed = snapshot[body.id] !== undefined ? snapshot[body.id] : true;
+    const header = body.previousElementSibling;
+    body.classList.toggle('collapsed', collapsed);
+    header.classList.toggle('collapsed', collapsed);
+    header.querySelector('.singer-hide-show').textContent = collapsed ? 'Show' : 'Hide';
+  });
+  document.querySelectorAll('.grid').forEach(grid => {
+    const collapsed = snapshot[grid.id] !== undefined ? snapshot[grid.id] : true;
+    const header = grid.previousElementSibling;
+    grid.classList.toggle('collapsed', collapsed);
+    header.classList.toggle('collapsed', collapsed);
+    header.querySelector('.hide-show').textContent = collapsed ? 'Show' : 'Hide';
+  });
+}
+
+// ---- FILTER ----
+function filterSongs(query) {
+  query = query.toLowerCase().trim();
+  document.getElementById('clearSearch').classList.toggle('visible', query.length > 0);
+
+  if (query.length === 0) {
+    document.querySelectorAll('.song-card').forEach(c => c.classList.remove('hidden'));
+    if (collapseSnapshot) {
+      restoreSnapshot(collapseSnapshot);
+      collapseSnapshot = null;
+    }
+    saveState();
+    return;
+  }
+
+  if (!collapseSnapshot) collapseSnapshot = takeSnapshot();
+
+  document.querySelectorAll('.song-card').forEach(card => {
+    card.classList.toggle('hidden', !card.dataset.title.includes(query));
+  });
+
+  document.querySelectorAll('.singer-body').forEach(body => {
+    const hasMatch = body.querySelectorAll('.song-card:not(.hidden)').length > 0;
+    const header = body.previousElementSibling;
+    body.classList.toggle('collapsed', !hasMatch);
+    header.classList.toggle('collapsed', !hasMatch);
+    header.querySelector('.singer-hide-show').textContent = hasMatch ? 'Hide' : 'Show';
+  });
+
+  document.querySelectorAll('.grid').forEach(grid => {
+    const hasMatch = grid.querySelectorAll('.song-card:not(.hidden)').length > 0;
+    const header = grid.previousElementSibling;
+    grid.classList.toggle('collapsed', !hasMatch);
+    header.classList.toggle('collapsed', !hasMatch);
+    header.querySelector('.hide-show').textContent = hasMatch ? 'Hide' : 'Show';
+  });
+}
+
+function clearFilter() {
+  document.getElementById('searchInput').value = '';
+  filterSongs('');
+  document.getElementById('searchInput').focus();
+}
+
+// ---- SESSION FILE PARSER (CSV) ----
+// Columns: #(comment) | Singer | Category | Song | Artist(future) | URL(future)
+// col1=# skips row, empty rows ignored, whitespace trimmed
+// One row can define singer + category + first song simultaneously
+function parseSession(text) {
+  const singers = [];
+  let currentSinger = null;
+  let currentCat = null;
+
+  const rows = text.split('\n').map(line => {
+    // Simple CSV split respecting quoted fields
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let c of line.replace(/\r/, '')) {
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    cols.push(cur.trim());
+    return cols;
+  });
+
+  for (const cols of rows) {
+    if (cols.every(c => c === '')) continue;   // skip empty rows
+    if (cols[0].startsWith('#')) continue;     // skip comment rows
+
+    const singer = cols[1] || '';
+    const cat    = cols[2] || '';
+    const song   = cols[3] || '';
+
+    if (singer) {
+      currentSinger = { name: singer, cats: [] };
+      singers.push(currentSinger);
+      currentCat = null;
+    }
+    if (cat && currentSinger) {
+      currentCat = { name: cat, songs: [] };
+      currentSinger.cats.push(currentCat);
+    }
+    if (song && currentSinger && currentCat) {
+      currentCat.songs.push(song);
+    }
+  }
+
+  return singers;
+}
+
+// ---- BUILD DOM ----
+function saveCurrentState() {
+  if (currentSingers.length) sessionStorage.setItem('karaokeState', JSON.stringify(currentSingers));
+  else sessionStorage.removeItem('karaokeState');
+}
+function markDirty() { sessionDirty = true; }
+function markClean() { sessionDirty = false; }
+function confirmDirty(msg) {
+  if (!sessionDirty) return true;
+  return confirm(msg || 'You have unsaved changes. Continue without saving?');
+}
+
+function buildDOM(singers) {
+  currentSingers = singers;
+  const container = document.getElementById('main-container');
+  container.innerHTML = '';
+  collapseSnapshot = null;
+
+  if (!singers.length) {
+    showWelcome();
+    document.getElementById('searchInput').disabled = true;
+    return;
+  }
+
+  // Enable session-dependent controls
+  document.getElementById('searchInput').disabled = false;
+  document.getElementById('ribbonCloseBtn').classList.remove('disabled');
+  document.getElementById('ribbonCloseBtn').onclick = ribbonClose;
+  document.getElementById('ribbonReopenBtn').classList.remove('disabled');
+  document.getElementById('ribbonAddBtn').classList.remove('disabled');
+  document.getElementById('ribbonDropBtn').classList.remove('disabled');
+  document.getElementById('ribbonSaveAsBtn').classList.remove('disabled');
+  ['viewSingersBtn','viewCatsBtn']
+    .forEach(id => document.getElementById(id).classList.remove('disabled'));
+  document.getElementById('rbView').classList.remove('disabled');
+  updateViewMenuState();
+  updateNewEditLabel();
+  saveCurrentState();
+
+  singers.forEach((singer, si) => {
+    const singerId = 'singer' + si;
+    const block = document.createElement('div');
+    block.className = 'singer-block';
+
+    const header = document.createElement('div');
+    header.className = 'singer-header collapsed';
+    header.onclick = (e) => { if (!e.target.closest('.edit-btn') && !e.target.closest('.edit-input')) toggleSinger(singerId); };
+    header.innerHTML = `
+      <span class="singer-icon">🎤</span>
+      <button class="edit-btn" title="Edit singer" onclick="showPencilMenu(event,'singer',${si})">✏️</button>
+      <span class="singer-title" id="stitle-${singerId}">${singer.name}</span>
+      <span class="singer-collapse-indicator">
+        <span class="singer-arrow">▼</span>
+        <span class="singer-hide-show">Show</span>
+      </span>`;
+
+    const body = document.createElement('div');
+    body.className = 'singer-body collapsed';
+    body.id = 'body-' + singerId;
+
+    singer.cats.forEach((cat, ci) => {
+      const catId = singerId + '-cat' + ci;
+      const section = document.createElement('div');
+      section.className = 'section';
+
+      const secHeader = document.createElement('div');
+      secHeader.className = 'section-header collapsed';
+      secHeader.onclick = (e) => { if (!e.target.closest('.edit-btn') && !e.target.closest('.edit-input')) toggleSection(catId); };
+      secHeader.innerHTML = `
+        <span class="section-icon">🎵</span>
+        <button class="edit-btn" title="Edit category" onclick="showPencilMenu(event,'cat',${si},${ci})">✏️</button>
+        <span class="section-title" id="ctitle-${catId}">${cat.name}</span>
+        <span class="collapse-indicator">
+          <span class="arrow">▼</span>
+          <span class="hide-show">Show</span>
+        </span>`;
+
+      const grid = document.createElement('div');
+      grid.className = 'grid collapsed';
+      grid.id = 'grid-' + catId;
+
+      cat.songs.forEach((song, soi) => grid.appendChild(makeCard(song, si, ci, soi)));
+
+      if (!cat.songs.length) {
+        const hintWrap = document.createElement('div');
+        hintWrap.style.cssText = 'padding:0.4em 0.75em;';
+        const hintIn = document.createElement('input');
+        hintIn.className = 'new-entry-input';
+        hintIn.placeholder = 'Add a song... (Enter to add)';
+        hintIn.style.cssText = 'width:100%;font-size:0.82rem;';
+        hintIn.onkeydown = (ev) => {
+          if (ev.key !== 'Enter') return;
+          ev.preventDefault();
+          const song = hintIn.value.trim();
+          if (!song) return;
+          currentSingers[si].cats[ci].songs.push(song);
+          const openState = getOpenState();
+          buildDOM(currentSingers);
+          restoreOpenState(openState);
+        };
+        hintWrap.appendChild(hintIn);
+        grid.appendChild(hintWrap);
+      }
+
+      section.appendChild(secHeader);
+      section.appendChild(grid);
+      body.appendChild(section);
+    });
+
+    if (!singer.cats.length) {
+      const hintWrap = document.createElement('div');
+      hintWrap.style.cssText = 'padding:0.4em 0.75em;';
+      const hintIn = document.createElement('input');
+      hintIn.className = 'new-entry-input';
+      hintIn.placeholder = 'Add a category... (Enter to add)';
+      hintIn.style.cssText = 'width:100%;font-size:0.82rem;';
+      hintIn.onkeydown = (ev) => {
+        if (ev.key !== 'Enter') return;
+        ev.preventDefault();
+        const cat = hintIn.value.trim();
+        if (!cat) return;
+        currentSingers[si].cats.push({ name: cat, songs: [] });
+        const openState = getOpenState();
+        buildDOM(currentSingers);
+        restoreOpenState(openState);
+      };
+      hintWrap.appendChild(hintIn);
+      body.appendChild(hintWrap);
+    }
+
+    block.appendChild(header);
+    block.appendChild(body);
+    container.appendChild(block);
+  });
+}
+
+// ---- LOAD SESSION ----
+// ---- OPEN SAMPLE ----
+function sampleLoad() {
+  closeAllRibbons();
+  fetch('cfg/sample.csv')
+    .then(r => {
+      if (!r.ok) throw new Error('fetch failed');
+      return r.text();
+    })
+    .then(text => {
+      sessionStorage.setItem('karaokeSession', text);
+      buildDOM(parseSession(text));
+      markClean();
+    })
+    .catch(() => alert('Could not load sample.csv — make sure cfg/sample.csv exists in the app folder.'));
+}
+
+// Download a file from the app to the user's device
+function downloadFile(path, filename) {
+  closeAllRibbons();
+  const a = document.createElement('a');
+  a.href = path;
+  a.download = filename;
+  a.click();
+}
+
+// Open doc pages in a new tab
+function openDoc(path) {
+  closeAllRibbons();
+  window.open(path, '_blank');
+}
+
+// ---- RIBBON SESSION ACTIONS ----
+// Session → New: disabled when session loaded, enabled when no session
+function updateNewEditLabel() {
+  const btn = document.getElementById('ribbonNewBtn');
+  if (!btn) return;
+  btn.textContent = 'New';
+  btn.classList.toggle('disabled', currentSingers.length > 0);
+}
+
+function ribbonNew() {
+  if (document.getElementById('ribbonNewBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  // Populate singer datalist
+  const sd = document.getElementById('singerSuggestions');
+  sd.innerHTML = '';
+  currentSingers.forEach(s => {
+    const o = document.createElement('option'); o.value = s.name; sd.appendChild(o);
+  });
+  document.getElementById('catSuggestions').innerHTML = '';
+  document.getElementById('newSingerInput').value = '';
+  document.getElementById('newCatInput').value = '';
+  document.getElementById('newSongInput').value = '';
+  document.getElementById('newCatRow').style.display = 'none';
+  document.getElementById('newSongRow').style.display = 'none';
+  document.getElementById('newEntryPanel').style.display = '';
+  document.getElementById('newSingerInput').focus();
+  if (!currentSingers.length) {
+    document.getElementById('main-container').innerHTML = '';
+    document.getElementById('searchInput').disabled = false;
+    document.getElementById('ribbonCloseBtn').classList.remove('disabled');
+    document.getElementById('ribbonReopenBtn').classList.remove('disabled');
+    document.getElementById('ribbonAddBtn').classList.remove('disabled');
+    document.getElementById('ribbonDropBtn').classList.remove('disabled');
+    document.getElementById('ribbonSaveAsBtn').classList.remove('disabled');
+    ['viewSingersBtn','viewCatsBtn'].forEach(id => document.getElementById(id).classList.remove('disabled'));
+    document.getElementById('rbView').classList.remove('disabled');
+  }
+  updateViewMenuState();
+  updateNewEditLabel();
+  setupNewEntryListeners();
+}
+
+// Entry panel in edit mode — appends cats/songs to existing singer
+function setupNewEntryListeners() {
+  const singerIn = document.getElementById('newSingerInput');
+  const catIn    = document.getElementById('newCatInput');
+  const songIn   = document.getElementById('newSongInput');
+  const catRow   = document.getElementById('newCatRow');
+  const songRow  = document.getElementById('newSongRow');
+
+  let pendingSinger = null;
+  let pendingSingerIdx = -1;
+  let pendingCat = null;
+
+  function populateCatList(singerRef) {
+    const dl = document.getElementById('catSuggestions');
+    dl.innerHTML = '';
+    if (singerRef) singerRef.cats.forEach(c => {
+      const o = document.createElement('option'); o.value = c.name; dl.appendChild(o);
+    });
+  }
+
+  function commitCat() {
+    if (!pendingCat) return;
+    const singerRef = pendingSingerIdx >= 0 ? currentSingers[pendingSingerIdx] : pendingSinger;
+    if (singerRef && !singerRef.cats.includes(pendingCat)) singerRef.cats.push(pendingCat);
+    pendingCat = null;
+  }
+
+  function commitSinger() {
+    commitCat();
+    if (pendingSingerIdx < 0 && pendingSinger) currentSingers.push(pendingSinger);
+    const openState = getOpenState();
+    buildDOM(currentSingers);
+    restoreOpenState(openState);
+    pendingSinger = null; pendingSingerIdx = -1; pendingCat = null;
+  }
+
+  // Singer — Enter to confirm name, blank Enter = close panel
+  singerIn.onkeydown = (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const name = singerIn.value.trim();
+    if (!name) {
+      // Blank = close
+      document.getElementById('newEntryPanel').style.display = 'none';
+      catRow.style.display = 'none'; songRow.style.display = 'none';
+      updateNewEditLabel();
+      return;
+    }
+    // Check if existing singer picked from datalist
+    const idx = currentSingers.findIndex(s => s.name === name);
+    if (idx >= 0) {
+      pendingSingerIdx = idx;
+      pendingSinger = currentSingers[idx];
+    } else {
+      pendingSingerIdx = -1;
+      pendingSinger = { name, cats: [] };
+    }
+    populateCatList(pendingSinger);
+    catIn.value = '';
+    catRow.style.display = '';
+    songRow.style.display = 'none';
+    catIn.focus();
+  };
+
+  // Category — Enter to confirm, blank Enter = commit singer + back to singer
+  catIn.onkeydown = (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const name = catIn.value.trim();
+    if (!name) {
+      commitSinger();
+      singerIn.value = '';
+      catRow.style.display = 'none'; songRow.style.display = 'none';
+      // Refresh singer datalist
+      const sd = document.getElementById('singerSuggestions');
+      sd.innerHTML = '';
+      currentSingers.forEach(s => { const o = document.createElement('option'); o.value = s.name; sd.appendChild(o); });
+      singerIn.focus();
+      return;
+    }
+    // Check if existing cat picked
+    const singerRef = pendingSingerIdx >= 0 ? currentSingers[pendingSingerIdx] : pendingSinger;
+    const existingCat = singerRef ? singerRef.cats.find(c => c.name === name) : null;
+    pendingCat = existingCat || { name, songs: [] };
+    songIn.value = '';
+    songRow.style.display = '';
+    songIn.focus();
+  };
+
+  // Song — Enter adds, blank Enter = commit cat + back to category
+  songIn.onkeydown = (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const song = songIn.value.trim();
+    if (song && pendingCat) {
+      pendingCat.songs.push(song);
+      songIn.value = '';
+    } else if (!song) {
+      commitCat();
+      catIn.value = '';
+      songRow.style.display = 'none';
+      const singerRef = pendingSingerIdx >= 0 ? currentSingers[pendingSingerIdx] : pendingSinger;
+      populateCatList(singerRef);
+      catIn.focus();
+    }
+  };
+}
+
+// Save As — build CSV from currentSingers and download
+function ribbonSaveAs() {
+  if (document.getElementById('ribbonSaveAsBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  // Suggest a default filename
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const suggested = 'session_' + now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate());
+  document.getElementById('saveAsFilename').value = suggested;
+  openModal('modalSaveAs');
+  setTimeout(() => {
+    const inp = document.getElementById('saveAsFilename');
+    inp.focus(); inp.select();
+  }, 50);
+}
+
+function saveAsConfirm() {
+  let name = document.getElementById('saveAsFilename').value.trim();
+  if (!name) return;
+  // Strip .csv if user typed it
+  name = name.replace(/\.csv$/i, '');
+  const filename = name + '.csv';
+  if (!confirm('If "' + filename + '" exists in your downloads it will be overwritten. Continue?')) return;
+  closeModal('modalSaveAs');
+  // Build CSV
+  const lines = [];
+  lines.push('# Karaoke Night | ' + BUILD);
+  lines.push('# Column layout: # comment | Singer | Category | Song | Artist (future) | Full URL (future)');
+  lines.push('# Singer,Category,Song,Artist (future),Full URL (future)');
+  lines.push('');
+  currentSingers.forEach(singer => {
+    if (!singer.cats.length) { lines.push(',' + csvField(singer.name) + ',,,'); return; }
+    singer.cats.forEach((cat, ci) => {
+      if (!cat.songs.length) { lines.push(',' + csvField(singer.name) + ',' + csvField(cat.name) + ',,'); return; }
+      cat.songs.forEach((song, si) => {
+        const singerCol = (ci === 0 && si === 0) ? csvField(singer.name) : '';
+        const catCol    = si === 0 ? csvField(cat.name) : '';
+        lines.push(',' + singerCol + ',' + catCol + ',' + csvField(song) + ',,');
+      });
+    });
+    lines.push('');
+  });
+  const csv = lines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  markClean();
+}
+
+function csvField(val) {
+  if (!val) return '';
+  return val.includes(',') || val.includes('"') ? '"' + val.replace(/"/g, '""') + '"' : val;
+}
+
+function ribbonOpen() {
+  closeAllRibbons();
+  if (currentSingers.length > 0) {
+    if (!confirm('Opening a new session will clear the current session. Continue?')) return;
+  }
+  if (!confirmDirty('Open new session without saving? Unsaved changes will be lost.')) return;
+  document.getElementById('fileInput').click();
+}
+function ribbonClose() {
+  if (document.getElementById('ribbonCloseBtn').classList.contains('disabled')) return;
+  if (!confirmDirty('Close without saving? Unsaved changes will be lost.')) return;
+  closeAllRibbons();
+  sessionStorage.removeItem('karaokeSession');
+  sessionStorage.removeItem('karaokeState');
+  sessionStorage.removeItem('karaokeSingerOpen');
+  sessionStorage.removeItem('karaokeCatOpen');
+  sessionStorage.removeItem('karaokeFilter');
+  sessionStorage.removeItem('karaokeYT');
+  sessionStorage.removeItem('karaokeScroll');
+  const container = document.getElementById('main-container');
+  container.innerHTML = '';
+  showWelcome();
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchInput').disabled = true;
+  document.getElementById('clearSearch').classList.remove('visible');
+  document.getElementById('ytInput').value = '';
+  document.getElementById('clearYT').classList.remove('visible');
+  document.getElementById('ytGoBtn').classList.remove('visible');
+  document.getElementById('newEntryPanel').style.display = 'none';
+  document.getElementById('ribbonCloseBtn').classList.add('disabled');
+  document.getElementById('ribbonReopenBtn').classList.add('disabled');
+  document.getElementById('ribbonAddBtn').classList.add('disabled');
+  document.getElementById('ribbonSaveAsBtn').classList.add('disabled');
+  document.getElementById('ribbonDropBtn').classList.add('disabled');
+  document.getElementById('ribbonUndropBtn').classList.add('disabled');
+  ['viewSingersBtn','viewCatsBtn']
+    .forEach(id => document.getElementById(id).classList.add('disabled'));
+  document.getElementById('rbView').classList.add('disabled');
+  currentSingers = [];
+  droppedSingers = [];
+  markClean();
+  updateNewEditLabel();
+}
+function ribbonExit() {
+  closeAllRibbons();
+  if (!confirmDirty('Exit without saving? Unsaved changes will be lost.')) return;
+  window.location.href = 'index.html';
+}
+
+// Reload — multi-file picker, rebuilds session fresh from selected files
+// Drop — show checklist of current singers, remove unchecked ones from memory
+// Undrop — bring dropped singers back from droppedSingers list
+function ribbonUndrop() {
+  if (document.getElementById('ribbonUndropBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  const list = document.getElementById('undropList');
+  list.innerHTML = '';
+  droppedSingers.forEach((singer, i) => {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = false;
+    cb.dataset.index = i;
+    cb.style.cssText = 'width:16px;height:16px;';
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(singer.name));
+    list.appendChild(label);
+  });
+  openModal('modalUndrop');
+}
+
+function applyUndrop() {
+  const checks = document.querySelectorAll('#undropList input[type=checkbox]');
+  const toRestore = droppedSingers.filter((_, i) => checks[i] && checks[i].checked);
+  droppedSingers = droppedSingers.filter((_, i) => checks[i] && !checks[i].checked);
+  closeModal('modalUndrop');
+  if (!toRestore.length) return;
+  markDirty();
+  const openState = getOpenState();
+  buildDOM(currentSingers.concat(toRestore));
+  restoreOpenState(openState);
+  if (!droppedSingers.length) document.getElementById('ribbonUndropBtn').classList.add('disabled');
+}
+
+function ribbonDrop() {
+  if (document.getElementById('ribbonDropBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  const list = document.getElementById('dropList');
+  list.innerHTML = '';
+  currentSingers.forEach((singer, i) => {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = false;
+    cb.dataset.index = i;
+    cb.style.cssText = 'width:16px;height:16px;';
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(singer.name));
+    list.appendChild(label);
+  });
+  openModal('modalDrop');
+}
+
+function applyDrop() {
+  const checks = document.querySelectorAll('#dropList input[type=checkbox]');
+  const mode = document.getElementById('modalDrop').dataset.mode || 'drop';
+  const dropped = currentSingers.filter((_, i) => checks[i] && checks[i].checked);
+  const kept = currentSingers.filter((_, i) => checks[i] && !checks[i].checked);
+  closeModal('modalDrop');
+  document.getElementById('modalDrop').dataset.mode = 'drop'; // reset
+  if (mode === 'reopen') {
+    // Drop without saving to droppedSingers, then open Add picker
+    if (kept.length) buildDOM(kept);
+    document.getElementById('fileInputAdd').click();
+    return;
+  }
+  // Normal drop mode — save to droppedSingers
+  droppedSingers = droppedSingers.concat(dropped);
+  markDirty();
+  if (!kept.length) {
+    // Clear DOM but stay in session — don't show welcome
+    currentSingers = [];
+    document.getElementById('main-container').innerHTML = '';
+    document.getElementById('ribbonUndropBtn').classList.remove('disabled');
+    saveCurrentState();
+    return;
+  }
+  const openState = getOpenState();
+  buildDOM(kept);
+  restoreOpenState(openState);
+  if (droppedSingers.length) document.getElementById('ribbonUndropBtn').classList.remove('disabled');
+}
+
+function ribbonReopen() {
+  if (document.getElementById('ribbonReopenBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  // Show drop dialog with all singers unchecked (kept) by default
+  const list = document.getElementById('dropList');
+  list.innerHTML = '';
+  currentSingers.forEach((singer, i) => {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = false;
+    cb.dataset.index = i;
+    cb.style.cssText = 'width:16px;height:16px;';
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(singer.name));
+    list.appendChild(label);
+  });
+  // Mark modal as reopen mode so Apply opens Add picker after
+  document.getElementById('modalDrop').dataset.mode = 'reopen';
+  openModal('modalDrop');
+}
+
+// Add — file picker to merge additional CSV into current session
+function ribbonAdd() {
+  if (document.getElementById('ribbonAddBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  document.getElementById('fileInputAdd').click();
+}
+function showWelcome() {
+  const container = document.getElementById('main-container');
+  const panel = document.createElement('div');
+  panel.className = 'welcome-panel';
+  panel.id = 'welcomePanel';
+  panel.innerHTML = `
+    <div class="welcome-title">Welcome to Karaoke Night 🎤</div>
+    <p style="color:var(--muted);font-size:0.9rem;">Open a session file to get started.</p>
+    <ol class="welcome-steps">
+      <li><span class="step-num">1.</span> Go to <strong>Session → Open</strong> to load your session file</li>
+      <li><span class="step-num">2.</span> Expand a Singer then a Category to browse and select a song</li>
+      <li><span class="step-num">3.</span> Use <strong>Filter</strong> to search songs in the loaded session</li>
+      <li><span class="step-num">4.</span> Use <strong>Find on YouTube</strong> for ad hoc song searches</li>
+      <li><span class="step-num">5.</span> Select 🎤 <strong>Karaoke Mode</strong> or 🎵 <strong>Music Video Mode</strong> to search YouTube for a karaoke version or music video</li>
+    </ol>`;
+  container.appendChild(panel);
+}
+
+// ---- LOAD SESSION ----
+function loadSession() {
+  document.getElementById('fileInput').click();
+}
+
+// Open — supports multiple files, merges all into one session
+function handleFile(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const readers = files.map(file => new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.readAsText(file);
+  }));
+  Promise.all(readers).then(texts => {
+    droppedSingers = [];
+    const merged = texts.join('\n');
+    sessionStorage.setItem('karaokeSession', merged);
+    buildDOM(parseSession(merged));
+    markClean();
+    input.value = '';
+  });
+}
+
+// Reload — reads all selected files, merges them, replaces current session
+function handleFileReopen(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const readers = files.map(file => new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.readAsText(file);
+  }));
+  Promise.all(readers).then(texts => {
+    const merged = texts.join('\n');
+    sessionStorage.setItem('karaokeSession', merged);
+    buildDOM(parseSession(merged));
+    markClean();
+    input.value = '';
+  });
+}
+
+// Add — merge one or more additional CSV files into current in-memory session
+function handleFileAdd(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const readers = files.map(file => new Promise(resolve => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.readAsText(file);
+  }));
+  Promise.all(readers).then(texts => {
+    const newSingers = texts.flatMap(t => parseSession(t));
+    const merged = currentSingers.concat(newSingers);
+    buildDOM(merged);
+    markDirty();
+    input.value = '';
+  });
+}
+
+// ---- SINGER TOGGLE ----
+function toggleSinger(singerId) {
+  const body = document.getElementById('body-' + singerId);
+  if (!body) return;
+  const header = body.previousElementSibling;
+  const isCollapsed = body.classList.toggle('collapsed');
+  header.classList.toggle('collapsed', isCollapsed);
+  header.querySelector('.singer-hide-show').textContent = isCollapsed ? 'Show' : 'Hide';
+  saveState();
+  updateViewMenuState();
+}
+
+// ---- SECTION TOGGLE ----
+function toggleSection(catId) {
+  const grid = document.getElementById('grid-' + catId);
+  if (!grid) return;
+  const header = grid.previousElementSibling;
+  const isCollapsed = grid.classList.toggle('collapsed');
+  header.classList.toggle('collapsed', isCollapsed);
+  header.querySelector('.hide-show').textContent = isCollapsed ? 'Show' : 'Hide';
+  saveState();
+}
+
+// ---- DARK/LIGHT TOGGLE ----
+let isDark = false;
+function toggleMode() {
+  isDark = !isDark;
+  document.body.classList.toggle('light', !isDark);
+  document.getElementById('modeBtn').textContent = isDark ? '☀️' : '🌙';
+  saveState();
+}
+
+// ---- SAVE STATE (sessionStorage) ----
+function saveState() {
+  const singerOpen = {};
+  document.querySelectorAll('.singer-body').forEach(body => {
+    singerOpen[body.id] = !body.classList.contains('collapsed');
+  });
+  const catOpen = {};
+  document.querySelectorAll('.grid').forEach(grid => {
+    catOpen[grid.id] = !grid.classList.contains('collapsed');
+  });
+  sessionStorage.setItem('karaokeSingerOpen', JSON.stringify(singerOpen));
+  sessionStorage.setItem('karaokeCatOpen', JSON.stringify(catOpen));
+  sessionStorage.setItem('karaokeDark', isDark);
+  sessionStorage.setItem('karaokeFilter', document.getElementById('searchInput').value);
+  sessionStorage.setItem('karaokeYT', document.getElementById('ytInput').value);
+  sessionStorage.setItem('karaokeMode', searchMode);
+}
+
+// ---- RESTORE STATE (sessionStorage) ----
+function restoreState() {
+  const savedDark = sessionStorage.getItem('karaokeDark');
+  if (savedDark === 'true') {
+    isDark = true;
+    document.body.classList.remove('light');
+    document.getElementById('modeBtn').textContent = '☀️';
+  }
+
+  // Restore search mode (karaoke/music)
+  const savedMode = sessionStorage.getItem('karaokeMode');
+  if (savedMode) setSearchMode(savedMode);
+
+  // Restore YT input value, clear button and arrow visibility
+  const savedYT = sessionStorage.getItem('karaokeYT');
+  if (savedYT && savedYT.length > 0) {
+    document.getElementById('ytInput').value = savedYT;
+    document.getElementById('clearYT').classList.add('visible');
+    document.getElementById('ytGoBtn').classList.add('visible');
+  }
+
+  const savedFilter = sessionStorage.getItem('karaokeFilter');
+  if (savedFilter && savedFilter.length > 0) {
+    document.getElementById('searchInput').value = savedFilter;
+    document.getElementById('clearSearch').classList.add('visible');
+    filterSongs(savedFilter);
+    return; // filter handles open/close state
+  }
+
+  const savedSingerOpen = sessionStorage.getItem('karaokeSingerOpen');
+  if (savedSingerOpen) {
+    const singerOpen = JSON.parse(savedSingerOpen);
+    document.querySelectorAll('.singer-body').forEach(body => {
+      if (singerOpen[body.id]) {
+        const header = body.previousElementSibling;
+        body.classList.remove('collapsed');
+        header.classList.remove('collapsed');
+        header.querySelector('.singer-hide-show').textContent = 'Hide';
+      }
+    });
+  }
+
+  const savedCatOpen = sessionStorage.getItem('karaokeCatOpen');
+  if (savedCatOpen) {
+    const catOpen = JSON.parse(savedCatOpen);
+    document.querySelectorAll('.grid').forEach(grid => {
+      if (catOpen[grid.id]) {
+        const header = grid.previousElementSibling;
+        grid.classList.remove('collapsed');
+        header.classList.remove('collapsed');
+        header.querySelector('.hide-show').textContent = 'Hide';
+      }
+    });
+  }
+
+  const savedScroll = sessionStorage.getItem('karaokeScroll');
+  if (savedScroll) {
+    const container = document.getElementById('main-container');
+    const openBodies = Array.from(document.querySelectorAll('.singer-body:not(.collapsed)'));
+    if (openBodies.length) {
+      const last = openBodies[openBodies.length - 1];
+      const onEnd = () => {
+        last.removeEventListener('transitionend', onEnd);
+        if (container) container.scrollTop = parseInt(savedScroll);
+      };
+      last.addEventListener('transitionend', onEnd);
+    } else {
+      if (container) container.scrollTop = parseInt(savedScroll);
+    }
+  }
+}
+
+// ---- RESTORE SESSION FROM LOCALSTORAGE THEN STATE ----
+function init() {
+  // Check for saved parsed state (post-drop) first, then raw CSV
+  const savedState = sessionStorage.getItem('karaokeState');
+  if (savedState) {
+    try {
+      const singers = JSON.parse(savedState);
+      if (singers && singers.length) buildDOM(singers);
+    } catch(e) {}
+  } else {
+    const saved = sessionStorage.getItem('karaokeSession');
+    if (saved) buildDOM(parseSession(saved));
+  }
+  // Only restore open/scroll state if returning via back button
+  const isBackNav = performance.getEntriesByType('navigation')[0]?.type === 'back_forward';
+  if (isBackNav) restoreState();
+}
+
+window.addEventListener('scroll', () => {
+  const c = document.getElementById('main-container');
+  if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+}, true);
+window.addEventListener('beforeunload', (e) => {
+  const c = document.getElementById('main-container');
+  if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+  if (sessionDirty) { e.preventDefault(); e.returnValue = ''; }
+});
+// ---- ABOUT BUILD DATE TOGGLE ----
+let buildDateShowing = false;
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function toggleBuildDate() {
+  const el = document.getElementById('aboutBuild');
+  buildDateShowing = !buildDateShowing;
+  el.textContent = buildDateShowing ? el.dataset.readable : el.dataset.epoch;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  init();
+});
+
+</script>
+</body>
+</html>

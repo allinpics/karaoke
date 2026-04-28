@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- Karaoke Night | R01V01L02 (1775481531) -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎤 Karaoke Night</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --accent: #f0c040;
+    --text: #e8e8f0;
+    --muted: #aaaacc;
+    --border: #2e2e45;
+  }
+  body.light {
+    --bg: #f4f4f0;
+    --accent: #8a6000;
+    --text: #111120;
+    --muted: #444466;
+    --border: #c8c8a0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Cascading background symbols */
+  .bg-canvas {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-symbol {
+    position: absolute;
+    font-size: 1.8rem;
+    opacity: 0;
+    animation: cascade linear infinite;
+    user-select: none;
+  }
+  @keyframes cascade {
+    0%   { opacity: 0;    transform: translateY(-60px) rotate(0deg);   }
+    10%  { opacity: 0.18; }
+    85%  { opacity: 0.12; }
+    100% { opacity: 0;    transform: translateY(110vh) rotate(30deg); }
+  }
+
+  /* Bordered card */
+  .card {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 56px 72px;
+    border: 3px solid var(--accent);
+    border-radius: 24px;
+    box-shadow: 0 0 0 6px var(--bg), 0 0 0 9px var(--border);
+    background: var(--bg);
+    max-width: 600px;
+    width: 90%;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 6rem);
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .tagline {
+    color: var(--muted);
+    font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+    margin-top: 18px;
+    letter-spacing: 0.12em;
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+  .cta {
+    display: inline-block;
+    margin-top: 44px;
+    padding: 16px 52px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.1em;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .cta:hover { opacity: 0.88; transform: translateY(-2px); }
+</style>
+</head>
+<body class="light">
+
+<div class="bg-canvas" id="bgCanvas"></div>
+
+<div class="card">
+  <h1>🎤 Karaoke Night</h1>
+  <p class="tagline">This is a 100% No Judgement Zone</p>
+  <a class="cta" href="player.html">Let's Sing!</a>
+</div>
+
+<script>
+// Cascading mics and musical notes background
+const symbols = ['🎤','🎵','🎶','🎼','🎤','🎵','🎶','🎤','🎵'];
+const canvas = document.getElementById('bgCanvas');
+const count = 28;
+
+for (let i = 0; i < count; i++) {
+  const el = document.createElement('span');
+  el.className = 'bg-symbol';
+  el.textContent = symbols[i % symbols.length];
+
+  const left = (i / count * 100) + (Math.random() * 4 - 2);
+  const duration = 6 + Math.random() * 8;
+  const delay = -(Math.random() * duration);
+  const size = 1.2 + Math.random() * 1.4;
+
+  el.style.left = left + '%';
+  el.style.fontSize = size + 'rem';
+  el.style.animationDuration = duration + 's';
+  el.style.animationDelay = delay + 's';
+
+  canvas.appendChild(el);
+}
+</script>
+</body>
+</html>
