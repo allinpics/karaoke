@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<!-- Karaoke Night | Virtual Participant Guide | DRAFT v0.1 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎤 Virtual Karaoke Night — Participant Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #18181f;
+    --border: #5a5040;
+    --accent: #f0c040;
+    --text: #e8e8f0;
+    --muted: #9a9080;
+    --header-bg: #13131a;
+    --section-title: #f0c040;
+    --tip-bg: #1e1e2a;
+    --base: 1rem;
+  }
+  body.light {
+    --bg: #f4f4f0;
+    --card: #ffffff;
+    --border: #c8a870;
+    --accent: #8a6000;
+    --text: #111120;
+    --muted: #7a6a50;
+    --header-bg: #e8e8e0;
+    --section-title: #6a4c00;
+    --tip-bg: #eeeee6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1.5rem;
+    background: var(--header-bg);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-unit {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .header-mic { font-size: clamp(1.2rem, 3vw, 2rem); line-height: 1; }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: clamp(0.5rem, 1vw, 0.65rem);
+    margin-top: 0.15rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .theme-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .theme-btn:hover { background: var(--border); }
+
+  /* ── Quick Nav ── */
+  .quick-nav {
+    background: var(--card);
+    border-bottom: 2px solid var(--border);
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.2rem;
+    align-items: center;
+  }
+  .quick-nav span {
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .quick-nav a {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: opacity 0.15s;
+  }
+  .quick-nav a:hover { opacity: 0.7; }
+
+  /* ── Main layout ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── Hero banner ── */
+  .hero {
+    text-align: center;
+    padding: 2.5rem 1rem 2rem;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    margin-bottom: 2.5rem;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: clamp(0.85rem, 2vw, 1.05rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 300;
+    margin-top: 0.75rem;
+  }
+  .hero-tagline {
+    color: var(--text);
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    margin-top: 1rem;
+    font-weight: 400;
+  }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: 80px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: var(--section-title);
+    letter-spacing: 0.08em;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+  }
+  .section-body {
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+  }
+
+  /* ── Card grid for checklist ── */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  .check-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .check-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+  /* ── Steps ── */
+  .steps { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem; }
+  .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 1.8rem;
+    text-align: center;
+  }
+  .step-content { flex: 1; }
+  .step-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+    color: var(--text);
+  }
+  .step-detail {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── Platform tabs ── */
+  .platform-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .tab-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Two-col platform table ── */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  @media (max-width: 540px) { .platform-grid { grid-template-columns: 1fr; } }
+  .platform-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+  .platform-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+  .platform-card ol, .platform-card ul {
+    padding-left: 1.2rem;
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  /* ── Tip box ── */
+  .tip {
+    background: var(--tip-bg);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7rem 1rem;
+    font-size: 0.88rem;
+    color: var(--text);
+    margin-top: 0.75rem;
+    line-height: 1.6;
+  }
+  .tip strong { color: var(--accent); }
+
+  /* ── Role cards ── */
+  .role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  @media (max-width: 540px) { .role-grid { grid-template-columns: 1fr; } }
+  .role-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1rem;
+  }
+  .role-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+  .role-card ul {
+    padding-left: 1.2rem;
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--text);
+  }
+
+  /* ── Trouble table ── */
+  .trouble-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.88rem; }
+  .trouble-table th {
+    background: var(--header-bg);
+    color: var(--accent);
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.08em;
+    font-size: 1rem;
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+  }
+  .trouble-table td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .trouble-table tr:last-child td { border-bottom: none; }
+  .trouble-table td:first-child { font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .trouble-table tr:nth-child(even) td { background: var(--card); }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body class="light">
+
+<header>
+  <div class="header-unit">
+    <span class="header-mic">🎤</span>
+    <div>
+      <h1>KARAOKE NIGHT</h1>
+      <div class="subtitle">Virtual Participant Guide</div>
+    </div>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+</header>
+
+<nav class="quick-nav">
+  <span>Jump to →</span>
+  <a href="#what-you-need">What You Need</a>
+  <a href="#join">Join the Session</a>
+  <a href="#your-turn">Your Turn to Sing</a>
+  <a href="#audio">Audio Tips</a>
+  <a href="#browsers">Browser Guide</a>
+  <a href="#trouble">Troubleshooting</a>
+</nav>
+
+<main>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-title">🎤 Let's Sing!</div>
+    <div class="hero-sub">Virtual KARAOKE NIGHT</div>
+    <div class="hero-tagline">100% No Judgement Zone &nbsp;•&nbsp; Any Device &nbsp;•&nbsp; Any Song</div>
+  </div>
+
+  <!-- What You Need -->
+  <section class="section" id="what-you-need">
+    <div class="section-title">What You Need</div>
+    <p class="section-body">If you can watch a video on your device you're ready to sing — That's it!</p>
+    <div class="check-grid">
+      <div class="check-item"><span class="check-icon">📱</span><span>Smartphone, tablet, or laptop</span></div>
+      <div class="check-item"><span class="check-icon">📶</span><span>WiFi connection (recommended over cellular)</span></div>
+      <div class="check-item"><span class="check-icon">🔊</span><span>Speaker or TV for the backing track</span></div>
+      <div class="check-item"><span class="check-icon">🎵</span><span>Your backing track ready to go (<span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span>, YouTube, or whatever you use)</span></div>
+      <div class="check-item"><span class="check-icon">🎤</span><span>Your voice — no experience required!</span></div>
+    </div>
+    <div class="tip"><strong>💡 Tip:</strong> Connect to WiFi before joining — it gives you a much more stable connection than cellular during a video call.</div>
+  </section>
+
+  <!-- Join the Session -->
+  <section class="section" id="join">
+    <div class="section-title">Join the Session</div>
+    <p class="section-body">Your host will send you a link before the event — Zoom, WhatsApp, or whatever platform the group is using. Just tap the link and you're in.</p>
+
+    <div class="platform-tabs">
+      <button class="tab-btn active" onclick="showTab('zoom')">Zoom</button>
+      <button class="tab-btn" onclick="showTab('whatsapp')">WhatsApp</button>
+      <button class="tab-btn" onclick="showTab('other')">Other / General</button>
+    </div>
+
+    <div id="tab-zoom" class="tab-panel active">
+      <div class="platform-grid">
+        <div class="platform-card">
+          <h3>📱 iPhone / iPad</h3>
+          <ol>
+            <li>Install <strong>Zoom</strong> from the App Store if needed</li>
+            <li>Tap the link your host sent</li>
+            <li>Tap <strong>Join with Video</strong></li>
+            <li>Tap <strong>Join with Computer Audio</strong></li>
+            <li>Allow mic and camera when prompted</li>
+          </ol>
+        </div>
+        <div class="platform-card">
+          <h3>🤖 Android</h3>
+          <ol>
+            <li>Install <strong>Zoom</strong> from Google Play if needed</li>
+            <li>Tap the link your host sent</li>
+            <li>Tap <strong>Join with Video</strong></li>
+            <li>Tap <strong>Join with Device Audio</strong></li>
+            <li>Allow mic and camera when prompted</li>
+          </ol>
+        </div>
+      </div>
+      <div class="tip"><strong>💡 Tip:</strong> No Zoom account needed to join — just tap the link and go. If Zoom is already installed, make sure it is updated first.</div>
+    </div>
+
+    <div id="tab-whatsapp" class="tab-panel">
+      <div class="platform-grid">
+        <div class="platform-card">
+          <h3>📱 iPhone / iPad</h3>
+          <ol>
+            <li>Make sure <strong>WhatsApp</strong> is installed and updated</li>
+            <li>Tap the video call link or answer the group call</li>
+            <li>Allow mic and camera when prompted</li>
+            <li>You're in — no extra steps needed</li>
+          </ol>
+        </div>
+        <div class="platform-card">
+          <h3>🤖 Android</h3>
+          <ol>
+            <li>Make sure <strong>WhatsApp</strong> is installed and updated</li>
+            <li>Tap the video call link or answer the group call</li>
+            <li>Allow mic and camera when prompted</li>
+            <li>You're in — no extra steps needed</li>
+          </ol>
+        </div>
+      </div>
+      <div class="tip"><strong>💡 Tip:</strong> WhatsApp video calls work great on mobile. For larger groups, make sure your host uses the Group Video Call feature.</div>
+    </div>
+
+    <div id="tab-other" class="tab-panel">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-label">Tap the link your host sends</div>
+            <div class="step-detail">It will open in the right app automatically — FaceTime, Google Meet, or whatever the group is using.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-label">Allow microphone and camera</div>
+            <div class="step-detail">Your device will ask permission the first time. Tap Allow — you need both for karaoke!</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-label">Turn your volume up</div>
+            <div class="step-detail">Max device volume so everyone in your room can hear the backing track.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Your Turn to Sing -->
+  <section class="section" id="your-turn">
+    <div class="section-title">Your Turn to Sing</div>
+    <p class="section-body">When it's your room's turn, <strong>you control your own show.</strong> The host coordinates the order but you run your own playback.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">Host gives you the heads up</div>
+          <div class="step-detail">Listen for your name or watch the group chat — your host will let you know you're up next.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">Unmute yourself</div>
+          <div class="step-detail">Tap the microphone icon to unmute. Make sure your device mic can pick up your voice.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-label">Start your backing track</div>
+          <div class="step-detail">Play from <span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span>, YouTube, or whatever source you use. Crank the volume so it fills your room and carries through your mic to everyone else.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-label">Sing!</div>
+          <div class="step-detail">No judgement zone. Own it. 🎤</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-label">Mute yourself when done</div>
+          <div class="step-detail">Tap the microphone icon again. This keeps background noise down while others are singing.</div>
+        </div>
+      </div>
+    </div>
+    <div class="tip"><strong>💡 Tip:</strong> Prop your phone or tablet up so your hands are free. Position it close enough that your voice comes through clearly over the backing track.</div>
+  </section>
+
+  <!-- Audio Tips -->
+  <section class="section" id="audio">
+    <div class="section-title">Audio Tips</div>
+    <p class="section-body">A little setup goes a long way. These tips make a big difference for everyone on the call.</p>
+
+    <div class="role-grid">
+      <div class="role-card">
+        <h3>🎤 When Singing</h3>
+        <ul>
+          <li>Unmute before you start</li>
+          <li>Back track volume up — let it fill the room</li>
+          <li>Hold or prop device at voice height</li>
+          <li>Minimize background noise in your space</li>
+          <li>Mute again when done</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <h3>👂 When Listening</h3>
+        <ul>
+          <li>Stay muted — it helps everyone</li>
+          <li>Use reactions to cheer (👏 🎉)</li>
+          <li>Keep your own background noise low</li>
+          <li>Unmute briefly to clap or cheer between songs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip"><strong>💡 Echo?</strong> If others hear an echo from your room, lower your speaker volume slightly or use headphones. The mic is picking up the audio from your speakers and sending it back out.</div>
+    <div class="tip" style="margin-top:0.5rem"><strong>💡 Zoom users:</strong> Go to Settings → Audio and set Noise Suppression to <strong>Low</strong> or <strong>Off</strong> — this keeps the backing track from being filtered out.</div>
+  </section>
+
+  <!-- Browser Compatibility -->
+  <section class="section" id="browsers">
+    <div class="section-title">Playing Backing Tracks — Browser Guide</div>
+    <p class="section-body">If you are playing your backing track from a laptop browser and want to cast or share it to a TV or bigger screen, browser choice matters.</p>
+
+    <div class="check-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); margin-bottom: 0.75rem;">
+      <div class="check-item" style="border-color: #4a8a4a;">
+        <span class="check-icon">✅</span>
+        <div><strong>Chrome</strong><br><span style="font-size:0.8rem; color: var(--muted);">Best — native Chromecast support built in</span></div>
+      </div>
+      <div class="check-item" style="border-color: #4a8a4a;">
+        <span class="check-icon">✅</span>
+        <div><strong>Edge</strong><br><span style="font-size:0.8rem; color: var(--muted);">Works — Chromecast via menu → More Tools → Cast</span></div>
+      </div>
+      <div class="check-item" style="border-color: #8a4a4a;">
+        <span class="check-icon">❌</span>
+        <div><strong>Firefox</strong><br><span style="font-size:0.8rem; color: var(--muted);">No Chromecast on desktop — use Chrome or Edge instead. On iOS, Firefox can cast via AirPlay.</span></div>
+      </div>
+      <div class="check-item" style="border-color: #8a6a4a;">
+        <span class="check-icon">⚠️</span>
+        <div><strong>Safari</strong><br><span style="font-size:0.8rem; color: var(--muted);">AirPlay only — works with Apple TV, not Chromecast</span></div>
+      </div>
+    </div>
+
+    <div class="tip"><strong>💡 Mobile — <span style="color:var(--accent)">KARAOKE NIGHT</span>:</strong> Open <strong>KARAOKE NIGHT</strong> in your mobile browser — Chrome on Android, Safari or Firefox on iPhone all work great. Find your song and tap to play. To cast to a TV, use the Cast icon in Chrome (Android) or AirPlay (iPhone).</div>
+    <div class="tip" style="margin-top: 0.5rem"><strong>💡 Just singing along?</strong> If you are not casting to a TV and just playing audio through your device speakers, any browser works fine.</div>
+    <div class="tip" style="margin-top: 0.5rem; border-left-color: #c06080;">❤️ <strong>Not using <span style="color:var(--accent)">KARAOKE NIGHT</span>?</strong> Sorry to hear that but you are always welcome at the party! Just use your preferred karaoke player and join in — we'd love to see you!</div>
+  </section>
+
+  <!-- Troubleshooting -->
+  <section class="section" id="trouble">
+    <div class="section-title">Troubleshooting</div>
+    <p class="section-body">Something not working? Try these first.</p>
+    <table class="trouble-table">
+      <thead>
+        <tr><th>Problem</th><th>Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Can't hear anything</td><td>Check device volume. Tap the speaker icon in your app. Make sure you joined with audio enabled.</td></tr>
+        <tr><td>Others can't hear me</td><td>Check you are not muted — tap the microphone icon. Check the app has microphone permission in your phone settings.</td></tr>
+        <tr><td>Echo or feedback</td><td>Turn your volume down a bit or use headphones. Someone in the call has their speaker too loud near their mic.</td></tr>
+        <tr><td>Video is frozen</td><td>Leave the meeting and rejoin using the same link from your host.</td></tr>
+        <tr><td>Call cuts off at 40 min</td><td>Normal on free Zoom. Your host will start a new meeting — watch for a new link in the group chat.</td></tr>
+        <tr><td>Can't find the link</td><td>Check your texts and email. Ask your host to resend it in the group chat.</td></tr>
+        <tr><td>Backing track sounds muffled</td><td>Turn it up louder in your room. Try Zoom's Noise Suppression set to Low or Off in audio settings.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<footer>
+  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; 100% No Judgement Zone 🎤
+</footer>
+
+<script>
+  // Theme toggle
+  function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('light')) {
+      body.classList.remove('light');
+      btn.textContent = '☀️ Light';
+    } else {
+      body.classList.add('light');
+      btn.textContent = '🌙 Dark';
+    }
+  }
+
+  // Platform tabs
+  function showTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

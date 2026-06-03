@@ -1,0 +1,8 @@
+#,Karaoke Night | R01V01L04g,,,,
+#,"Session file template. Copy, rename and edit for your session.",,,,
+#,Column layout: # comment | Singer | Category | Song | Artist (future) | Full URL (future),,,,
+#,Rules: col1=# skips row | empty rows ignored | whitespace trimmed,,,,
+#,One row can define Singer + Category + first Song simultaneously,,,,
+,,,,,
+#,Singer,Category,Song,Artist (future),Full URL (future)
+#,,,,,

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<!-- Karaoke Night | User Guide | R01V01L03 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎤 Karaoke Night — User Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #18181f;
+    --border: #5a5040;
+    --accent: #f0c040;
+    --text: #e8e8f0;
+    --muted: #9a9080;
+    --header-bg: #13131a;
+    --section-title: #f0c040;
+    --tip-bg: #1e1e2a;
+    --base: 1rem;
+  }
+  body.light {
+    --bg: #f4f4f0;
+    --card: #ffffff;
+    --border: #c8a870;
+    --accent: #8a6000;
+    --text: #111120;
+    --muted: #7a6a50;
+    --header-bg: #e8e8e0;
+    --section-title: #6a4c00;
+    --tip-bg: #eeeee6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1.5rem;
+    background: var(--header-bg);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-unit { display: flex; align-items: center; gap: 0.5rem; }
+  .header-mic { font-size: clamp(1.2rem, 3vw, 2rem); line-height: 1; }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: clamp(0.5rem, 1vw, 0.65rem);
+    margin-top: 0.15rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .theme-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .theme-btn:hover { background: var(--border); }
+
+  .quick-nav {
+    background: var(--card);
+    border-bottom: 2px solid var(--border);
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.2rem;
+    align-items: center;
+  }
+  .quick-nav span { color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+  .quick-nav a { color: var(--accent); font-size: 0.85rem; font-weight: 600; text-decoration: none; letter-spacing: 0.04em; transition: opacity 0.15s; }
+  .quick-nav a:hover { opacity: 0.7; }
+
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .hero {
+    text-align: center;
+    padding: 2.5rem 1rem 2rem;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    margin-bottom: 2.5rem;
+  }
+  .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 8vw, 4.5rem); color: var(--accent); letter-spacing: 0.08em; line-height: 1; }
+  .hero-sub { color: var(--muted); font-size: clamp(0.85rem, 2vw, 1.05rem); letter-spacing: 0.15em; text-transform: uppercase; font-weight: 300; margin-top: 0.75rem; }
+  .hero-tagline { color: var(--text); font-size: clamp(1rem, 2.5vw, 1.2rem); margin-top: 1rem; font-weight: 400; }
+
+  .section { margin-bottom: 2.5rem; scroll-margin-top: 80px; }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: var(--section-title);
+    letter-spacing: 0.08em;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+  }
+  .section-body { color: var(--text); font-size: 0.95rem; line-height: 1.7; margin-bottom: 0.8rem; }
+
+  .steps { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem; }
+  .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--accent); line-height: 1; flex-shrink: 0; width: 1.8rem; text-align: center; }
+  .step-content { flex: 1; }
+  .step-label { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; color: var(--text); }
+  .step-detail { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+  .step-detail code { background: var(--tip-bg); padding: 1px 5px; border-radius: 3px; font-size: 0.85em; color: var(--accent); }
+
+  .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+  .check-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .check-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+  .menu-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-top: 0.75rem;
+  }
+  .menu-block h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.06em; margin-bottom: 0.6rem; }
+  .menu-item { font-size: 0.9rem; padding: 0.3rem 0; color: var(--text); display: flex; gap: 0.75rem; border-bottom: 1px solid var(--border); }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item-name { font-weight: 600; min-width: 130px; color: var(--accent); flex-shrink: 0; }
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+  @media (max-width: 540px) { .menu-grid { grid-template-columns: 1fr; } }
+
+  .tip {
+    background: var(--tip-bg);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7rem 1rem;
+    font-size: 0.88rem;
+    color: var(--text);
+    margin-top: 0.75rem;
+    line-height: 1.6;
+  }
+  .tip strong { color: var(--accent); }
+
+  .trouble-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.88rem; }
+  .trouble-table th { background: var(--header-bg); color: var(--accent); font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; font-size: 1rem; padding: 0.6rem 0.9rem; text-align: left; border-bottom: 2px solid var(--border); }
+  .trouble-table td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; color: var(--text); }
+  .trouble-table tr:last-child td { border-bottom: none; }
+  .trouble-table td:first-child { font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .trouble-table tr:nth-child(even) td { background: var(--card); }
+
+  footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--border); letter-spacing: 0.08em; }
+</style>
+</head>
+<body class="light">
+
+<header>
+  <div class="header-unit">
+    <span class="header-mic">🎤</span>
+    <div>
+      <h1>KARAOKE NIGHT</h1>
+      <div class="subtitle">User Guide</div>
+    </div>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+</header>
+
+<nav class="quick-nav">
+  <span>Jump to →</span>
+  <a href="#getting-started">Getting Started</a>
+  <a href="#session-menu">Session Menu</a>
+  <a href="#editing">Editing</a>
+  <a href="#browsing">Browsing Songs</a>
+  <a href="#searching">Searching</a>
+  <a href="#youtube">YouTube Modes</a>
+  <a href="#session-files">Session Files</a>
+  <a href="#trouble">Troubleshooting</a>
+</nav>
+
+<main>
+
+  <div class="hero">
+    <div class="hero-title">🎤 Karaoke Night</div>
+    <div class="hero-sub">User Guide</div>
+    <div class="hero-tagline">Your personal song finder &nbsp;•&nbsp; 100% No Judgement Zone</div>
+  </div>
+
+  <!-- Getting Started -->
+  <section class="section" id="getting-started">
+    <div class="section-title">Getting Started</div>
+    <p class="section-body">Karaoke Night is a personal song finder. You load a session file containing your singers, categories, and songs, then use the app to find and play them on YouTube.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">Open the app</div>
+          <div class="step-detail">Tap <strong>Let's Sing!</strong> on the landing page to open the song finder.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">Load a session file</div>
+          <div class="step-detail">Go to <code>Session → Open</code> and choose your <code>.csv</code> session file. Or use <code>Session → Open Sample</code> to load the built-in example. To get a template to edit, use <code>Session → Download → Blank Session</code>.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-label">Browse and sing</div>
+          <div class="step-detail">Expand a Singer, then a Category to see songs. Tap any song card to search YouTube.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Session Menu -->
+  <section class="section" id="session-menu">
+    <div class="section-title">Session Menu</div>
+    <p class="section-body">The <strong>Session</strong> menu controls loading and managing your session. Some items are disabled until a session is loaded.</p>
+    <div class="menu-block" style="margin-bottom:0.75rem;">
+      <h3>Session</h3>
+      <div class="menu-item"><span class="menu-item-name">New</span><span>Build a session from scratch using the inline entry panel. Disabled once a session is loaded — use Add to append singers.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Open</span><span>Load one or more .csv session files. Warns if a session is already loaded.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Add</span><span>Load one or more additional .csv files and append their singers to the current session.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Reopen</span><span>Optionally drop singers, then opens the Add file picker. Useful mid-party.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Save As...</span><span>Downloads the current session as a .csv — includes all edits, excludes dropped/deleted items.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Close</span><span>Clears the session and returns to the welcome screen.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Open Sample</span><span>Loads the built-in sample session from the server.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Download →</span><span>Download Sample Session or Blank Session template to your device.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Exit</span><span>Returns to the landing page.</span></div>
+    </div>
+    <div class="menu-block" style="margin-bottom:0.75rem;">
+      <h3>Singer</h3>
+      <div class="menu-item"><span class="menu-item-name">Drop Singer(s)</span><span>Removes selected singers from the session. Saved for Undrop.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Undrop Singer(s)</span><span>Restores dropped singers. Disabled when nothing has been dropped.</span></div>
+    </div>
+    <div class="menu-block">
+      <h3>Help</h3>
+      <div class="menu-item"><span class="menu-item-name">User Guide</span><span>Opens this guide in a new tab.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Virtual Setup</span><span>Opens the Virtual Karaoke Night participant guide.</span></div>
+      <div class="menu-item"><span class="menu-item-name">About</span><span>Shows build version. Click the build line to toggle between epoch and readable date.</span></div>
+    </div>
+    <div class="tip"><strong>💡 Mid-party tip:</strong> Use <strong>Add</strong> to load a new singer without disturbing the current session. Use <strong>Drop Singer(s)</strong> to remove singers who have left.</div>
+  </section>
+
+  <!-- Editing -->
+  <section class="section" id="editing">
+    <div class="section-title">Editing Your Session</div>
+    <p class="section-body">Every singer header, category header, and song card shows a small ✏️ pencil icon. Tap it to open the edit menu for that item.</p>
+    <div class="menu-block" style="margin-bottom:0.75rem;">
+      <h3>✏️ Edit Menu</h3>
+      <div class="menu-item"><span class="menu-item-name">Rename</span><span>Opens an inline text field. Enter commits, Escape cancels.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Delete</span><span>Removes the singer, category, or song from the session immediately.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Add Above / Below</span><span>Singers and categories — inserts a new item above or below. Enter adds, blank Enter exits.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Add Before / After</span><span>Songs — inserts a new song before or after in the card grid. Same Enter flow.</span></div>
+    </div>
+    <div class="tip"><strong>💡 Tip:</strong> Use <strong>Save As...</strong> after editing to save your updated session as a .csv file.</div>
+  </section>
+
+  <!-- Browsing Songs -->
+  <section class="section" id="browsing">
+    <div class="section-title">Browsing Songs</div>
+    <p class="section-body">Songs are organized in a Singer → Category → Song hierarchy. Tap any header to expand or collapse it.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">Tap a Singer header to expand</div>
+          <div class="step-detail">Shows all categories for that singer. Tap again to collapse.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">Tap a Category header to expand</div>
+          <div class="step-detail">Shows the song cards in that category.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-label">Tap a song card</div>
+          <div class="step-detail">Opens a YouTube search for that song in the current search mode (Karaoke or Music Video).</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-label">Tap Back to return</div>
+          <div class="step-detail">Your scroll position, open sections, and search state are all restored automatically.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Searching -->
+  <section class="section" id="searching">
+    <div class="section-title">Searching</div>
+    <p class="section-body">Two search tools are available in the top controls bar.</p>
+    <div class="check-grid">
+      <div class="check-item">
+        <span class="check-icon">🔍</span>
+        <div>
+          <strong>Filter</strong><br>
+          <span style="font-size:0.85rem; color:var(--muted);">Searches your loaded session. Narrows singers and categories to matching songs only. Tap ✕ to clear and restore full view. Disabled until a session is loaded.</span>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">▶</span>
+        <div>
+          <strong>Find on YouTube</strong><br>
+          <span style="font-size:0.85rem; color:var(--muted);">Search YouTube directly for any song — no session needed. Type a song name and press Enter. Tap ✕ to clear.</span>
+        </div>
+      </div>
+    </div>
+    <div class="tip"><strong>💡 Tip:</strong> Use <strong>Filter</strong> to quickly find a song in your session list. Use <strong>Find on YouTube</strong> for ad hoc searches for songs not in your session.</div>
+  </section>
+
+  <!-- YouTube Modes -->
+  <section class="section" id="youtube">
+    <div class="section-title">YouTube Search Modes</div>
+    <p class="section-body">The two mode buttons next to the Find on YouTube box control how songs are searched on YouTube.</p>
+    <div class="check-grid">
+      <div class="check-item" style="border-color: var(--accent);">
+        <span class="check-icon">🎤</span>
+        <div>
+          <strong>Karaoke Mode</strong> (default)<br>
+          <span style="font-size:0.85rem; color:var(--muted);">Searches YouTube for <em>karaoke [song title]</em> — finds backing tracks with lyrics.</span>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">🎵</span>
+        <div>
+          <strong>Music Video Mode</strong><br>
+          <span style="font-size:0.85rem; color:var(--muted);">Searches YouTube for <em>[song title] music video</em> — finds the original artist recording.</span>
+        </div>
+      </div>
+    </div>
+    <div class="tip"><strong>💡 Tip:</strong> The active mode button appears lit/bright. Your mode selection is remembered if you navigate back from YouTube.</div>
+  </section>
+
+  <!-- Session Files -->
+  <section class="section" id="session-files">
+    <div class="section-title">Session Files</div>
+    <p class="section-body">A session file is a <code>.csv</code> file that defines your singers, categories, and songs. It can be created and edited in any spreadsheet app (Google Sheets, Excel, LibreOffice Calc) or a plain text editor.</p>
+
+    <div class="menu-block" style="margin-top:0.75rem;">
+      <h3>File Format</h3>
+      <div class="menu-item"><span class="menu-item-name">Column 1</span><span><code>#</code> marks a comment row — entire row is ignored by the app</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 2</span><span>Singer name</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 3</span><span>Category name</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 4</span><span>Song title</span></div>
+      <div class="menu-item"><span class="menu-item-name">Columns 5–6</span><span>Artist and Full URL — reserved for future use</span></div>
+    </div>
+
+    <div class="tip"><strong>💡 One row can do multiple things:</strong> A single row can define a Singer, Category, and first Song all at once — just fill in columns 2, 3, and 4 together.</div>
+    <div class="tip" style="margin-top:0.5rem;"><strong>💡 File naming:</strong> Name your session files starting with <code>session_</code> (e.g. <code>session_friday.csv</code>) to keep them organized. Use <strong>Session → Download → Blank Session</strong> to get a template to start from.</div>
+  </section>
+
+  <!-- Troubleshooting -->
+  <section class="section" id="trouble">
+    <div class="section-title">Troubleshooting</div>
+    <table class="trouble-table">
+      <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Session won't load</td><td>Make sure the file is a .csv file. Check that it follows the column format — Singer in column 2, Category in column 3, Song in column 4.</td></tr>
+        <tr><td>No singers showing</td><td>The file may have no data rows. Open Session → Open Sample to verify the app is working, then check your file.</td></tr>
+        <tr><td>Filter not working</td><td>A session must be loaded first — the Filter is disabled until a session is open.</td></tr>
+        <tr><td>Scroll position lost</td><td>Make sure you tap Back — don't close the YouTube tab. The app restores scroll position on Back navigation.</td></tr>
+        <tr><td>YouTube opens wrong search</td><td>Check which mode is active — 🎤 Karaoke Mode or 🎵 Music Video Mode. The lit button is the active one.</td></tr>
+        <tr><td>Open Sample fails</td><td>This feature requires an internet connection — it fetches the sample file from the app server.</td></tr>
+        <tr><td>App looks wrong after update</td><td>Hard refresh the page: Ctrl+Shift+R on desktop, or clear browser cache on mobile.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<footer>
+  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; User Guide &nbsp;•&nbsp; R01V01L03 🎤
+</footer>
+
+<script>
+  function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    if (body.classList.contains('light')) {
+      body.classList.remove('light');
+      btn.textContent = '☀️ Light';
+    } else {
+      body.classList.add('light');
+      btn.textContent = '🌙 Dark';
+    }
+  }
+</script>
+</body>
+</html>
