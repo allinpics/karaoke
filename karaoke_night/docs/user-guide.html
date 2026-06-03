@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | User Guide | R01V01L03 -->
+<!-- Karaoke Night | User Guide | R01V01L09d (1780164595 EDT-0400) -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -39,6 +39,12 @@
     transition: background 0.3s, color 0.3s;
   }
 
+  .sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
   header {
     display: flex;
     justify-content: space-between;
@@ -46,9 +52,6 @@
     padding: 0.6rem 1.5rem;
     background: var(--header-bg);
     border-bottom: 2px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
   }
   .header-unit { display: flex; align-items: center; gap: 0.5rem; }
   .header-mic { font-size: clamp(1.2rem, 3vw, 2rem); line-height: 1; }
@@ -165,6 +168,46 @@
   }
   .tip strong { color: var(--accent); }
 
+  .section-body a, .menu-item a, .trouble-table a { color: var(--accent); text-decoration: underline; }
+
+  /* Terminology — styled defined terms + tap/hover popover */
+  .term {
+    color: var(--accent);
+    border-bottom: 1px dotted var(--accent);
+    cursor: help;
+    font-weight: 600;
+  }
+  .term:focus { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  #termPop {
+    position: absolute;
+    display: none;
+    max-width: 240px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    z-index: 200;
+  }
+  #termPop strong { color: var(--accent); display: block; margin-bottom: 0.15rem; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  .badge {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 0.12rem 0.6rem;
+    vertical-align: middle;
+    margin-left: 0.6rem;
+  }
+
   .trouble-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.88rem; }
   .trouble-table th { background: var(--header-bg); color: var(--accent); font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; font-size: 1rem; padding: 0.6rem 0.9rem; text-align: left; border-bottom: 2px solid var(--border); }
   .trouble-table td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; color: var(--text); }
@@ -177,6 +220,7 @@
 </head>
 <body class="light">
 
+<div class="sticky-top">
 <header>
   <div class="header-unit">
     <span class="header-mic">🎤</span>
@@ -192,13 +236,15 @@
   <span>Jump to →</span>
   <a href="#getting-started">Getting Started</a>
   <a href="#session-menu">Session Menu</a>
+  <a href="#view-menu">View Menu</a>
   <a href="#editing">Editing</a>
   <a href="#browsing">Browsing Songs</a>
   <a href="#searching">Searching</a>
-  <a href="#youtube">YouTube Modes</a>
-  <a href="#session-files">Session Files</a>
+  <a href="#youtube">Search Modes</a>
   <a href="#trouble">Troubleshooting</a>
+  <a href="#session-files">Session Files</a>
 </nav>
+</div>
 
 <main>
 
@@ -211,45 +257,30 @@
   <!-- Getting Started -->
   <section class="section" id="getting-started">
     <div class="section-title">Getting Started</div>
-    <p class="section-body">Karaoke Night is a personal song finder. You load a session file containing your singers, categories, and songs, then use the app to find and play them on YouTube.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <div class="step-label">Open the app</div>
-          <div class="step-detail">Tap <strong>Let's Sing!</strong> on the landing page to open the song finder.</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <div class="step-label">Load a session file</div>
-          <div class="step-detail">Go to <code>Session → Open</code> and choose your <code>.csv</code> session file. Or use <code>Session → Open Sample</code> to load the built-in example. To get a template to edit, use <code>Session → Download → Blank Session</code>.</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <div class="step-label">Browse and sing</div>
-          <div class="step-detail">Expand a Singer, then a Category to see songs. Tap any song card to search YouTube.</div>
-        </div>
-      </div>
+    <p class="section-body">Karaoke Night is a personal song finder — open it by tapping <strong>Let's Sing!</strong> on the landing page. Your first step is to have a <span class="term" data-term="session" tabindex="0">session</span>: your <span class="term" data-term="singer" tabindex="0">singers</span>, <span class="term" data-term="category" tabindex="0">categories</span>, and <span class="term" data-term="song" tabindex="0">songs</span>.</p>
+
+    <div class="menu-block" style="margin-top:0.75rem;">
+      <h3>Create or load a session</h3>
+      <div class="menu-item"><span class="menu-item-name">Session → New</span><span>Build a session from scratch using the inline entry panel.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Session → Open</span><span>Load your saved session file(s).</span></div>
+      <div class="menu-item"><span class="menu-item-name">Session → Open Sample</span><span>Load the built-in example to try out the app — easy to edit.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Session → Download</span><span>Get a Sample or Blank Session to build and maintain in a spreadsheet or text editor. See <a href="#session-files">Session Files</a> for the format.</span></div>
     </div>
   </section>
 
   <!-- Session Menu -->
   <section class="section" id="session-menu">
     <div class="section-title">Session Menu</div>
-    <p class="section-body">The <strong>Session</strong> menu controls loading and managing your session. Some items are disabled until a session is loaded.</p>
+    <p class="section-body">The <strong>Session</strong> menu controls loading and managing your <span class="term" data-term="session" tabindex="0">session</span>. Some items are disabled until a session is loaded.</p>
     <div class="menu-block" style="margin-bottom:0.75rem;">
       <h3>Session</h3>
+      <div class="menu-item"><span class="menu-item-name">Open</span><span>Load one or more saved session files. Warns if a session is already loaded.</span></div>
       <div class="menu-item"><span class="menu-item-name">New</span><span>Build a session from scratch using the inline entry panel. Disabled once a session is loaded — use Add to append singers.</span></div>
-      <div class="menu-item"><span class="menu-item-name">Open</span><span>Load one or more .csv session files. Warns if a session is already loaded.</span></div>
-      <div class="menu-item"><span class="menu-item-name">Add</span><span>Load one or more additional .csv files and append their singers to the current session.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Add</span><span>Load one or more additional session files and append their singers to the current session.</span></div>
       <div class="menu-item"><span class="menu-item-name">Reopen</span><span>Optionally drop singers, then opens the Add file picker. Useful mid-party.</span></div>
-      <div class="menu-item"><span class="menu-item-name">Save As...</span><span>Downloads the current session as a .csv — includes all edits, excludes dropped/deleted items.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Save As...</span><span>Saves the current session as a file — includes all edits, excludes dropped/deleted items.</span></div>
       <div class="menu-item"><span class="menu-item-name">Close</span><span>Clears the session and returns to the welcome screen.</span></div>
-      <div class="menu-item"><span class="menu-item-name">Open Sample</span><span>Loads the built-in sample session from the server.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Open Sample</span><span>Loads the built-in sample session.</span></div>
       <div class="menu-item"><span class="menu-item-name">Download →</span><span>Download Sample Session or Blank Session template to your device.</span></div>
       <div class="menu-item"><span class="menu-item-name">Exit</span><span>Returns to the landing page.</span></div>
     </div>
@@ -267,24 +298,37 @@
     <div class="tip"><strong>💡 Mid-party tip:</strong> Use <strong>Add</strong> to load a new singer without disturbing the current session. Use <strong>Drop Singer(s)</strong> to remove singers who have left.</div>
   </section>
 
+  <!-- View Menu -->
+  <section class="section" id="view-menu">
+    <div class="section-title">View Menu</div>
+    <p class="section-body">The <strong>View</strong> menu controls how <span class="term" data-term="singer" tabindex="0">singers</span> and <span class="term" data-term="category" tabindex="0">categories</span> are displayed. Items are disabled when there is nothing to act on or when an edit is in progress.</p>
+    <div class="menu-block">
+      <h3>View</h3>
+      <div class="menu-item"><span class="menu-item-name">Singers ›</span><span>Expand All or Collapse All singer panels.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Categories ›</span><span>Expand All or Collapse All category panels within expanded singers.</span></div>
+      <div class="menu-item"><span class="menu-item-name">All ›</span><span>Expand or Collapse all singers and categories at once. Active only when there is something to expand or collapse.</span></div>
+    </div>
+  </section>
+
   <!-- Editing -->
   <section class="section" id="editing">
     <div class="section-title">Editing Your Session</div>
-    <p class="section-body">Every singer header, category header, and song card shows a small ✏️ pencil icon. Tap it to open the edit menu for that item.</p>
+    <p class="section-body">Every <span class="term" data-term="singer" tabindex="0">singer</span> header, <span class="term" data-term="category" tabindex="0">category</span> header, and <span class="term" data-term="song" tabindex="0">song</span> card shows a small ✏️ pencil icon. Tap it to open the edit menu for that item.</p>
     <div class="menu-block" style="margin-bottom:0.75rem;">
       <h3>✏️ Edit Menu</h3>
       <div class="menu-item"><span class="menu-item-name">Rename</span><span>Opens an inline text field. Enter commits, Escape cancels.</span></div>
       <div class="menu-item"><span class="menu-item-name">Delete</span><span>Removes the singer, category, or song from the session immediately.</span></div>
-      <div class="menu-item"><span class="menu-item-name">Add Above / Below</span><span>Singers and categories — inserts a new item above or below. Enter adds, blank Enter exits.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Add Above / Below</span><span>Singers and categories — inserts a new item above or below. Type a name and press <strong>Enter</strong> to add it; a blank entry finishes.</span></div>
       <div class="menu-item"><span class="menu-item-name">Add Before / After</span><span>Songs — inserts a new song before or after in the card grid. Same Enter flow.</span></div>
+      <div class="menu-item"><span class="menu-item-name">Artist &amp; URL</span><span><strong>Optional fields.</strong> After entering a song, you can add the artist name (🎼) and/or a direct URL link (🌐). Press <strong>Enter</strong> to confirm each field or <strong>Escape</strong> to skip. You can enter one, both, or neither — all combinations are valid.</span></div>
     </div>
-    <div class="tip"><strong>💡 Tip:</strong> Use <strong>Save As...</strong> after editing to save your updated session as a .csv file.</div>
+    <div class="tip"><strong>💡 Tip:</strong> Use <strong>Save As...</strong> after editing to save your updated session.</div>
   </section>
 
   <!-- Browsing Songs -->
   <section class="section" id="browsing">
     <div class="section-title">Browsing Songs</div>
-    <p class="section-body">Songs are organized in a Singer → Category → Song hierarchy. Tap any header to expand or collapse it.</p>
+    <p class="section-body">Songs are organized in a <span class="term" data-term="singer" tabindex="0">Singer</span> → <span class="term" data-term="category" tabindex="0">Category</span> → <span class="term" data-term="song" tabindex="0">Song</span> hierarchy. Tap any header to expand or collapse it.</p>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
@@ -304,7 +348,7 @@
         <div class="step-num">3</div>
         <div class="step-content">
           <div class="step-label">Tap a song card</div>
-          <div class="step-detail">Opens a YouTube search for that song in the current search mode (Karaoke or Music Video).</div>
+          <div class="step-detail">Opens a search for that song in the current search mode. If the song has artist or URL data, icons appear on the card — 🎼 shows the artist name (tap to search song + artist), 🌐 navigates directly to a preset URL.</div>
         </div>
       </div>
       <div class="step">
@@ -326,14 +370,14 @@
         <span class="check-icon">🔍</span>
         <div>
           <strong>Filter</strong><br>
-          <span style="font-size:0.85rem; color:var(--muted);">Searches your loaded session. Narrows singers and categories to matching songs only. Tap ✕ to clear and restore full view. Disabled until a session is loaded.</span>
+          <span style="font-size:0.85rem; color:var(--muted);">Searches your loaded <span class="term" data-term="session" tabindex="0">session</span>. Narrows singers and categories to matching songs only. Tap ✕ to clear and restore full view. Tap ▼ to pick from your recent filters. Disabled until a session is loaded.</span>
         </div>
       </div>
       <div class="check-item">
         <span class="check-icon">▶</span>
         <div>
           <strong>Find on YouTube</strong><br>
-          <span style="font-size:0.85rem; color:var(--muted);">Search YouTube directly for any song — no session needed. Type a song name and press Enter. Tap ✕ to clear.</span>
+          <span style="font-size:0.85rem; color:var(--muted);">Search YouTube directly for any song — no session needed. Type a song name and press Enter. Tap ✕ to clear, or ▼ to pick from your recent searches.</span>
         </div>
       </div>
     </div>
@@ -342,8 +386,8 @@
 
   <!-- YouTube Modes -->
   <section class="section" id="youtube">
-    <div class="section-title">YouTube Search Modes</div>
-    <p class="section-body">The two mode buttons next to the Find on YouTube box control how songs are searched on YouTube.</p>
+    <div class="section-title">Search Modes</div>
+    <p class="section-body">The four mode buttons next to the Find box control how <span class="term" data-term="song" tabindex="0">songs</span> are searched. The active button appears pressed/darker.</p>
     <div class="check-grid">
       <div class="check-item" style="border-color: var(--accent);">
         <span class="check-icon">🎤</span>
@@ -356,29 +400,25 @@
         <span class="check-icon">🎵</span>
         <div>
           <strong>Music Video Mode</strong><br>
-          <span style="font-size:0.85rem; color:var(--muted);">Searches YouTube for <em>[song title] music video</em> — finds the original artist recording.</span>
+          <span style="font-size:0.85rem; color:var(--muted);">Searches YouTube for <em>[song title] music video</em>.</span>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">▶</span>
+        <div>
+          <strong>YouTube Mode</strong><br>
+          <span style="font-size:0.85rem; color:var(--muted);">Raw YouTube search — no prefix or suffix added. Good for finding specific versions.</span>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon" style="font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:1.1rem;">G</span>
+        <div>
+          <strong>Google Search</strong><br>
+          <span style="font-size:0.85rem; color:var(--muted);">Opens a Google web search in a new tab. Useful for finding lyrics or song info.</span>
         </div>
       </div>
     </div>
-    <div class="tip"><strong>💡 Tip:</strong> The active mode button appears lit/bright. Your mode selection is remembered if you navigate back from YouTube.</div>
-  </section>
-
-  <!-- Session Files -->
-  <section class="section" id="session-files">
-    <div class="section-title">Session Files</div>
-    <p class="section-body">A session file is a <code>.csv</code> file that defines your singers, categories, and songs. It can be created and edited in any spreadsheet app (Google Sheets, Excel, LibreOffice Calc) or a plain text editor.</p>
-
-    <div class="menu-block" style="margin-top:0.75rem;">
-      <h3>File Format</h3>
-      <div class="menu-item"><span class="menu-item-name">Column 1</span><span><code>#</code> marks a comment row — entire row is ignored by the app</span></div>
-      <div class="menu-item"><span class="menu-item-name">Column 2</span><span>Singer name</span></div>
-      <div class="menu-item"><span class="menu-item-name">Column 3</span><span>Category name</span></div>
-      <div class="menu-item"><span class="menu-item-name">Column 4</span><span>Song title</span></div>
-      <div class="menu-item"><span class="menu-item-name">Columns 5–6</span><span>Artist and Full URL — reserved for future use</span></div>
-    </div>
-
-    <div class="tip"><strong>💡 One row can do multiple things:</strong> A single row can define a Singer, Category, and first Song all at once — just fill in columns 2, 3, and 4 together.</div>
-    <div class="tip" style="margin-top:0.5rem;"><strong>💡 File naming:</strong> Name your session files starting with <code>session_</code> (e.g. <code>session_friday.csv</code>) to keep them organized. Use <strong>Session → Download → Blank Session</strong> to get a template to start from.</div>
+    <div class="tip"><strong>💡 Tip:</strong> Your selected mode is remembered if you navigate back from a search. Web mode opens in a new tab so the app stays open.</div>
   </section>
 
   <!-- Troubleshooting -->
@@ -387,22 +427,45 @@
     <table class="trouble-table">
       <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
       <tbody>
-        <tr><td>Session won't load</td><td>Make sure the file is a .csv file. Check that it follows the column format — Singer in column 2, Category in column 3, Song in column 4.</td></tr>
-        <tr><td>No singers showing</td><td>The file may have no data rows. Open Session → Open Sample to verify the app is working, then check your file.</td></tr>
+        <tr><td>Session won't load</td><td>Make sure you're opening a session you saved or downloaded from this app. Try <strong>Session → Open Sample</strong> to confirm the app is working.</td></tr>
+        <tr><td>No singers showing</td><td>The session may have no entries. Open Session → Open Sample to verify the app is working, then check your file.</td></tr>
+        <tr><td>⚠️ icon in the header</td><td>Some rows in your session couldn't be read. Tap the ⚠️ to see which rows had problems, fix them, and reload.</td></tr>
         <tr><td>Filter not working</td><td>A session must be loaded first — the Filter is disabled until a session is open.</td></tr>
         <tr><td>Scroll position lost</td><td>Make sure you tap Back — don't close the YouTube tab. The app restores scroll position on Back navigation.</td></tr>
-        <tr><td>YouTube opens wrong search</td><td>Check which mode is active — 🎤 Karaoke Mode or 🎵 Music Video Mode. The lit button is the active one.</td></tr>
+        <tr><td>YouTube opens wrong search</td><td>Check which mode is active — 🎤 Karaoke, 🎵 Music Video, ▶ YouTube (raw), or <strong>G</strong> Google. The lit button is the active one.</td></tr>
         <tr><td>Open Sample fails</td><td>This feature requires an internet connection — it fetches the sample file from the app server.</td></tr>
         <tr><td>App looks wrong after update</td><td>Hard refresh the page: Ctrl+Shift+R on desktop, or clear browser cache on mobile.</td></tr>
       </tbody>
     </table>
   </section>
 
+  <!-- Session Files -->
+  <section class="section" id="session-files">
+    <div class="section-title">Session Files <span class="badge">For experienced users</span></div>
+    <p class="section-body">Most people never need this — just use <strong>Session → New</strong> or <strong>Open Sample</strong>. This section is for users who'd rather build and maintain a <span class="term" data-term="session" tabindex="0">session</span> in a spreadsheet or text editor.</p>
+    <p class="section-body">A session file is a <code>.csv</code> file that defines your <span class="term" data-term="singer" tabindex="0">singers</span>, <span class="term" data-term="category" tabindex="0">categories</span>, and <span class="term" data-term="song" tabindex="0">songs</span>. It can be created and edited in any spreadsheet app (Google Sheets, Excel, LibreOffice Calc) or a plain text editor. Use <strong>Session → Download</strong> to start from a Sample or Blank session.</p>
+
+    <div class="menu-block" style="margin-top:0.75rem;">
+      <h3>File Format</h3>
+      <div class="menu-item"><span class="menu-item-name">Column 1</span><span><code>#</code> marks a comment row — entire row is ignored by the app</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 2</span><span>Singer name</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 3</span><span>Category name</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 4</span><span>Song title</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 5</span><span>Artist — optional, enter inline or in the file</span></div>
+      <div class="menu-item"><span class="menu-item-name">Column 6</span><span>Full URL — optional, enter inline or in the file</span></div>
+    </div>
+
+    <div class="tip"><strong>💡 One row can do multiple things:</strong> A single row can define a Singer, Category, and first Song all at once — just fill in columns 2, 3, and 4 together.</div>
+    <div class="tip" style="margin-top:0.5rem;"><strong>⚠️ Rows that don't fit the format:</strong> If a file has rows the app can't read, the session still loads and a <strong>⚠️ warning icon</strong> appears in the header. Tap it to see exactly which rows had problems, then fix them in your spreadsheet and reload.</div>
+  </section>
+
 </main>
 
 <footer>
-  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; User Guide &nbsp;•&nbsp; R01V01L03 🎤
+  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; User Guide &nbsp;•&nbsp; R01V01L09d 🎤 &nbsp;•&nbsp; 1780164595
 </footer>
+
+<div id="termPop" role="tooltip"></div>
 
 <script>
   function toggleTheme() {
@@ -416,6 +479,62 @@
       btn.textContent = '🌙 Dark';
     }
   }
+
+  // ---- Terminology popover ----
+  const TERMS = {
+    session:  ['Session', 'Your whole list of singers, categories, and songs — what you load, build, and save.'],
+    singer:   ['Singer', 'A person in your session. Singers are the top level of the list.'],
+    category: ['Category', 'A grouping of songs under a singer — e.g. Favorites, Ballads, Duets.'],
+    song:     ['Song', 'One track you can search and play. Can also hold an optional artist and link.']
+  };
+  const canHover = window.matchMedia('(hover: hover)').matches;
+  let activeTerm = null;
+
+  function showTermPop(el) {
+    const pop = document.getElementById('termPop');
+    const def = TERMS[el.dataset.term];
+    if (!def) return;
+    pop.innerHTML = '<strong>' + def[0] + '</strong>' + def[1];
+    pop.style.display = 'block';
+    const r = el.getBoundingClientRect();
+    let left = r.left + window.scrollX + r.width / 2 - pop.offsetWidth / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - pop.offsetWidth - 8));
+    let top = r.top + window.scrollY - pop.offsetHeight - 8;
+    if (top < window.scrollY + 4) top = r.bottom + window.scrollY + 8; // flip below if no room above
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+    activeTerm = el;
+  }
+  function hideTermPop() {
+    document.getElementById('termPop').style.display = 'none';
+    activeTerm = null;
+  }
+
+  // Tap / click toggles (covers touch; on desktop keeps it pinned)
+  document.addEventListener('click', e => {
+    const t = e.target.closest('.term');
+    if (t) {
+      e.stopPropagation();
+      if (activeTerm === t) hideTermPop(); else showTermPop(t);
+    } else if (!e.target.closest('#termPop')) {
+      hideTermPop();
+    }
+  });
+  // Keyboard accessibility
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') hideTermPop();
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('term')) {
+      e.preventDefault();
+      if (activeTerm === e.target) hideTermPop(); else showTermPop(e.target);
+    }
+  });
+  // Desktop hover preview
+  if (canHover) {
+    document.addEventListener('mouseover', e => { const t = e.target.closest('.term'); if (t) showTermPop(t); });
+    document.addEventListener('mouseout', e => { const t = e.target.closest('.term'); if (t && activeTerm === t) hideTermPop(); });
+  }
+  window.addEventListener('scroll', hideTermPop, { passive: true });
+  window.addEventListener('resize', hideTermPop);
 </script>
 </body>
 </html>

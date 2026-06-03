@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V01L04i (1777386302 EDT-0400) -->
+<!-- Karaoke Night | R01V01L09d (1780162068 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<!-- iOS: prevent zoom on input focus -->
 <title>🎤 Karaoke Night</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
@@ -19,6 +20,11 @@
     --header-bg: #13131a;
     --section-title: #f0c040;
     --footer-text: #ddddee;
+    --ribbon-inactive: #8a8070;
+    --ribbon-active: #e8e8f0;
+    --mode-inactive-bg: #2e2e3a;   /* mode button inactive bg in dark mode */
+    --mode-active-bg: #4a4a60;     /* mode button active bg - 20% brighter in dark mode */
+    --mode-active-text: #ffffff;   /* mode button active text in dark mode */
 
     /* --- sizing formula: singer 100%, cat 85%, song 75% --- */
     --sz-singer: 1.2rem;
@@ -48,18 +54,27 @@
     --section-title: #6a4c00;
     --footer-text: #4a3a20;
     --cat-bg: #eeeee6;
+    --ribbon-inactive: #5a4a30;
+    --ribbon-active: #111120;
+    --mode-inactive-bg: #d8d0c0;   /* mode button inactive bg - 30% darker in light mode */
+    --mode-active-bg: #ffffff;
+    --mode-active-text: #111120;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
-    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     transition: background 0.3s, color 0.3s;
   }
+  /* Deferred: long-press tooltip support (disabled in R01V01L08a, see initLongPressTooltip for details) */
+  button { -webkit-touch-callout: none; user-select: none; }
+  [title] { -webkit-user-select: none; }
 
   /* --- sticky header --- */
   header {
@@ -136,7 +151,7 @@
   .ribbon-btn {
     background: none;
     border: none;
-    color: var(--text);
+    color: var(--ribbon-inactive);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.85rem;
     font-weight: 600;
@@ -147,8 +162,9 @@
     transition: background 0.15s, color 0.15s;
     border-radius: 4px;
   }
-  .ribbon-btn:hover,
-  .ribbon-btn.open { background: var(--header-bg); color: var(--accent); }
+  .ribbon-btn:hover { background: var(--header-bg); color: var(--ribbon-active); }
+  .ribbon-btn.open  { background: var(--header-bg); color: var(--ribbon-active); box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+  .ribbon-btn.disabled { color: var(--muted); cursor: default; pointer-events: none; }
   .ribbon-dropdown {
     display: none;
     position: absolute;
@@ -158,7 +174,7 @@
     border: 1px solid var(--border);
     border-radius: 0 6px 6px 6px;
     width: max-content;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
     z-index: 200;
     padding: 4px 0;
   }
@@ -168,7 +184,7 @@
     width: 100%;
     background: none;
     border: none;
-    color: var(--text);
+    color: var(--ribbon-inactive);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.85rem;
     padding: 6px 16px;
@@ -177,8 +193,8 @@
     transition: background 0.12s, color 0.12s;
     white-space: nowrap;
   }
-  .ribbon-item:hover { background: var(--header-bg); color: var(--accent); }
-  .ribbon-item.disabled { color: var(--muted); cursor: default; }
+  .ribbon-item:hover { background: var(--header-bg); color: var(--ribbon-active); }
+  .ribbon-item.disabled { color: var(--muted); cursor: default; opacity: 0.5; }
   .ribbon-item.disabled:hover { background: none; color: var(--muted); }
   .ribbon-sep {
     border: none;
@@ -202,6 +218,10 @@
     padding: 4px 0;
   }
   .ribbon-flyout:hover .ribbon-submenu { display: block; }
+  /* Prevent flyout opening when parent item is disabled */
+  .ribbon-item.disabled ~ .ribbon-submenu,
+  .ribbon-item.disabled:hover ~ .ribbon-submenu { display: none !important; }
+  .ribbon-flyout .ribbon-item.disabled { pointer-events: none; }
 
   /* --- modals --- */
   .modal-overlay {
@@ -260,7 +280,7 @@
     background: var(--card);
     border: 2px solid var(--border);
     color: var(--text);
-    padding: calc(var(--base) * 0.3) calc(var(--base) * 2) calc(var(--base) * 0.3) calc(var(--base) * 0.75);
+    padding: calc(var(--base) * 0.3) calc(var(--base) * 2) calc(var(--base) * 0.3) calc(var(--base) * 1.6);
     border-radius: 6px;
     width: 240px;
     font-family: 'DM Sans', sans-serif;
@@ -271,6 +291,47 @@
   .input-wrap input:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
   .input-wrap input:disabled { opacity: 0.45; cursor: not-allowed; }
   .input-wrap input::placeholder { color: var(--muted); font-weight: 500; }
+  .search-history {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    z-index: 200;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  }
+  .search-history::before {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: 20px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 9px solid var(--border);
+  }
+  .search-history::after {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 21px;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 8px solid var(--card);
+  }
+  .search-history.open { display: block; }
+  .search-history-item {
+    padding: 0.55rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-history-item:hover { background: var(--header-bg); }
   .clear-btn {
     position: absolute;
     right: 8px;
@@ -300,6 +361,19 @@
   }
   .yt-go-btn:hover { color: var(--accent); }
   .yt-go-btn.visible { display: block; }
+  /* history reveal — small ▾ at the left of each field; tap to show recents */
+  .hist-btn {
+    position: absolute;
+    left: 6px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.68rem;
+    cursor: pointer;
+    padding: 0 3px;
+    line-height: 1;
+  }
+  .hist-btn:hover { color: var(--accent); }
   .toggle-btn {
     background: var(--card);
     border: 2px solid var(--border);
@@ -381,6 +455,40 @@
   .pencil-menu-item:hover { background: var(--border); }
   .pencil-menu-item.danger { color: #e05050; }
   .pencil-menu hr { border: none; border-top: 1px solid var(--border); margin: 3px 0; }
+  .artist-url-panel {
+    padding: 6px 10px 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    margin-top: -2px;
+  }
+  .artist-url-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .artist-url-row:last-child { margin-bottom: 0; }
+  .artist-url-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    min-width: 38px;
+  }
+  .artist-url-row input {
+    flex: 1;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 2px 0;
+    outline: none;
+  }
   .edit-input {
     background: rgba(255,255,255,0.15);
     border: none;
@@ -513,6 +621,29 @@
     border-color: var(--accent);
   }
   .song-card.hidden { display: none; }
+  .song-card.has-icons-1 { padding-right: calc(var(--sz-song) * 1.8); }
+  .song-card.has-icons-2 { padding-right: calc(var(--sz-song) * 3.2); }
+  .song-meta-icons {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    align-items: center;
+  }
+  .song-meta-icon {
+    font-size: 0.72rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.55;
+    padding: 1px 0;
+    background: none;
+    border: none;
+    color: inherit;
+    transition: opacity 0.15s;
+  }
+  .song-meta-icon:hover { opacity: 1; }
   .song-title {
     font-size: var(--sz-song);
     font-weight: 600;
@@ -575,38 +706,50 @@
     font-size: 1rem;
     padding: calc(var(--base) * 3) calc(var(--base) * 1);
   }
+  .container:has(> .welcome-panel) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    min-height: 0;
+  }
   .welcome-panel {
     text-align: center;
-    padding: calc(var(--base) * 2.5) calc(var(--base) * 2);
-    max-width: 480px;
+    padding: calc(var(--base) * 2) calc(var(--base) * 1.5);
+    max-width: 520px;
     margin: 0 auto;
+    font-size: 0.95rem;
+    line-height: 1.6;
   }
   .welcome-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.8rem;
     color: var(--accent);
     letter-spacing: 0.06em;
-    margin-bottom: calc(var(--base) * 0.6);
+    margin-bottom: calc(var(--base) * 1);
   }
-  .welcome-steps {
-    list-style: none;
-    padding: 0;
-    margin: calc(var(--base) * 1) 0 0;
+  .welcome-intro {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: calc(var(--base) * 1.5);
+  }
+  .welcome-item {
     text-align: left;
-    display: inline-block;
+    padding: calc(var(--base) * 0.6) 0;
+    border-bottom: 1px solid var(--border);
   }
-  .welcome-steps li {
+  .welcome-item:last-child {
+    border-bottom: none;
+  }
+  .welcome-item strong {
+    color: var(--text);
+    display: inline-block;
+    min-width: 140px;
+  }
+  .welcome-item span {
     color: var(--muted);
     font-size: 0.9rem;
-    padding: calc(var(--base) * 0.3) 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .welcome-steps li .step-num {
-    color: var(--accent);
-    font-weight: 700;
-    min-width: 1.2rem;
   }
 
   /* --- sticky footer --- */
@@ -617,8 +760,10 @@
     position: relative;
     color: var(--footer-text);
     font-size: 0.78rem;
-    padding: calc(var(--base) * 0.4) calc(var(--base) * 1.5);
-    border-top: 1px solid var(--border);
+    padding: calc(var(--base) * 0.4) calc(var(--base) * 1.5)
+             calc(var(--base) * 0.4 + env(safe-area-inset-bottom, 0px))
+             calc(var(--base) * 1.5);
+    border-top: 2px solid var(--border);
     letter-spacing: 0.06em;
     font-weight: 600;
     background: var(--header-bg);
@@ -641,7 +786,7 @@
   .mode-toggle:hover { opacity: 0.8; }
 
   .search-mode-btn {
-    background: var(--border);
+    background: var(--mode-inactive-bg);
     border: 2px solid var(--border);
     color: var(--muted);
     font-size: 1.2rem;
@@ -652,29 +797,42 @@
     position: relative;
     top: 0;
   }
-  #btnMic {
-    border-radius: 6px 0 0 6px;
-    border-right: none;
-  }
-  #btnNote {
-    border-radius: 0 6px 6px 0;
-  }
+  #btnMic  { border-radius: 6px 0 0 6px; }
+  #btnNote { border-radius: 0; border-left: none; }
+  #btnYT   { border-radius: 0; border-left: none; }
+  #btnWeb  { border-radius: 0 6px 6px 0; border-left: none; }
   .search-mode-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    background: var(--header-bg);
+    color: var(--ribbon-active);
   }
   .search-mode-btn.active {
-    background: #ffffff;
-    border-color: var(--accent);
-    color: var(--accent);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 6px rgba(240,192,64,0.5);
+    background: var(--mode-active-bg);
+    border-color: var(--border);
+    color: var(--mode-active-text);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.18);
     top: 1px;
+    filter: brightness(1.15);
+    font-weight: 700;
   }
-  body:not(.light) .search-mode-btn.active {
-    background: #fff8d0;
-    color: #8a6000;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), 0 0 8px rgba(240,192,64,0.5);
+
+  /* --- long-press tooltip (DEFERRED — see initLongPressTooltip for details) --- */
+  #lp-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: rgba(30,30,40,0.92);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.15s;
+    max-width: 220px;
+    white-space: normal;
+    text-align: center;
   }
+  #lp-tooltip.visible { opacity: 1; }
 </style>
 </head>
 <body class="light">
@@ -686,20 +844,25 @@
       <h1>Karaoke Night</h1>
       <p class="subtitle">Your personal song finder</p>
     </div>
+    <button id="csvErrorWarn" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem; margin-left:0.5rem;" onclick="showCsvErrorModal()" title="Some rows couldn't be read — click to view">⚠️</button>
   </div>
 </header>
 
 <div class="top-controls">
   <div class="input-wrap" id="searchWrap">
-    <input type="text" id="searchInput" placeholder="Filter song list..." oninput="filterSongs(this.value)" disabled>
+    <button class="hist-btn" id="filterHistBtn" onmousedown="event.preventDefault()" onclick="toggleFilterHistory()" title="Recent filters">▼</button>
+    <input type="text" id="searchInput" placeholder="Filter song list..." oninput="filterSongs(this.value)" onfocus="hideHistory()" onblur="onFilterBlur()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" disabled>
     <button class="clear-btn" id="clearSearch" onclick="clearFilter()" title="Clear filter">✕</button>
+    <div class="search-history" id="filterHistory"></div>
   </div>
   <div class="input-wrap">
-    <input type="text" id="ytInput" placeholder="Find on YouTube..." onkeydown="if(event.key==='Enter') goYT()" oninput="toggleYTClear()">
+    <button class="hist-btn" id="ytHistBtn" onmousedown="event.preventDefault()" onclick="toggleYTHistory()" title="Recent searches">▼</button>
+    <input type="text" id="ytInput" placeholder="Find on YouTube..." onkeydown="if(event.key==='Enter') goYT()" oninput="toggleYTClear()" onfocus="hideHistory()" onblur="hideHistory()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <button class="yt-go-btn" id="ytGoBtn" onclick="goYT()" title="Search YouTube">▶</button>
     <button class="clear-btn" id="clearYT" onclick="clearYT()" title="Clear">✕</button>
+    <div class="search-history" id="ytHistory"></div>
   </div>
-  <div style="display:inline-flex"><button class="search-mode-btn active" id="btnMic" onclick="setSearchMode('karaoke')" title="Karaoke Mode">🎤</button><button class="search-mode-btn" id="btnNote" onclick="setSearchMode('music')" title="Music Video Mode">🎵</button></div>
+  <div style="display:inline-flex"><button class="search-mode-btn active" id="btnMic" onclick="setSearchMode('karaoke')" title="Karaoke Mode">🎤</button><button class="search-mode-btn" id="btnNote" onclick="setSearchMode('music')" title="Music Video Mode">🎵</button><button class="search-mode-btn" id="btnYT" onclick="setSearchMode('youtube')" title="YouTube Search">▶</button><button class="search-mode-btn" id="btnWeb" onclick="setSearchMode('web')" title="Google Search"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:1.15rem;">G</span></button></div>
 </div>
 
 <!-- Tool ribbon — stub menus, functionality wired in r01v01l03 -->
@@ -738,7 +901,7 @@
   </div>
 
   <div class="ribbon-menu">
-    <button class="ribbon-btn disabled" id="rbView" onclick="toggleRibbon('rbView','ddView')">View</button>
+    <button class="ribbon-btn" id="rbView" onclick="toggleRibbon('rbView','ddView')">View</button>
     <div class="ribbon-dropdown" id="ddView">
       <div class="ribbon-flyout">
         <button class="ribbon-item disabled" id="viewSingersBtn">Singers ›</button>
@@ -752,6 +915,13 @@
         <div class="ribbon-submenu">
           <button class="ribbon-item" onclick="viewExpand('cats')">Expand All</button>
           <button class="ribbon-item" onclick="viewCollapse('cats')">Collapse All</button>
+        </div>
+      </div>
+      <div class="ribbon-flyout">
+        <button class="ribbon-item disabled" id="viewAllBtn">All ›</button>
+        <div class="ribbon-submenu">
+          <button class="ribbon-item disabled" id="viewAllExpandBtn" onclick="viewExpandAll()">Expand</button>
+          <button class="ribbon-item disabled" id="viewAllCollapseBtn" onclick="viewCollapseAll()">Collapse</button>
         </div>
       </div>
     </div>
@@ -776,13 +946,11 @@
 <div id="newEntryPanel" style="display:none;" class="new-entry-panel">
   <div class="new-entry-row" id="newSingerRow">
     <span class="new-entry-label">Singer</span>
-    <input class="new-entry-input" id="newSingerInput" placeholder="Add singer or select existing..." autocomplete="off" list="singerSuggestions">
-    <datalist id="singerSuggestions"></datalist>
+    <input class="new-entry-input" id="newSingerInput" placeholder="Singer name..." autocomplete="off">
   </div>
   <div class="new-entry-row" id="newCatRow" style="display:none;">
     <span class="new-entry-label">Category</span>
-    <input class="new-entry-input" id="newCatInput" placeholder="Add category or select existing..." autocomplete="off" list="catSuggestions">
-    <datalist id="catSuggestions"></datalist>
+    <input class="new-entry-input" id="newCatInput" placeholder="Category name..." autocomplete="off">
   </div>
   <div class="new-entry-row" id="newSongRow" style="display:none;">
     <span class="new-entry-label">Song</span>
@@ -790,26 +958,14 @@
   </div>
 </div>
 
-<div class="container" id="main-container">
-  <div class="welcome-panel" id="welcomePanel">
-    <div class="welcome-title">Welcome to Karaoke Night 🎤</div>
-    <p style="color:var(--muted);font-size:0.9rem;">Your personal song finder — load a session or build one right here.</p>
-    <ol class="welcome-steps">
-      <li><span class="step-num">1.</span> <strong>Session → Open</strong> to load a .csv session file, or <strong>Session → New</strong> to build one in-app</li>
-      <li><span class="step-num">2.</span> Expand a Singer, then a Category to browse songs — tap a card to search YouTube</li>
-      <li><span class="step-num">3.</span> Use <strong>Filter</strong> to search within your session, or <strong>Find on YouTube</strong> for any song</li>
-      <li><span class="step-num">4.</span> 🎤 <strong>Karaoke Mode</strong> searches for backing tracks &nbsp;·&nbsp; 🎵 <strong>Music Video Mode</strong> finds the original recording</li>
-      <li><span class="step-num">5.</span> Use <strong>Singer</strong> and <strong>View</strong> menus to manage singers and expand/collapse your list</li>
-    </ol>
-  </div>
-</div>
+<div class="container" id="main-container"></div>
 
 <!-- Undrop singers modal -->
 <div class="modal-overlay" id="modalUndrop">
   <div class="modal-box">
     <div class="modal-title">Undrop Singers</div>
     <div class="modal-body" style="text-align:left;">
-      <p style="margin-bottom:10px;font-size:0.85rem;">Check singers to bring back into the session:</p>
+      <p style="margin-bottom:10px;font-size:0.85rem;">Check singers to undrop in current session:</p>
       <div id="undropList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
     </div>
     <div style="display:flex;gap:10px;justify-content:center;">
@@ -824,7 +980,7 @@
   <div class="modal-box">
     <div class="modal-title">Drop Singers</div>
     <div class="modal-body" style="text-align:left;">
-      <p style="margin-bottom:10px;font-size:0.85rem;">Uncheck singers to remove from the current session:</p>
+      <p style="margin-bottom:10px;font-size:0.85rem;">Check singers to drop in current session:</p>
       <div id="dropList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
     </div>
     <div style="display:flex;gap:10px;justify-content:center;">
@@ -834,9 +990,38 @@
   </div>
 </div>
 
+<!-- CSV errors modal -->
+<div class="modal-overlay" id="modalCsvErrors">
+  <div class="modal-box">
+    <div class="modal-title">Session File — Rows Skipped</div>
+    <div class="modal-body" style="text-align:left;">
+      <p style="margin-bottom:10px;font-size:0.85rem;">The following rows were skipped during parsing:</p>
+      <div id="csvErrorList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:300px;overflow-y:auto;"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="modal-ok" style="background:var(--muted);" onclick="closeModal('modalCsvErrors')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation modal -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">Confirm Action</div>
+    <div class="modal-body" style="text-align:left;">
+      <p id="confirmMessage"></p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="modal-ok" onclick="confirmAction(true)">OK</button>
+      <button class="modal-ok" style="background:var(--muted);" onclick="confirmAction(false)">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Pencil context menu -->
 <div class="pencil-menu" id="pencilMenu">
   <button class="pencil-menu-item" id="pmRename">✏️ Rename</button>
+  <button class="pencil-menu-item" id="pmEditArtistUrl">🎼 Edit Artist / URL</button>
   <button class="pencil-menu-item danger" id="pmDelete">🗑️ Delete</button>
   <hr>
   <button class="pencil-menu-item" id="pmAddAbove">＋ Add Above</button>
@@ -850,7 +1035,6 @@
     <div class="modal-body" style="text-align:left;">
       <p style="margin-bottom:10px;font-size:0.85rem;">Enter a filename for your session:</p>
       <input class="new-entry-input" id="saveAsFilename" style="width:100%;" placeholder="session_name" autocomplete="off">
-      <p style="margin-top:6px;font-size:0.78rem;color:var(--muted);">.csv will be added automatically</p>
     </div>
     <div style="display:flex;gap:10px;justify-content:center;margin-top:4px;">
       <button class="modal-ok" onclick="saveAsConfirm()">Save</button>
@@ -872,8 +1056,8 @@
   </div>
 </div>
 
-<footer>
-  Tap a song card to search YouTube &nbsp;·&nbsp; Filter searches your session &nbsp;·&nbsp; Find on YouTube for any song &nbsp;·&nbsp; ✏️ to rename &nbsp;·&nbsp; 🗑️ to delete
+<footer id="footerTip">
+  Tap a song card to search YouTube &nbsp;·&nbsp; Filter searches your session &nbsp;·&nbsp; Find on YouTube for any song &nbsp;·&nbsp; ✏️ edit
 </footer>
 
 <input type="file" id="fileInput" accept=".csv" multiple style="display:none" onchange="handleFile(this)">
@@ -882,7 +1066,7 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V01L04i (1777386302 EDT-0400)';
+const BUILD = 'R01V01L09d (1780162068 EDT-0400)';
 
 // ---- YOUTUBE ----
 // ---- MODALS ----
@@ -927,6 +1111,27 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// ---- CSV ERROR TRACKING ----
+function updateCsvErrorWarn() {
+  const errors = sessionStorage.getItem('karaokeCsvErrors');
+  const warnBtn = document.getElementById('csvErrorWarn');
+  if (errors && JSON.parse(errors).length > 0) {
+    warnBtn.style.display = '';
+  } else {
+    warnBtn.style.display = 'none';
+  }
+}
+function showCsvErrorModal() {
+  const errors = sessionStorage.getItem('karaokeCsvErrors');
+  if (!errors) return;
+  const errorList = JSON.parse(errors);
+  const listEl = document.getElementById('csvErrorList');
+  listEl.innerHTML = errorList.map(err =>
+    `<div style="padding:8px;background:var(--card);border-left:3px solid var(--accent);">Row ${err.lineNum}: ${err.reason}</div>`
+  ).join('');
+  openModal('modalCsvErrors');
+}
+
 // ---- TOOL RIBBON ----
 function closeAllRibbons() {
   document.querySelectorAll('.ribbon-btn').forEach(b => b.classList.remove('open'));
@@ -946,26 +1151,76 @@ document.addEventListener('click', function(e) {
   if (!e.target.closest('.ribbon-menu')) closeAllRibbons();
 });
 
-// ---- YOUTUBE SEARCH MODE ----
-// 'karaoke' = prefix search with 'karaoke ' (default)
-// 'music'   = search without prefix (music video mode)
+// ---- SEARCH MODE ----
+// 'karaoke' = prefix 'karaoke ' | 'music' = append ' music video'
+// 'youtube' = raw YouTube search | 'web' = Google web search
 let searchMode = 'karaoke';
+
+// Confirmation modal management
+let _pendingConfirm = null;
+function showConfirm(title, message, onConfirm) {
+  _pendingConfirm = onConfirm;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  openModal('modalConfirm');
+}
+function confirmAction(confirmed) {
+  closeModal('modalConfirm');
+  if (_pendingConfirm) {
+    _pendingConfirm(confirmed);
+    _pendingConfirm = null;
+  }
+}
 
 function setSearchMode(mode) {
   searchMode = mode;
   document.getElementById('btnMic').classList.toggle('active', mode === 'karaoke');
   document.getElementById('btnNote').classList.toggle('active', mode === 'music');
+  document.getElementById('btnYT').classList.toggle('active', mode === 'youtube');
+  document.getElementById('btnWeb').classList.toggle('active', mode === 'web');
+  document.getElementById('ytInput').placeholder = mode === 'web' ? 'Search with Google...' : 'Find on YouTube...';
+  updateFooterTip();
+}
+
+function updateFooterTip() {
+  const el = document.getElementById('footerTip');
+  if (!el) return;
+  const hasSession = currentSingers.length > 0;
+  if (!hasSession) {
+    el.innerHTML = 'Open a session file to get started &nbsp;·&nbsp; Use Session &rarr; Open';
+    return;
+  }
+  const edit = '✏️ edit';
+  const filter = 'Filter to find songs';
+  const find = 'Use Find box for any search';
+  const tips = {
+    karaoke:  'Tap a card to search karaoke &nbsp;·&nbsp; 🎼 searches by artist &nbsp;·&nbsp; ' + filter + ' &nbsp;·&nbsp; ' + edit,
+    music:    'Tap a card to search music videos &nbsp;·&nbsp; 🎼 searches by artist &nbsp;·&nbsp; ' + filter + ' &nbsp;·&nbsp; ' + edit,
+    youtube:  'Tap a card to search YouTube &nbsp;·&nbsp; ' + find + ' &nbsp;·&nbsp; ' + filter + ' &nbsp;·&nbsp; ' + edit,
+    web:      'Tap a card to search the web &nbsp;·&nbsp; ' + find.replace('any search','any web search') + ' &nbsp;·&nbsp; ' + filter + ' &nbsp;·&nbsp; ' + edit,
+  };
+  el.innerHTML = tips[searchMode] || tips.karaoke;
 }
 
 function ytSearch(q) {
-  const query = searchMode === 'karaoke' ? 'karaoke ' + q : q + ' music video';
-  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(query);
+  if (searchMode === 'karaoke') return 'https://www.youtube.com/results?search_query=' + encodeURIComponent('karaoke ' + q);
+  if (searchMode === 'music')   return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q + ' music video');
+  if (searchMode === 'youtube') return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+  // web
+  return 'https://www.google.com/search?q=' + encodeURIComponent(q);
+}
+let ytNavigating = false;
+function navigateSearch(q) {
+  const url = ytSearch(q);
+  if (searchMode === 'web') { window.open(url, '_blank'); }
+  else { ytNavigating = true; window.location.href = url; }
 }
 function goYT() {
   var val = document.getElementById('ytInput').value;
   if (val.trim()) {
+    addSearchHistory('karaokeYTHistory', val.trim());
     sessionStorage.setItem('karaokeYT', val);
-    window.location.href = ytSearch(val);
+    navigateSearch(val);
   }
 }
 function toggleYTClear() {
@@ -978,23 +1233,100 @@ function clearYT() {
   document.getElementById('ytInput').value = '';
   document.getElementById('clearYT').classList.remove('visible');
   document.getElementById('ytGoBtn').classList.remove('visible');
+  hideHistory();
   document.getElementById('ytInput').focus();
 }
 
+// ---- SEARCH HISTORY ----
+function addSearchHistory(key, val) {
+  val = val.trim();
+  if (!val) return;
+  let h = JSON.parse(sessionStorage.getItem(key) || '[]');
+  h = [val, ...h.filter(v => v !== val)].slice(0, 10);
+  sessionStorage.setItem(key, JSON.stringify(h));
+}
+function showSearchHistory(historyId, storageKey, onPick) {
+  const h = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+  const el = document.getElementById(historyId);
+  if (!h.length) return;
+  el.innerHTML = '';
+  h.forEach(val => {
+    const item = document.createElement('div');
+    item.className = 'search-history-item';
+    item.textContent = val;
+    item.addEventListener('mousedown', e => { e.preventDefault(); onPick(val); });
+    el.appendChild(item);
+  });
+  el.classList.add('open');
+}
+function hideSearchHistory(historyId) {
+  const el = document.getElementById(historyId);
+  if (el) el.classList.remove('open');
+}
+// History reveals only on an explicit ▾ tap — never on focus. Focusing the input
+// to type hides any open list so it never covers what you're entering. Tapping
+// outside the list (tracked via a document listener) also closes it.
+let _histOpenId = null;
+function toggleHistory(historyId, storageKey, onPick) {
+  if (_histOpenId === historyId) { hideHistory(); return; }
+  hideHistory();
+  showSearchHistory(historyId, storageKey, onPick);  // returns early (stays closed) if no history
+  const el = document.getElementById(historyId);
+  if (!el || !el.classList.contains('open')) return;
+  _histOpenId = historyId;
+  setTimeout(() => document.addEventListener('mousedown', _histOutside, true), 0);
+}
+function hideHistory() {
+  if (_histOpenId) { hideSearchHistory(_histOpenId); _histOpenId = null; }
+  document.removeEventListener('mousedown', _histOutside, true);
+}
+function _histOutside(e) {
+  const el = _histOpenId && document.getElementById(_histOpenId);
+  if (el && el.contains(e.target)) return;                       // tap inside list → let it pick
+  if (e.target.closest && e.target.closest('.hist-btn')) return; // ▾ handles its own toggle
+  hideHistory();
+}
+function toggleFilterHistory() {
+  toggleHistory('filterHistory', 'karaokeFilterHistory', val => {
+    document.getElementById('searchInput').value = val;
+    filterSongs(val);
+    hideHistory();
+  });
+}
+function toggleYTHistory() {
+  toggleHistory('ytHistory', 'karaokeYTHistory', val => {
+    document.getElementById('ytInput').value = val;
+    toggleYTClear();
+    hideHistory();
+  });
+}
+function onFilterBlur() {
+  const val = document.getElementById('searchInput').value.trim();
+  if (val) addSearchHistory('karaokeFilterHistory', val);
+}
+
 // ---- SONG CARD ----
-function makeCard(title, si, ci, soi) {
+function makeCard(song, si, ci, soi) {
+  // song is always {title, artist, url}
+  const { title = '', artist = '', url = '' } = song;
+
   const card = document.createElement('a');
   card.className = 'song-card';
   card.dataset.title = title.toLowerCase();
   card.href = '#';
   card.target = '_self';
   card.onclick = function(e) {
-    if (e.target.closest('.edit-btn') || e.target.closest('.edit-input')) return;
+    if (e.target.closest('.edit-btn') || e.target.closest('.edit-input') || e.target.closest('.song-meta-icon')) return;
     e.preventDefault();
     const c = document.getElementById('main-container');
     if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
     saveState();
-    window.location.href = ytSearch(title);
+    if (url) {
+      ytNavigating = true;
+      window.location.href = url;
+    } else {
+      navigateSearch(title + (artist ? ' ' + artist : ''));
+    }
   };
   const editBtn = document.createElement('button');
   editBtn.className = 'edit-btn';
@@ -1008,9 +1340,56 @@ function makeCard(title, si, ci, soi) {
   const t = document.createElement('div');
   t.className = 'song-title';
   t.textContent = title;
+
   card.appendChild(editBtn);
   card.appendChild(t);
+
+  // Meta icons: artist and/or url
+  if (artist || url) {
+    const iconCount = (artist ? 1 : 0) + (url ? 1 : 0);
+    card.classList.add('has-icons-' + iconCount);
+    const iconsWrap = document.createElement('div');
+    iconsWrap.className = 'song-meta-icons';
+
+    if (artist) {
+      const btn = document.createElement('button');
+      btn.className = 'song-meta-icon';
+      btn.textContent = '🎼';
+      btn.title = artist;
+      btn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const c = document.getElementById('main-container');
+        if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+        saveState();
+        navigateSearch(title + ' ' + artist);
+      };
+      iconsWrap.appendChild(btn);
+    }
+
+    if (url) {
+      const btn = document.createElement('button');
+      btn.className = 'song-meta-icon';
+      btn.textContent = '🌐';
+      btn.title = url;
+      btn.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        ytNavigating = true;
+        window.location.href = url;
+      };
+      iconsWrap.appendChild(btn);
+    }
+
+    card.appendChild(iconsWrap);
+  }
+
   return card;
+}
+
+// Grid ID generator — single source of truth for category grid element IDs
+function getGridId(si, ci) {
+  return 'grid-singer' + si + '-cat' + ci;
 }
 
 // Save/restore open state by singer name (survives DOM rebuild)
@@ -1055,6 +1434,8 @@ function restoreOpenState(state) {
 
 // ---- VIEW MENU ----
 function viewExpand(type) {
+  const btnId = type === 'singers' ? 'viewSingersBtn' : 'viewCatsBtn';
+  if (document.getElementById(btnId).classList.contains('disabled')) return;
   closeAllRibbons();
   if (type === 'singers') {
     document.querySelectorAll('.singer-body').forEach(body => {
@@ -1080,6 +1461,8 @@ function viewExpand(type) {
 }
 
 function viewCollapse(type) {
+  const btnId = type === 'singers' ? 'viewSingersBtn' : 'viewCatsBtn';
+  if (document.getElementById(btnId).classList.contains('disabled')) return;
   closeAllRibbons();
   if (type === 'singers') {
     // Collapse singers AND their categories
@@ -1115,21 +1498,79 @@ function viewCollapse(type) {
 
 // Update View menu items based on current DOM context
 function updateViewMenuState() {
+  // Edit mode = a dynamic entry or rename input is active in the singer list
+  // (excludes static panel inputs like newSingerInput, newCatInput, newSongInput, saveAsFilename)
+  const inEditMode = document.querySelector(
+    '#main-container .new-entry-input, #main-container .edit-input'
+  ) !== null;
   const hasSingers = document.querySelectorAll('.singer-body').length > 0;
   const hasExpandedSinger = document.querySelectorAll('.singer-body:not(.collapsed)').length > 0;
   const sb = document.getElementById('viewSingersBtn');
   const cb = document.getElementById('viewCatsBtn');
-  if (sb) sb.classList.toggle('disabled', !hasSingers);
-  if (cb) cb.classList.toggle('disabled', !hasExpandedSinger);
+  if (sb) sb.classList.toggle('disabled', !hasSingers || inEditMode);
+  if (cb) cb.classList.toggle('disabled', !hasExpandedSinger || inEditMode);
+
+  // All › button: enabled if any singer or cat exists and not in edit mode
+  const hasCats = document.querySelectorAll('.grid').length > 0;
+  const hasAny = hasSingers || hasCats;
+  const ab = document.getElementById('viewAllBtn');
+  if (ab) ab.classList.toggle('disabled', !hasAny || inEditMode);
+
+  // All → Expand: active if any singer or cat grid is collapsed
+  const anyCollapsed = document.querySelectorAll('.singer-body.collapsed, .grid.collapsed').length > 0;
+  // All → Collapse: active if any singer or cat grid is expanded
+  const anyExpanded  = document.querySelectorAll('.singer-body:not(.collapsed), .grid:not(.collapsed)').length > 0;
+  const aeb = document.getElementById('viewAllExpandBtn');
+  const acb = document.getElementById('viewAllCollapseBtn');
+  if (aeb) aeb.classList.toggle('disabled', !anyCollapsed || inEditMode);
+  if (acb) acb.classList.toggle('disabled', !anyExpanded  || inEditMode);
+}
+
+function viewExpandAll() {
+  if (document.getElementById('viewAllExpandBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  document.querySelectorAll('.singer-body.collapsed').forEach(el => el.classList.remove('collapsed'));
+  document.querySelectorAll('.grid.collapsed').forEach(el => {
+    el.classList.remove('collapsed');
+    const header = el.previousElementSibling;
+    if (header) { header.classList.remove('collapsed'); const hs = header.querySelector('.hide-show'); if (hs) hs.textContent = 'Hide'; }
+  });
+  updateViewMenuState();
+  saveCurrentState();
+}
+
+function viewCollapseAll() {
+  if (document.getElementById('viewAllCollapseBtn').classList.contains('disabled')) return;
+  closeAllRibbons();
+  document.querySelectorAll('.singer-body:not(.collapsed)').forEach(el => el.classList.add('collapsed'));
+  document.querySelectorAll('.grid:not(.collapsed)').forEach(el => {
+    el.classList.add('collapsed');
+    const header = el.previousElementSibling;
+    if (header) { header.classList.add('collapsed'); const hs = header.querySelector('.hide-show'); if (hs) hs.textContent = 'Show'; }
+  });
+  updateViewMenuState();
+  saveCurrentState();
 }
 
 // ---- PENCIL CONTEXT MENU ----
-let _pm = null; // current menu context: {type, si, ci, soi}
+// Pencil menu context manager — encapsulates menu state
+const PencilMenuManager = {
+  _context: null,
+  setContext(type, si, ci, soi) {
+    this._context = { type, si, ci: ci !== undefined ? ci : -1, soi: soi !== undefined ? soi : -1 };
+  },
+  getContext() {
+    return this._context;
+  },
+  clear() {
+    this._context = null;
+  }
+};
 
 function showPencilMenu(e, type, si, ci, soi) {
   e.preventDefault();
   e.stopPropagation();
-  _pm = { type, si, ci: ci !== undefined ? ci : -1, soi: soi !== undefined ? soi : -1 };
+  PencilMenuManager.setContext(type, si, ci, soi);
   const label = type === 'singer' ? 'Singer' : type === 'cat' ? 'Category' : 'Song';
   const aboveLabel = type === 'song' ? 'Before' : 'Above';
   const belowLabel = type === 'song' ? 'After'  : 'Below';
@@ -1137,6 +1578,7 @@ function showPencilMenu(e, type, si, ci, soi) {
   document.getElementById('pmDelete').textContent   = '🗑️ Delete ' + label;
   document.getElementById('pmAddAbove').textContent = '＋ Add ' + label + ' ' + aboveLabel;
   document.getElementById('pmAddBelow').textContent = '＋ Add ' + label + ' ' + belowLabel;
+  document.getElementById('pmEditArtistUrl').style.display = type === 'song' ? '' : 'none';
   const menu = document.getElementById('pencilMenu');
   menu.classList.add('open');
   // Position near click
@@ -1148,7 +1590,7 @@ function showPencilMenu(e, type, si, ci, soi) {
 
 function closePencilMenu() {
   document.getElementById('pencilMenu').classList.remove('open');
-  _pm = null;
+  PencilMenuManager.clear();
 }
 
 document.addEventListener('click', function(e) {
@@ -1157,8 +1599,9 @@ document.addEventListener('click', function(e) {
 
 // Rename
 document.getElementById('pmRename').onclick = function() {
-  if (!_pm) return;
-  const { type, si, ci, soi } = _pm;
+  const ctx = PencilMenuManager.getContext();
+  if (!ctx) return;
+  const { type, si, ci, soi } = ctx;
   closePencilMenu();
   if (type === 'singer') startInlineRename('stitle-singer' + si, 'singer', si, -1);
   else if (type === 'cat') startInlineRename('ctitle-singer' + si + '-cat' + ci, 'cat', si, ci);
@@ -1167,8 +1610,9 @@ document.getElementById('pmRename').onclick = function() {
 
 // Delete
 document.getElementById('pmDelete').onclick = function() {
-  if (!_pm) return;
-  const { type, si, ci, soi } = _pm;
+  const ctx = PencilMenuManager.getContext();
+  if (!ctx) return;
+  const { type, si, ci, soi } = ctx;
   closePencilMenu();
   markDirty();
   const openState = getOpenState();
@@ -1181,84 +1625,314 @@ document.getElementById('pmDelete').onclick = function() {
 
 // Add Above / Before
 document.getElementById('pmAddAbove').onclick = function() {
-  if (!_pm) return;
-  const { type, si, ci, soi } = _pm;
+  const ctx = PencilMenuManager.getContext();
+  if (!ctx) return;
+  const { type, si, ci, soi } = ctx;
   closePencilMenu();
   promptInlineAdd(type, si, ci, soi, 'above');
 };
 
 // Add Below / After
 document.getElementById('pmAddBelow').onclick = function() {
-  if (!_pm) return;
-  const { type, si, ci, soi } = _pm;
+  const ctx = PencilMenuManager.getContext();
+  if (!ctx) return;
+  const { type, si, ci, soi } = ctx;
   closePencilMenu();
   promptInlineAdd(type, si, ci, soi, 'below');
 };
 
-function promptInlineAdd(type, si, ci, soi, direction) {
-  const openState = getOpenState();
+function showArtistUrlPanel(anchorEl, initial, onDone) {
+  const existing = document.querySelector('.artist-url-panel');
+  if (existing) existing.remove();
 
-  function insertAndRefresh(insertIdx) {
-    if (type === 'singer') currentSingers.splice(insertIdx, 0, { name: '', cats: [] });
-    else if (type === 'cat') currentSingers[si].cats.splice(insertIdx, 0, { name: '', songs: [] });
-    else currentSingers[si].cats[ci].songs.splice(insertIdx, 0, '');
+  const panel = document.createElement('div');
+  panel.className = 'artist-url-panel';
+
+  function makeRow(labelText, value, placeholder) {
+    const row = document.createElement('div');
+    row.className = 'artist-url-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'artist-url-label';
+    lbl.textContent = labelText;
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = value || '';
+    inp.placeholder = placeholder || '';
+    row.appendChild(lbl);
+    row.appendChild(inp);
+    panel.appendChild(row);
+    return inp;
   }
 
+  const artistInput = makeRow('Artist', initial.artist, 'Artist name…');
+  const urlInput    = makeRow('URL',    initial.url,    'https://youtube.com/watch?v=…');
+
+  anchorEl.parentNode.insertBefore(panel, anchorEl.nextSibling);
+  artistInput.focus();
+  updateViewMenuState();
+
+  let done = false;
+  function finish(result) {
+    if (done) return;
+    done = true;
+    panel.remove();
+    updateViewMenuState();
+    onDone(result);
+  }
+
+  artistInput.onkeydown = ev => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') { ev.preventDefault(); urlInput.focus(); }
+    if (ev.key === 'Escape') finish(null);
+  };
+  urlInput.onkeydown = ev => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') { ev.preventDefault(); finish({ artist: artistInput.value.trim(), url: urlInput.value.trim() }); }
+    if (ev.key === 'Escape') finish(null);
+  };
+  panel.addEventListener('focusout', () => {
+    setTimeout(() => { if (!panel.contains(document.activeElement)) finish({ artist: artistInput.value.trim(), url: urlInput.value.trim() }); }, 100);
+  });
+}
+
+document.getElementById('pmEditArtistUrl').onclick = function() {
+  const ctx = PencilMenuManager.getContext();
+  if (!ctx || ctx.type !== 'song') return;
+  const { si, ci, soi } = ctx;
+  closePencilMenu();
+  let songObj = currentSingers[si]?.cats[ci]?.songs[soi];
+  if (!songObj) return;
+  if (typeof songObj === 'string') {
+    currentSingers[si].cats[ci].songs[soi] = { title: songObj, artist: '', url: '' };
+    songObj = currentSingers[si].cats[ci].songs[soi];
+  }
+  const grid = document.getElementById(getGridId(si, ci));
+  const cards = grid && grid.querySelectorAll('.song-card');
+  const card = cards && cards[soi];
+  if (!card) return;
+  showArtistUrlPanel(card, { artist: songObj.artist || '', url: songObj.url || '' }, result => {
+    if (!result) return;
+    songObj.artist = result.artist;
+    songObj.url    = result.url;
+    markDirty();
+    const openState = getOpenState();
+    buildDOM(currentSingers);
+    restoreOpenState(openState);
+  });
+};
+
+function promptInlineAdd(type, si, ci, soi, direction) {
   const insertIdx = direction === 'above'
     ? (type === 'singer' ? si : type === 'cat' ? ci : soi)
     : (type === 'singer' ? si + 1 : type === 'cat' ? ci + 1 : soi + 1);
 
-  // Find target element by actual DOM IDs
+  // Find anchor element in current DOM
   let targetEl = null;
   if (type === 'singer') {
-    const singerId = 'singer' + si;
-    const body = document.getElementById('body-' + singerId);
+    const body = document.getElementById('body-singer' + si);
     targetEl = direction === 'above' ? body && body.previousElementSibling : body;
   } else if (type === 'cat') {
-    const catId = 'singer' + si + '-cat' + ci;
-    const grid = document.getElementById('grid-' + catId);
+    const grid = document.getElementById(getGridId(si, ci));
     targetEl = direction === 'above' ? grid && grid.previousElementSibling : grid;
   } else {
-    const catId = 'singer' + si + '-cat' + ci;
-    const grid = document.getElementById('grid-' + catId);
+    const grid = document.getElementById(getGridId(si, ci));
     if (grid) {
       const cards = grid.querySelectorAll('.song-card');
-      targetEl = direction === 'above' ? cards[soi] : (cards[soi] ? cards[soi] : null);
+      targetEl = direction === 'above' ? cards[soi] : (cards[soi] || null);
     }
   }
   if (!targetEl) return;
+
+  const ph = type === 'singer' ? 'Singer name\u2026 (Enter=add, blank=done)'
+           : type === 'cat'    ? 'Category name\u2026 (Enter=add, blank=done)'
+           :                     'Song title\u2026 (Enter=add, blank=done)';
 
   const wrap = document.createElement('div');
   wrap.style.cssText = 'padding:4px 8px;';
   const input = document.createElement('input');
   input.className = 'new-entry-input';
-  input.placeholder = 'Name... (Enter=add, blank=done)';
+  input.placeholder = ph;
   input.style.cssText = 'width:100%;font-size:0.85rem;';
   wrap.appendChild(input);
 
   if (direction === 'above') targetEl.parentNode.insertBefore(wrap, targetEl);
   else targetEl.parentNode.insertBefore(wrap, targetEl.nextSibling);
   input.focus();
+  updateViewMenuState();
 
   input.onkeydown = function(ev) {
     if (ev.key !== 'Enter') return;
     ev.preventDefault();
     const name = input.value.trim();
     wrap.remove();
-    if (!name) return;
+    updateViewMenuState();
+    if (!name) return; // blank = done at this level, no cascade up
+
     markDirty();
-    if (type === 'singer') currentSingers.splice(insertIdx, 0, { name, cats: [] });
-    else if (type === 'cat') currentSingers[si].cats.splice(insertIdx, 0, { name, songs: [] });
-    else currentSingers[si].cats[ci].songs.splice(insertIdx, 0, name);
+    const openState = getOpenState();
+
+    if (type === 'singer') {
+      currentSingers.splice(insertIdx, 0, { name, cats: [] });
+      // open the new singer in open state so restoreOpenState expands it
+      openState.singers[name] = true;
+      buildDOM(currentSingers);
+      restoreOpenState(openState);
+      // cascade: prompt cats inside the new singer, then loop singers
+      setTimeout(() => cascadeCats(insertIdx, function() {
+        // blank cat = prompt next singer below current insertIdx
+        setTimeout(() => promptInlineAdd('singer', insertIdx, -1, -1, 'below'), 50);
+      }), 50);
+
+    } else if (type === 'cat') {
+      currentSingers[si].cats.splice(insertIdx, 0, { name, songs: [] });
+      openState.cats[name] = true;
+      buildDOM(currentSingers);
+      restoreOpenState(openState);
+      // cascade: prompt songs inside the new cat, then loop cats in same singer
+      setTimeout(() => cascadeSongs(si, insertIdx, function() {
+        // blank song = prompt next cat below current insertIdx in same singer
+        setTimeout(() => cascadeCats(si, null, insertIdx), 50);
+      }), 50);
+
+    } else {
+      currentSingers[si].cats[ci].songs.splice(insertIdx, 0, { title: name, artist: '', url: '' });
+      const songObj = currentSingers[si].cats[ci].songs[insertIdx];
+      buildDOM(currentSingers);
+      restoreOpenState(openState);
+      const g = document.getElementById(getGridId(si, ci));
+      const newCard = g && g.querySelectorAll('.song-card')[insertIdx];
+      if (newCard) {
+        showArtistUrlPanel(newCard, { artist: '', url: '' }, result => {
+          if (result && (result.artist || result.url)) {
+            songObj.artist = result.artist;
+            songObj.url = result.url;
+            markDirty();
+            const os = getOpenState();
+            buildDOM(currentSingers);
+            restoreOpenState(os);
+          }
+          setTimeout(() => promptInlineAdd('song', si, ci, insertIdx, 'below'), 50);
+        });
+      } else {
+        setTimeout(() => promptInlineAdd('song', si, ci, insertIdx, 'below'), 50);
+      }
+    }
+  };
+}
+
+// cascadeCats(singerIdx, onBlank, startCatIdx)
+// Injects a cat input at the bottom of singer[singerIdx]'s body.
+// On blank Enter: calls onBlank() if provided, otherwise done.
+// On name Enter: commits cat, cascades to songs, then loops back here.
+// startCatIdx is used internally to track insert position; omit on first call.
+function cascadeCats(singerIdx, onBlank, startCatIdx) {
+  const body = document.getElementById('body-singer' + singerIdx);
+  if (!body) return;
+
+  // ensure singer is expanded
+  const sHeader = body.previousElementSibling;
+  body.classList.remove('collapsed');
+  if (sHeader) { sHeader.classList.remove('collapsed'); if (sHeader.querySelector('.singer-hide-show')) sHeader.querySelector('.singer-hide-show').textContent = 'Hide'; }
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'padding:4px 8px;';
+  const input = document.createElement('input');
+  input.className = 'new-entry-input';
+  input.placeholder = 'Category name\u2026 (Enter=add, blank=done)';
+  input.style.cssText = 'width:100%;font-size:0.85rem;';
+  wrap.appendChild(input);
+  body.appendChild(wrap);
+  input.focus();
+  updateViewMenuState();
+
+  input.onkeydown = function(ev) {
+    if (ev.key !== 'Enter') return;
+    ev.preventDefault();
+    const name = input.value.trim();
+    wrap.remove();
+    updateViewMenuState();
+    if (!name) {
+      if (onBlank) onBlank();
+      return;
+    }
+    markDirty();
+    const openState = getOpenState();
+    // insert at end (or after startCatIdx if provided)
+    const catIdx = startCatIdx !== undefined
+      ? startCatIdx + 1
+      : currentSingers[singerIdx].cats.length;
+    currentSingers[singerIdx].cats.splice(catIdx, 0, { name, songs: [] });
+    openState.singers[currentSingers[singerIdx].name] = true;
+    openState.cats[name] = true;
     buildDOM(currentSingers);
     restoreOpenState(openState);
-    // Re-prompt below new item for continued entry
-    const newIdx = insertIdx;
-    setTimeout(() => promptInlineAdd(type,
-      type === 'singer' ? newIdx : si,
-      type === 'cat' ? newIdx : ci,
-      type === 'song' ? newIdx : soi,
-      'below'), 50);
+    // cascade to songs, then loop back to cats
+    setTimeout(() => cascadeSongs(singerIdx, catIdx, function() {
+      setTimeout(() => cascadeCats(singerIdx, onBlank, catIdx), 50);
+    }), 50);
+  };
+}
+
+// cascadeSongs(singerIdx, catIdx, onBlank)
+// Injects a song input at the bottom of the cat grid.
+// On blank Enter: calls onBlank().
+// On name Enter: commits song and loops.
+function cascadeSongs(singerIdx, catIdx, onBlank) {
+  const grid = document.getElementById(getGridId(singerIdx, catIdx));
+  if (!grid) return;
+
+  // ensure cat is expanded
+  const cHeader = grid.previousElementSibling;
+  grid.classList.remove('collapsed');
+  if (cHeader) { cHeader.classList.remove('collapsed'); if (cHeader.querySelector('.hide-show')) cHeader.querySelector('.hide-show').textContent = 'Hide'; }
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'padding:4px 8px;';
+  const input = document.createElement('input');
+  input.className = 'new-entry-input';
+  input.placeholder = 'Song title\u2026 (Enter=add, blank=done)';
+  input.style.cssText = 'width:100%;font-size:0.85rem;';
+  wrap.appendChild(input);
+  grid.appendChild(wrap);
+  input.focus();
+  updateViewMenuState();
+
+  input.onkeydown = function(ev) {
+    if (ev.key !== 'Enter') return;
+    ev.preventDefault();
+    const name = input.value.trim();
+    wrap.remove();
+    updateViewMenuState();
+    if (!name) {
+      if (onBlank) onBlank();
+      return;
+    }
+    markDirty();
+    const openState = getOpenState();
+    openState.singers[currentSingers[singerIdx].name] = true;
+    openState.cats[currentSingers[singerIdx].cats[catIdx].name] = true;
+    currentSingers[singerIdx].cats[catIdx].songs.push({ title: name, artist: '', url: '' });
+    const songIdx = currentSingers[singerIdx].cats[catIdx].songs.length - 1;
+    const songObj = currentSingers[singerIdx].cats[catIdx].songs[songIdx];
+    buildDOM(currentSingers);
+    restoreOpenState(openState);
+    const g = document.getElementById(getGridId(singerIdx, catIdx));
+    const newCard = g && g.querySelectorAll('.song-card')[songIdx];
+    if (newCard) {
+      showArtistUrlPanel(newCard, { artist: '', url: '' }, result => {
+        if (result && (result.artist || result.url)) {
+          songObj.artist = result.artist;
+          songObj.url = result.url;
+          markDirty();
+          const os = getOpenState();
+          buildDOM(currentSingers);
+          restoreOpenState(os);
+        }
+        setTimeout(() => cascadeSongs(singerIdx, catIdx, onBlank), 50);
+      });
+    } else {
+      setTimeout(() => cascadeSongs(singerIdx, catIdx, onBlank), 50);
+    }
   };
 }
 
@@ -1273,12 +1947,14 @@ function startInlineRename(spanId, type, si, ci) {
   span.appendChild(input);
   input.focus();
   input.setSelectionRange(input.value.length, input.value.length);
+  updateViewMenuState();
   const commit = () => {
     const val = input.value.trim() || old;
     if (val !== old) markDirty();
     span.textContent = val;
     if (type === 'singer') currentSingers[si].name = val;
     else if (type === 'cat') currentSingers[si].cats[ci].name = val;
+    updateViewMenuState();
   };
   input.onblur = commit;
   input.onkeydown = ev => {
@@ -1289,8 +1965,7 @@ function startInlineRename(spanId, type, si, ci) {
 }
 
 function startInlineSongRename(si, ci, soi) {
-  const catId = 'singer' + si + '-cat' + ci;
-  const grid = document.getElementById('grid-' + catId);
+  const grid = document.getElementById(getGridId(si, ci));
   if (!grid) return;
   const cards = grid.querySelectorAll('.song-card');
   const card = cards[soi];
@@ -1305,18 +1980,27 @@ function startInlineSongRename(si, ci, soi) {
   titleEl.appendChild(input);
   input.focus();
   input.setSelectionRange(input.value.length, input.value.length);
+  updateViewMenuState();
   const commit = () => {
     const val = input.value.trim() || old;
     if (val !== old) markDirty();
     titleEl.textContent = val;
-    if (currentSingers[si] && currentSingers[si].cats[ci]) currentSingers[si].cats[ci].songs[soi] = val;
+    if (currentSingers[si] && currentSingers[si].cats[ci]) {
+      const s = currentSingers[si].cats[ci].songs[soi];
+      if (typeof s === 'string') currentSingers[si].cats[ci].songs[soi] = { title: val, artist: '', url: '' };
+      else s.title = val;
+    }
+    updateViewMenuState();
     card.onclick = function(ev) {
-      if (ev.target.closest('.edit-btn')) return;
+      if (ev.target.closest('.edit-btn') || ev.target.closest('.song-meta-icon')) return;
       ev.preventDefault();
       const c = document.getElementById('main-container');
       if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
       saveState();
-      window.location.href = ytSearch(val);
+      const songObj = currentSingers[si]?.cats[ci]?.songs[soi];
+      const u = (typeof songObj === 'object') ? songObj.url : '';
+      if (u) window.location.href = u;
+      else navigateSearch(val);
     };
   };
   input.onblur = commit;
@@ -1343,6 +2027,7 @@ function startEdit(e, spanId, type, si, ci) {
   span.appendChild(input);
   input.focus();
   input.setSelectionRange(input.value.length, input.value.length);
+  updateViewMenuState();
   // Switch pencil to trash
   btn.textContent = '🗑️';
   btn.title = type === 'singer' ? 'Delete singer' : 'Delete category';
@@ -1371,6 +2056,7 @@ function startEdit(e, spanId, type, si, ci) {
     if (type === 'singer') currentSingers[si].name = newName;
     if (type === 'cat') currentSingers[si].cats[ci].name = newName;
     restore();
+    updateViewMenuState();
   };
   input.onblur = commit;
   input.onkeydown = (ev) => {
@@ -1394,6 +2080,7 @@ function startEditSong(e, card, titleEl, si, ci, soi) {
   titleEl.appendChild(input);
   input.focus();
   input.setSelectionRange(input.value.length, input.value.length);
+  updateViewMenuState();
   // Switch pencil to trash
   btn.textContent = '🗑️';
   btn.title = 'Delete song';
@@ -1422,17 +2109,23 @@ function startEditSong(e, card, titleEl, si, ci, soi) {
     titleEl.textContent = newTitle;
     card.dataset.title = newTitle.toLowerCase();
     if (currentSingers[si] && currentSingers[si].cats[ci]) {
-      currentSingers[si].cats[ci].songs[soi] = newTitle;
+      const s = currentSingers[si].cats[ci].songs[soi];
+      if (typeof s === 'string') currentSingers[si].cats[ci].songs[soi] = { title: newTitle, artist: '', url: '' };
+      else s.title = newTitle;
     }
     card.onclick = function(ev) {
-      if (ev.target.closest('.edit-btn') || ev.target.closest('.edit-input')) return;
+      if (ev.target.closest('.edit-btn') || ev.target.closest('.song-meta-icon') || ev.target.closest('.edit-input')) return;
       ev.preventDefault();
       const c = document.getElementById('main-container');
       if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
       saveState();
-      window.location.href = ytSearch(newTitle);
+      const songObj = currentSingers[si]?.cats[ci]?.songs[soi];
+      const u = (typeof songObj === 'object') ? songObj.url : '';
+      if (u) window.location.href = u;
+      else navigateSearch(newTitle);
     };
     restore();
+    updateViewMenuState();
   };
   input.onblur = commit;
   input.onkeydown = (ev) => {
@@ -1521,13 +2214,16 @@ function clearFilter() {
 }
 
 // ---- SESSION FILE PARSER (CSV) ----
-// Columns: #(comment) | Singer | Category | Song | Artist(future) | URL(future)
+// Columns: #(comment) | Singer | Category | Song | Artist | Full URL
 // col1=# skips row, empty rows ignored, whitespace trimmed
 // One row can define singer + category + first song simultaneously
+// Returns {singers, errors} — errors recorded but parsing continues (silent skip)
 function parseSession(text) {
   const singers = [];
+  const errors = [];
   let currentSinger = null;
   let currentCat = null;
+  let lineNum = 0;
 
   const rows = text.split('\n').map(line => {
     // Simple CSV split respecting quoted fields
@@ -1543,12 +2239,15 @@ function parseSession(text) {
   });
 
   for (const cols of rows) {
+    lineNum++;
     if (cols.every(c => c === '')) continue;   // skip empty rows
     if (cols[0].startsWith('#')) continue;     // skip comment rows
 
     const singer = cols[1] || '';
     const cat    = cols[2] || '';
     const song   = cols[3] || '';
+    const artist = cols[4] || '';
+    const url    = cols[5] || '';
 
     if (singer) {
       currentSinger = { name: singer, cats: [] };
@@ -1558,13 +2257,17 @@ function parseSession(text) {
     if (cat && currentSinger) {
       currentCat = { name: cat, songs: [] };
       currentSinger.cats.push(currentCat);
+    } else if (cat && !currentSinger) {
+      errors.push({ lineNum, reason: 'category without singer' });
     }
     if (song && currentSinger && currentCat) {
-      currentCat.songs.push(song);
+      currentCat.songs.push({ title: song, artist, url });
+    } else if (song && (!currentSinger || !currentCat)) {
+      errors.push({ lineNum, reason: 'song without singer/category' });
     }
   }
 
-  return singers;
+  return { singers, errors };
 }
 
 // ---- BUILD DOM ----
@@ -1574,9 +2277,20 @@ function saveCurrentState() {
 }
 function markDirty() { sessionDirty = true; }
 function markClean() { sessionDirty = false; }
-function confirmDirty(msg) {
-  if (!sessionDirty) return true;
-  return confirm(msg || 'You have unsaved changes. Continue without saving?');
+// Clear all persisted session state — used by every in-app exit point (Close, Exit)
+// so returning to player.html lands on the welcome screen, not the stale session.
+function flushSession() {
+  ['karaokeSession','karaokeState','karaokeSingerOpen','karaokeCatOpen','karaokeFilter',
+   'karaokeYT','karaokeScroll','karaokeFilterHistory','karaokeYTHistory']
+    .forEach(k => sessionStorage.removeItem(k));
+}
+// Dirty guard — proceeds immediately when clean; when dirty, shows our custom
+// confirm modal (never the native browser dialog) and proceeds only on OK.
+function confirmDirty(msg, onProceed) {
+  if (!sessionDirty) { onProceed(); return; }
+  showConfirm('Unsaved Changes', msg || 'You have unsaved changes. Continue without saving?', (ok) => {
+    if (ok) onProceed();
+  });
 }
 
 function buildDOM(singers) {
@@ -1586,7 +2300,7 @@ function buildDOM(singers) {
   collapseSnapshot = null;
 
   if (!singers.length) {
-    showWelcome();
+    container.appendChild(renderWelcome());
     document.getElementById('searchInput').disabled = true;
     return;
   }
@@ -1599,12 +2313,8 @@ function buildDOM(singers) {
   document.getElementById('ribbonAddBtn').classList.remove('disabled');
   document.getElementById('ribbonDropBtn').classList.remove('disabled');
   document.getElementById('ribbonSaveAsBtn').classList.remove('disabled');
-  ['viewSingersBtn','viewCatsBtn']
+  ['viewSingersBtn','viewCatsBtn','viewAllBtn']
     .forEach(id => document.getElementById(id).classList.remove('disabled'));
-  document.getElementById('rbView').classList.remove('disabled');
-  updateViewMenuState();
-  updateNewEditLabel();
-  saveCurrentState();
 
   singers.forEach((singer, si) => {
     const singerId = 'singer' + si;
@@ -1634,7 +2344,7 @@ function buildDOM(singers) {
 
       const secHeader = document.createElement('div');
       secHeader.className = 'section-header collapsed';
-      secHeader.onclick = (e) => { if (!e.target.closest('.edit-btn') && !e.target.closest('.edit-input')) toggleSection(catId); };
+      secHeader.onclick = (e) => { if (!e.target.closest('.edit-btn') && !e.target.closest('.edit-input')) toggleSection(si, ci); };
       secHeader.innerHTML = `
         <span class="section-icon">🎵</span>
         <button class="edit-btn" title="Edit category" onclick="showPencilMenu(event,'cat',${si},${ci})">✏️</button>
@@ -1646,78 +2356,45 @@ function buildDOM(singers) {
 
       const grid = document.createElement('div');
       grid.className = 'grid collapsed';
-      grid.id = 'grid-' + catId;
+      grid.id = getGridId(si, ci);
 
       cat.songs.forEach((song, soi) => grid.appendChild(makeCard(song, si, ci, soi)));
-
-      if (!cat.songs.length) {
-        const hintWrap = document.createElement('div');
-        hintWrap.style.cssText = 'padding:0.4em 0.75em;';
-        const hintIn = document.createElement('input');
-        hintIn.className = 'new-entry-input';
-        hintIn.placeholder = 'Add a song... (Enter to add)';
-        hintIn.style.cssText = 'width:100%;font-size:0.82rem;';
-        hintIn.onkeydown = (ev) => {
-          if (ev.key !== 'Enter') return;
-          ev.preventDefault();
-          const song = hintIn.value.trim();
-          if (!song) return;
-          currentSingers[si].cats[ci].songs.push(song);
-          const openState = getOpenState();
-          buildDOM(currentSingers);
-          restoreOpenState(openState);
-        };
-        hintWrap.appendChild(hintIn);
-        grid.appendChild(hintWrap);
-      }
 
       section.appendChild(secHeader);
       section.appendChild(grid);
       body.appendChild(section);
     });
 
-    if (!singer.cats.length) {
-      const hintWrap = document.createElement('div');
-      hintWrap.style.cssText = 'padding:0.4em 0.75em;';
-      const hintIn = document.createElement('input');
-      hintIn.className = 'new-entry-input';
-      hintIn.placeholder = 'Add a category... (Enter to add)';
-      hintIn.style.cssText = 'width:100%;font-size:0.82rem;';
-      hintIn.onkeydown = (ev) => {
-        if (ev.key !== 'Enter') return;
-        ev.preventDefault();
-        const cat = hintIn.value.trim();
-        if (!cat) return;
-        currentSingers[si].cats.push({ name: cat, songs: [] });
-        const openState = getOpenState();
-        buildDOM(currentSingers);
-        restoreOpenState(openState);
-      };
-      hintWrap.appendChild(hintIn);
-      body.appendChild(hintWrap);
-    }
-
     block.appendChild(header);
     block.appendChild(body);
     container.appendChild(block);
   });
+  updateViewMenuState();
+  updateNewEditLabel();
+  updateFooterTip();
+  updateCsvErrorWarn();
 }
 
 // ---- LOAD SESSION ----
 // ---- OPEN SAMPLE ----
 function sampleLoad() {
   closeAllRibbons();
-  fetch('cfg/sample.csv')
-    .then(r => {
-      if (!r.ok) throw new Error('fetch failed');
-      return r.text();
-    })
-    .then(text => {
-      sessionStorage.setItem('karaokeSession', text);
-      buildDOM(parseSession(text));
-      markClean();
-    })
-    .catch(() => alert('Could not load sample.csv — make sure cfg/sample.csv exists in the app folder.'));
+  confirmDirty('Load sample session without saving? Unsaved changes will be lost.', () => {
+    fetch('cfg/sample.csv')
+      .then(r => {
+        if (!r.ok) throw new Error('fetch failed');
+        return r.text();
+      })
+      .then(text => {
+        sessionStorage.setItem('karaokeSession', text);
+        const { singers, errors } = parseSession(text);
+        if (errors.length) sessionStorage.setItem('karaokeCsvErrors', JSON.stringify(errors));
+        else sessionStorage.removeItem('karaokeCsvErrors');
+        buildDOM(singers);
+        markClean();
+      })
+      .catch(() => alert('Could not load sample.csv — make sure cfg/sample.csv exists in the app folder.'));
+  });
 }
 
 // Download a file from the app to the user's device
@@ -1729,10 +2406,12 @@ function downloadFile(path, filename) {
   a.click();
 }
 
-// Open doc pages in a new tab
+// Open doc pages in a new tab. Append the build epoch as a cache-buster so the
+// guide/setup pages always match the current app build (no stale-cache surprises).
 function openDoc(path) {
   closeAllRibbons();
-  window.open(path, '_blank');
+  const v = (BUILD.match(/\((\d+)/) || [])[1] || '';
+  window.open(v ? path + '?v=' + v : path, '_blank');
 }
 
 // ---- RIBBON SESSION ACTIONS ----
@@ -1747,13 +2426,6 @@ function updateNewEditLabel() {
 function ribbonNew() {
   if (document.getElementById('ribbonNewBtn').classList.contains('disabled')) return;
   closeAllRibbons();
-  // Populate singer datalist
-  const sd = document.getElementById('singerSuggestions');
-  sd.innerHTML = '';
-  currentSingers.forEach(s => {
-    const o = document.createElement('option'); o.value = s.name; sd.appendChild(o);
-  });
-  document.getElementById('catSuggestions').innerHTML = '';
   document.getElementById('newSingerInput').value = '';
   document.getElementById('newCatInput').value = '';
   document.getElementById('newSongInput').value = '';
@@ -1767,10 +2439,9 @@ function ribbonNew() {
     document.getElementById('ribbonCloseBtn').classList.remove('disabled');
     document.getElementById('ribbonReopenBtn').classList.remove('disabled');
     document.getElementById('ribbonAddBtn').classList.remove('disabled');
-    document.getElementById('ribbonDropBtn').classList.remove('disabled');
+    // Drop stays disabled until singers are actually added
     document.getElementById('ribbonSaveAsBtn').classList.remove('disabled');
-    ['viewSingersBtn','viewCatsBtn'].forEach(id => document.getElementById(id).classList.remove('disabled'));
-    document.getElementById('rbView').classList.remove('disabled');
+    ['viewSingersBtn','viewCatsBtn','viewAllBtn'].forEach(id => document.getElementById(id).classList.remove('disabled'));
   }
   updateViewMenuState();
   updateNewEditLabel();
@@ -1789,24 +2460,24 @@ function setupNewEntryListeners() {
   let pendingSingerIdx = -1;
   let pendingCat = null;
 
-  function populateCatList(singerRef) {
-    const dl = document.getElementById('catSuggestions');
-    dl.innerHTML = '';
-    if (singerRef) singerRef.cats.forEach(c => {
-      const o = document.createElement('option'); o.value = c.name; dl.appendChild(o);
-    });
-  }
+  function populateCatList(singerRef) { }
 
   function commitCat() {
     if (!pendingCat) return;
     const singerRef = pendingSingerIdx >= 0 ? currentSingers[pendingSingerIdx] : pendingSinger;
-    if (singerRef && !singerRef.cats.includes(pendingCat)) singerRef.cats.push(pendingCat);
+    if (singerRef && !singerRef.cats.includes(pendingCat)) {
+      singerRef.cats.push(pendingCat);
+      markDirty();   // a category was actually added
+    }
     pendingCat = null;
   }
 
   function commitSinger() {
     commitCat();
-    if (pendingSingerIdx < 0 && pendingSinger) currentSingers.push(pendingSinger);
+    if (pendingSingerIdx < 0 && pendingSinger) {
+      currentSingers.push(pendingSinger);
+      markDirty();   // a new singer was actually added
+    }
     const openState = getOpenState();
     buildDOM(currentSingers);
     restoreOpenState(openState);
@@ -1825,7 +2496,6 @@ function setupNewEntryListeners() {
       updateNewEditLabel();
       return;
     }
-    // Check if existing singer picked from datalist
     const idx = currentSingers.findIndex(s => s.name === name);
     if (idx >= 0) {
       pendingSingerIdx = idx;
@@ -1850,10 +2520,6 @@ function setupNewEntryListeners() {
       commitSinger();
       singerIn.value = '';
       catRow.style.display = 'none'; songRow.style.display = 'none';
-      // Refresh singer datalist
-      const sd = document.getElementById('singerSuggestions');
-      sd.innerHTML = '';
-      currentSingers.forEach(s => { const o = document.createElement('option'); o.value = s.name; sd.appendChild(o); });
       singerIn.focus();
       return;
     }
@@ -1872,8 +2538,17 @@ function setupNewEntryListeners() {
     e.preventDefault();
     const song = songIn.value.trim();
     if (song && pendingCat) {
-      pendingCat.songs.push(song);
+      pendingCat.songs.push({ title: song, artist: '', url: '' });
+      markDirty();
+      const songObj = pendingCat.songs[pendingCat.songs.length - 1];
       songIn.value = '';
+      showArtistUrlPanel(document.getElementById('newSongRow'), { artist: '', url: '' }, result => {
+        if (result && (result.artist || result.url)) {
+          songObj.artist = result.artist;
+          songObj.url = result.url;
+        }
+        songIn.focus();
+      });
     } else if (!song) {
       commitCat();
       catIn.value = '';
@@ -1890,10 +2565,9 @@ function ribbonSaveAs() {
   if (document.getElementById('ribbonSaveAsBtn').classList.contains('disabled')) return;
   closeAllRibbons();
   // Suggest a default filename
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  const suggested = 'session_' + now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate());
+  const suggested = 'session_' + Math.floor(Date.now() / 1000);
   document.getElementById('saveAsFilename').value = suggested;
+  document.getElementById('saveAsFilename').dataset.default = suggested;
   openModal('modalSaveAs');
   setTimeout(() => {
     const inp = document.getElementById('saveAsFilename');
@@ -1902,27 +2576,30 @@ function ribbonSaveAs() {
 }
 
 function saveAsConfirm() {
-  let name = document.getElementById('saveAsFilename').value.trim();
+  const inp = document.getElementById('saveAsFilename');
+  let name = inp.value.trim();
   if (!name) return;
-  // Strip .csv if user typed it
   name = name.replace(/\.csv$/i, '');
   const filename = name + '.csv';
-  if (!confirm('If "' + filename + '" exists in your downloads it will be overwritten. Continue?')) return;
   closeModal('modalSaveAs');
   // Build CSV
   const lines = [];
-  lines.push('# Karaoke Night | ' + BUILD);
-  lines.push('# Column layout: # comment | Singer | Category | Song | Artist (future) | Full URL (future)');
-  lines.push('# Singer,Category,Song,Artist (future),Full URL (future)');
+  lines.push('#,' + 'Karaoke Night | ' + BUILD);
+  lines.push('#,"Session file template. Copy, rename and edit for your session."');
+  lines.push('#,Column layout: # comment | Singer | Category | Song | Artist | Full URL');
+  lines.push('#,Rules: col1=# skips row | empty rows ignored | whitespace trimmed');
+  lines.push('#,One row can define Singer + Category + first Song simultaneously');
   lines.push('');
+  lines.push('#,Singer,Category,Song,Artist,Full URL');
   currentSingers.forEach(singer => {
     if (!singer.cats.length) { lines.push(',' + csvField(singer.name) + ',,,'); return; }
     singer.cats.forEach((cat, ci) => {
       if (!cat.songs.length) { lines.push(',' + csvField(singer.name) + ',' + csvField(cat.name) + ',,'); return; }
       cat.songs.forEach((song, si) => {
+        const { title: songTitle = '', artist: songArtist = '', url: songUrl = '' } = song;
         const singerCol = (ci === 0 && si === 0) ? csvField(singer.name) : '';
         const catCol    = si === 0 ? csvField(cat.name) : '';
-        lines.push(',' + singerCol + ',' + catCol + ',' + csvField(song) + ',,');
+        lines.push(',' + singerCol + ',' + catCol + ',' + csvField(songTitle) + ',' + csvField(songArtist) + ',' + csvField(songUrl));
       });
     });
     lines.push('');
@@ -1945,51 +2622,47 @@ function csvField(val) {
 
 function ribbonOpen() {
   closeAllRibbons();
-  if (currentSingers.length > 0) {
-    if (!confirm('Opening a new session will clear the current session. Continue?')) return;
-  }
-  if (!confirmDirty('Open new session without saving? Unsaved changes will be lost.')) return;
-  document.getElementById('fileInput').click();
+  confirmDirty('Open new session without saving? Unsaved changes will be lost.', () => {
+    document.getElementById('fileInput').click();
+  });
 }
 function ribbonClose() {
   if (document.getElementById('ribbonCloseBtn').classList.contains('disabled')) return;
-  if (!confirmDirty('Close without saving? Unsaved changes will be lost.')) return;
-  closeAllRibbons();
-  sessionStorage.removeItem('karaokeSession');
-  sessionStorage.removeItem('karaokeState');
-  sessionStorage.removeItem('karaokeSingerOpen');
-  sessionStorage.removeItem('karaokeCatOpen');
-  sessionStorage.removeItem('karaokeFilter');
-  sessionStorage.removeItem('karaokeYT');
-  sessionStorage.removeItem('karaokeScroll');
-  const container = document.getElementById('main-container');
-  container.innerHTML = '';
-  showWelcome();
-  document.getElementById('searchInput').value = '';
-  document.getElementById('searchInput').disabled = true;
-  document.getElementById('clearSearch').classList.remove('visible');
-  document.getElementById('ytInput').value = '';
-  document.getElementById('clearYT').classList.remove('visible');
-  document.getElementById('ytGoBtn').classList.remove('visible');
-  document.getElementById('newEntryPanel').style.display = 'none';
-  document.getElementById('ribbonCloseBtn').classList.add('disabled');
-  document.getElementById('ribbonReopenBtn').classList.add('disabled');
-  document.getElementById('ribbonAddBtn').classList.add('disabled');
-  document.getElementById('ribbonSaveAsBtn').classList.add('disabled');
-  document.getElementById('ribbonDropBtn').classList.add('disabled');
-  document.getElementById('ribbonUndropBtn').classList.add('disabled');
-  ['viewSingersBtn','viewCatsBtn']
-    .forEach(id => document.getElementById(id).classList.add('disabled'));
-  document.getElementById('rbView').classList.add('disabled');
-  currentSingers = [];
-  droppedSingers = [];
-  markClean();
-  updateNewEditLabel();
+  confirmDirty('Close without saving? Unsaved changes will be lost.', () => {
+    closeAllRibbons();
+    flushSession();
+    const container = document.getElementById('main-container');
+    container.innerHTML = '';
+    container.appendChild(renderWelcome());
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchInput').disabled = true;
+    document.getElementById('clearSearch').classList.remove('visible');
+    document.getElementById('ytInput').value = '';
+    document.getElementById('clearYT').classList.remove('visible');
+    document.getElementById('ytGoBtn').classList.remove('visible');
+    document.getElementById('newEntryPanel').style.display = 'none';
+    document.getElementById('ribbonCloseBtn').classList.add('disabled');
+    document.getElementById('ribbonReopenBtn').classList.add('disabled');
+    document.getElementById('ribbonAddBtn').classList.add('disabled');
+    document.getElementById('ribbonSaveAsBtn').classList.add('disabled');
+    document.getElementById('ribbonDropBtn').classList.add('disabled');
+    document.getElementById('ribbonUndropBtn').classList.add('disabled');
+    ['viewSingersBtn','viewCatsBtn','viewAllBtn','viewAllExpandBtn','viewAllCollapseBtn']
+      .forEach(id => document.getElementById(id).classList.add('disabled'));
+    currentSingers = [];
+    droppedSingers = [];
+    markClean();
+    updateNewEditLabel();
+    updateFooterTip();
+  });
 }
 function ribbonExit() {
   closeAllRibbons();
-  if (!confirmDirty('Exit without saving? Unsaved changes will be lost.')) return;
-  window.location.href = 'index.html';
+  confirmDirty('Exit without saving? Unsaved changes will be lost.', () => {
+    markClean();     // user accepted leaving — suppress the beforeunload native prompt
+    flushSession();  // clear state so returning via "Let's Sing" shows the welcome screen
+    window.location.href = 'index.html';
+  });
 }
 
 // Reload — multi-file picker, rebuilds session fresh from selected files
@@ -2081,24 +2754,26 @@ function applyDrop() {
 function ribbonReopen() {
   if (document.getElementById('ribbonReopenBtn').classList.contains('disabled')) return;
   closeAllRibbons();
-  // Show drop dialog with all singers unchecked (kept) by default
-  const list = document.getElementById('dropList');
-  list.innerHTML = '';
-  currentSingers.forEach((singer, i) => {
-    const label = document.createElement('label');
-    label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = false;
-    cb.dataset.index = i;
-    cb.style.cssText = 'width:16px;height:16px;';
-    label.appendChild(cb);
-    label.appendChild(document.createTextNode(singer.name));
-    list.appendChild(label);
+  confirmDirty('Reopen without saving? Unsaved changes will be lost.', () => {
+    // Show drop dialog with all singers unchecked (kept) by default
+    const list = document.getElementById('dropList');
+    list.innerHTML = '';
+    currentSingers.forEach((singer, i) => {
+      const label = document.createElement('label');
+      label.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer;';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = false;
+      cb.dataset.index = i;
+      cb.style.cssText = 'width:16px;height:16px;';
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(singer.name));
+      list.appendChild(label);
+    });
+    // Mark modal as reopen mode so Apply opens Add picker after
+    document.getElementById('modalDrop').dataset.mode = 'reopen';
+    openModal('modalDrop');
   });
-  // Mark modal as reopen mode so Apply opens Add picker after
-  document.getElementById('modalDrop').dataset.mode = 'reopen';
-  openModal('modalDrop');
 }
 
 // Add — file picker to merge additional CSV into current session
@@ -2107,22 +2782,20 @@ function ribbonAdd() {
   closeAllRibbons();
   document.getElementById('fileInputAdd').click();
 }
-function showWelcome() {
-  const container = document.getElementById('main-container');
+// Render welcome panel — single source of truth for welcome UI
+function renderWelcome() {
   const panel = document.createElement('div');
   panel.className = 'welcome-panel';
   panel.id = 'welcomePanel';
   panel.innerHTML = `
-    <div class="welcome-title">Welcome to Karaoke Night 🎤</div>
-    <p style="color:var(--muted);font-size:0.9rem;">Open a session file to get started.</p>
-    <ol class="welcome-steps">
-      <li><span class="step-num">1.</span> Go to <strong>Session → Open</strong> to load your session file</li>
-      <li><span class="step-num">2.</span> Expand a Singer then a Category to browse and select a song</li>
-      <li><span class="step-num">3.</span> Use <strong>Filter</strong> to search songs in the loaded session</li>
-      <li><span class="step-num">4.</span> Use <strong>Find on YouTube</strong> for ad hoc song searches</li>
-      <li><span class="step-num">5.</span> Select 🎤 <strong>Karaoke Mode</strong> or 🎵 <strong>Music Video Mode</strong> to search YouTube for a karaoke version or music video</li>
-    </ol>`;
-  container.appendChild(panel);
+    <div class="welcome-title">Karaoke Night 🎤</div>
+    <div class="welcome-intro">Find and play songs for group singing</div>
+    <div class="welcome-item"><strong>[Session→New]</strong> <span>starts a new session</span></div>
+    <div class="welcome-item"><strong>[Session→Open]</strong> <span>open saved session file(s)</span></div>
+    <div class="welcome-item"><strong>[Session→Open Sample]</strong> <span>try out the app/easy to edit</span></div>
+    <div class="welcome-item"><strong>[Find on YouTube...]</strong> <span>search YouTube from here</span></div>
+    <div class="welcome-item"><strong>[Help]</strong> <span>learn more</span></div>`;
+  return panel;
 }
 
 // ---- LOAD SESSION ----
@@ -2143,7 +2816,10 @@ function handleFile(input) {
     droppedSingers = [];
     const merged = texts.join('\n');
     sessionStorage.setItem('karaokeSession', merged);
-    buildDOM(parseSession(merged));
+    const { singers, errors } = parseSession(merged);
+    if (errors.length) sessionStorage.setItem('karaokeCsvErrors', JSON.stringify(errors));
+    else sessionStorage.removeItem('karaokeCsvErrors');
+    buildDOM(singers);
     markClean();
     input.value = '';
   });
@@ -2161,7 +2837,10 @@ function handleFileReopen(input) {
   Promise.all(readers).then(texts => {
     const merged = texts.join('\n');
     sessionStorage.setItem('karaokeSession', merged);
-    buildDOM(parseSession(merged));
+    const { singers, errors } = parseSession(merged);
+    if (errors.length) sessionStorage.setItem('karaokeCsvErrors', JSON.stringify(errors));
+    else sessionStorage.removeItem('karaokeCsvErrors');
+    buildDOM(singers);
     markClean();
     input.value = '';
   });
@@ -2177,9 +2856,22 @@ function handleFileAdd(input) {
     r.readAsText(file);
   }));
   Promise.all(readers).then(texts => {
-    const newSingers = texts.flatMap(t => parseSession(t));
+    const allErrors = [];
+    const newSingers = texts.flatMap(t => {
+      const { singers, errors } = parseSession(t);
+      allErrors.push(...errors);
+      return singers;
+    });
+    if (allErrors.length) sessionStorage.setItem('karaokeCsvErrors', JSON.stringify(allErrors));
+    else sessionStorage.removeItem('karaokeCsvErrors');
     const merged = currentSingers.concat(newSingers);
+    const openState = getOpenState();
+    const scroll = document.getElementById('main-container')?.scrollTop || 0;
     buildDOM(merged);
+    restoreOpenState(openState);
+    markDirty();
+    const c = document.getElementById('main-container');
+    if (c) c.scrollTop = scroll;
     markDirty();
     input.value = '';
   });
@@ -2198,8 +2890,8 @@ function toggleSinger(singerId) {
 }
 
 // ---- SECTION TOGGLE ----
-function toggleSection(catId) {
-  const grid = document.getElementById('grid-' + catId);
+function toggleSection(si, ci) {
+  const grid = document.getElementById(getGridId(si, ci));
   if (!grid) return;
   const header = grid.previousElementSibling;
   const isCollapsed = grid.classList.toggle('collapsed');
@@ -2297,9 +2989,13 @@ function restoreState() {
     if (openBodies.length) {
       const last = openBodies[openBodies.length - 1];
       const onEnd = () => {
+        clearTimeout(fallback);
         last.removeEventListener('transitionend', onEnd);
         if (container) container.scrollTop = parseInt(savedScroll);
       };
+      // Fallback: if transitionend never fires (already-expanded body,
+      // zero-duration transition, interrupted layout), restore anyway.
+      const fallback = setTimeout(onEnd, 500);
       last.addEventListener('transitionend', onEnd);
     } else {
       if (container) container.scrollTop = parseInt(savedScroll);
@@ -2310,28 +3006,45 @@ function restoreState() {
 // ---- RESTORE SESSION FROM LOCALSTORAGE THEN STATE ----
 function init() {
   // Check for saved parsed state (post-drop) first, then raw CSV
+  let rendered = false;
   const savedState = sessionStorage.getItem('karaokeState');
   if (savedState) {
     try {
       const singers = JSON.parse(savedState);
-      if (singers && singers.length) buildDOM(singers);
+      if (singers && singers.length) { buildDOM(singers); rendered = true; }
     } catch(e) {}
   } else {
     const saved = sessionStorage.getItem('karaokeSession');
-    if (saved) buildDOM(parseSession(saved));
+    if (saved) {
+      const { singers, errors } = parseSession(saved);
+      if (errors.length) sessionStorage.setItem('karaokeCsvErrors', JSON.stringify(errors));
+      buildDOM(singers);
+      rendered = true;
+    }
   }
+  // No session to restore → render the welcome screen (fresh visit or post-exit return)
+  if (!rendered) buildDOM([]);
   // Only restore open/scroll state if returning via back button
   const isBackNav = performance.getEntriesByType('navigation')[0]?.type === 'back_forward';
-  if (isBackNav) restoreState();
+  if (isBackNav) {
+    restoreState();
+  } else {
+    sessionStorage.removeItem('karaokeFilterHistory');
+    sessionStorage.removeItem('karaokeYTHistory');
+  }
 }
 
 window.addEventListener('scroll', () => {
   const c = document.getElementById('main-container');
   if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
 }, true);
+// Warn on window/tab close (the X) when there are unsaved edits. Custom modals
+// can't intercept a browser close, so this is the native prompt — fired only
+// when dirty. ytNavigating skips it when we intentionally jump to YouTube.
 window.addEventListener('beforeunload', (e) => {
   const c = document.getElementById('main-container');
   if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+  if (ytNavigating) return;
   if (sessionDirty) { e.preventDefault(); e.returnValue = ''; }
 });
 // ---- ABOUT BUILD DATE TOGGLE ----
@@ -2346,7 +3059,74 @@ function toggleBuildDate() {
 
 window.addEventListener('DOMContentLoaded', () => {
   init();
+  updateFooterTip();
+  // initLongPressTooltip(); // DEFERRED: long-press tooltips — see comment in function for details
 });
+
+// ---- LONG-PRESS TOOLTIP (iOS title attr fix) ----
+// DEFERRED to future release: R01V01L08a implementation was unreliable on iOS.
+// Touch selection, gesture interference, and timing issues made the 600ms threshold difficult to hit reliably.
+// Current approach (preventing text selection + contextmenu) insufficient. Future solution should:
+// - Use pointer events instead of touch events for better cross-device consistency
+// - Implement stricter gesture detection (movement threshold, pressure detection)
+// - Consider alternative UX (e.g., tap-to-toggle info panel vs. long-press tooltip)
+function initLongPressTooltip() {
+  const tip = document.createElement('div');
+  tip.id = 'lp-tooltip';
+  document.body.appendChild(tip);
+
+  let timer = null;
+  let dismissTimer = null;
+
+  function show(text, x, y) {
+    tip.textContent = text;
+    tip.classList.add('visible');
+    const margin = 8;
+    const tw = Math.min(220, tip.scrollWidth + 20);
+    let left = x - tw / 2;
+    let top  = y - 48;
+    left = Math.max(margin, Math.min(left, window.innerWidth  - tw - margin));
+    top  = Math.max(margin, Math.min(top,  window.innerHeight - 40 - margin));
+    tip.style.left = left + 'px';
+    tip.style.top  = top  + 'px';
+    clearTimeout(dismissTimer);
+    dismissTimer = setTimeout(hide, 2500);
+  }
+
+  function hide() {
+    tip.classList.remove('visible');
+    clearTimeout(dismissTimer);
+  }
+
+  function cancel() {
+    clearTimeout(timer);
+    timer = null;
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    hide();
+    cancel();
+    const el = e.target.closest('[title]');
+    if (!el) return;
+    const text = el.title;
+    if (!text) return;
+    const t = e.touches[0];
+    const sx = t.clientX, sy = t.clientY;
+    timer = setTimeout(() => {
+      show(text, sx, sy);
+      timer = null;
+    }, 600);
+  }, { passive: true });
+
+  document.addEventListener('touchmove',  cancel, { passive: true });
+  document.addEventListener('touchend',   cancel, { passive: true });
+  document.addEventListener('touchcancel',cancel, { passive: true });
+
+  // Prevent iOS native context menu on titled elements
+  document.querySelectorAll('[title]').forEach(el => {
+    el.addEventListener('contextmenu', e => e.preventDefault());
+  });
+}
 
 </script>
 </body>
