@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V01L10a (1780934415 EDT-0400) -->
+<!-- Karaoke Night | R01V01L09d (1780162068 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
@@ -8,8 +8,6 @@
 <!-- iOS: prevent zoom on input focus -->
 <title>🎤 Karaoke Night</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-<!-- Google Analytics (GA4) — env-specific single source: creds/gtag.js -->
-<script src="../creds/gtag.js"></script>
 <style>
   :root {
     /* --- theme colors --- */
@@ -741,15 +739,8 @@
     padding: calc(var(--base) * 0.6) 0;
     border-bottom: 1px solid var(--border);
   }
-  .welcome-item:not(:has(~ .welcome-item)) {
+  .welcome-item:last-child {
     border-bottom: none;
-  }
-  .welcome-copy {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-    margin-top: calc(var(--base) * 1.4);
   }
   .welcome-item strong {
     color: var(--text);
@@ -1060,7 +1051,6 @@
       Open a session file to get started. Filter your song list, find tracks on YouTube, and switch between Karaoke and Music Video search modes.<br><br>
       <strong>Build:</strong> <span id="aboutRVL"></span><br>
       <span id="aboutBuild" onclick="toggleBuildDate()" style="cursor:pointer;text-decoration:underline dotted;font-size:0.9em;" title="Click to toggle date"></span>
-      <div style="margin-top:1em;color:var(--muted);font-size:0.8rem;">© 2026 AllinPics</div>
     </div>
     <button class="modal-ok" onclick="closeModal('modalAbout')">OK</button>
   </div>
@@ -1076,7 +1066,7 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V01L10a (1780934415 EDT-0400)';
+const BUILD = 'R01V01L09d (1780162068 EDT-0400)';
 
 // ---- YOUTUBE ----
 // ---- MODALS ----
@@ -1591,16 +1581,9 @@ function showPencilMenu(e, type, si, ci, soi) {
   document.getElementById('pmEditArtistUrl').style.display = type === 'song' ? '' : 'none';
   const menu = document.getElementById('pencilMenu');
   menu.classList.add('open');
-  // Position near click — clamp to viewport, keep whole menu above the sticky footer
-  const gap = 6;
-  const footer = document.getElementById('footerTip');
-  const footerTop = footer ? footer.getBoundingClientRect().top : window.innerHeight;
-  const menuW = menu.offsetWidth, menuH = menu.offsetHeight;
-  let x = Math.min(e.clientX, window.innerWidth - menuW - gap);
-  let y = e.clientY + 4;
-  if (y + menuH > footerTop - gap) y = footerTop - menuH - gap;  // flip up near footer
-  x = Math.max(gap, x);
-  y = Math.max(gap, y);
+  // Position near click
+  const x = Math.min(e.clientX, window.innerWidth - 180);
+  const y = Math.min(e.clientY + 4, window.innerHeight - 160);
   menu.style.left = x + 'px';
   menu.style.top  = y + 'px';
 }
@@ -2811,8 +2794,7 @@ function renderWelcome() {
     <div class="welcome-item"><strong>[Session→Open]</strong> <span>open saved session file(s)</span></div>
     <div class="welcome-item"><strong>[Session→Open Sample]</strong> <span>try out the app/easy to edit</span></div>
     <div class="welcome-item"><strong>[Find on YouTube...]</strong> <span>search YouTube from here</span></div>
-    <div class="welcome-item"><strong>[Help]</strong> <span>learn more</span></div>
-    <div class="welcome-copy">© 2026 AllinPics</div>`;
+    <div class="welcome-item"><strong>[Help]</strong> <span>learn more</span></div>`;
   return panel;
 }
 
