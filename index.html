@@ -137,6 +137,19 @@
       btn.textContent = '🌙 Dark';
     }
   }
+
+  // Track which app a visitor clicks through to (GA4 portal property).
+  // Generic: applies to every .link-card, so new app cards are tracked automatically.
+  document.querySelectorAll('.link-card').forEach(function (a) {
+    a.addEventListener('click', function () {
+      if (!window.gtag) return;
+      var t = a.querySelector('.link-title');
+      gtag('event', 'app_select', {
+        app: a.getAttribute('href'),
+        app_name: t ? t.textContent.trim() : a.getAttribute('href')
+      });
+    });
+  });
 </script>
 </body>
 </html>
