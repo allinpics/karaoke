@@ -1,0 +1,7 @@
+#,Karaoke Night | R01V01L08a (1779542808 EDT-0400)
+#,"Session file template. Copy, rename and edit for your session."
+#,Column layout: # comment | Singer | Category | Song | Artist | Full URL
+#,Rules: col1=# skips row | empty rows ignored | whitespace trimmed
+#,One row can define Singer + Category + first Song simultaneously
+
+#,Singer,Category,Song,Artist,Full URL

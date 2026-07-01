@@ -4,7 +4,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="format-detection" content="telephone=no">
 <title>🎤 Virtual Karaoke Night — Participant Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <!-- Google Analytics (GA4) — env-specific single source: creds/gtag.js -->
@@ -620,7 +619,7 @@
 </main>
 
 <footer>
-  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; Virtual Setup Guide &nbsp;•&nbsp; R01V01L10a 🎤 &nbsp;•&nbsp; <span id="buildTag" data-build="R01V01L10a (1782068226 EDT-0400)" onclick="toggleBuild()" style="cursor:pointer;text-decoration:underline dotted;" title="Click for build date">1782068226</span><br>© 2026 AllinPics
+  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; Virtual Setup Guide &nbsp;•&nbsp; R01V01L10a 🎤 &nbsp;•&nbsp; 1780930064<br>© 2026 AllinPics
 </footer>
 
 <script>
@@ -644,27 +643,6 @@
     document.getElementById('tab-' + name).classList.add('active');
     event.target.classList.add('active');
   }
-
-  // Build stamp — show the build number; click to reveal the readable date (TZ only here).
-  (function () {
-    var el = document.getElementById('buildTag');
-    if (!el) return;
-    var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
-        MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var m = (el.dataset.build || '').match(/\((\d+)\s+(\w+)([+-]\d{4})\)/);
-    if (!m) return;
-    var epoch = m[1], tzLabel = m[2], tz = m[3], sign = tz[0] === '-' ? -1 : 1,
-        off = sign * (parseInt(tz.slice(1, 3)) * 60 + parseInt(tz.slice(3))),
-        d = new Date(parseInt(epoch) * 1000 + off * 60000),
-        pad = function (n) { return String(n).padStart(2, '0'); },
-        readable = DAYS[d.getUTCDay()] + ' ' + MONTHS[d.getUTCMonth()] + ' ' +
-          String(d.getUTCDate()).padStart(2, ' ') + ' ' +
-          pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()) + ':' + pad(d.getUTCSeconds()) +
-          ' ' + tzLabel + ' ' + d.getUTCFullYear(),
-        showing = false;
-    el.textContent = epoch;                       // default = bare build number (no TZ)
-    window.toggleBuild = function () { showing = !showing; el.textContent = showing ? readable : epoch; };
-  })();
 </script>
 </body>
 </html>
