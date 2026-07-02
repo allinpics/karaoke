@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /songs*
+Disallow: /r01v01l04i/
+Disallow: /r01v01l09d/
+Disallow: /r01v01l10a/
 
 Sitemap: https://allinpics.com/sitemap.xml
