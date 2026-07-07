@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V02L03a (1783262627 EDT-0400) -->
+<!-- Karaoke Night | R01V02L03 (1782926088 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
@@ -1084,23 +1084,13 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V02L03a (1783262627 EDT-0400)';
-
-// ---- GA4 EVENT HELPER ----
-// All custom events prefixed KN_ to avoid colliding with GA4's own reserved/
-// automatic event names (e.g. session_start). Never pass singer/category/song
-// content as params — engagement signal only.
-function knEvent(name, params) {
-  if (!window.gtag) return;
-  gtag('event', name, params || {});
-}
+const BUILD = 'R01V02L03 (1782926088 EDT-0400)';
 
 // ---- YOUTUBE ----
 // ---- MODALS ----
 function openModal(id) {
   closeAllRibbons();
   if (id === 'modalAbout') {
-    knEvent('KN_menu_action', { menu: 'help', action: 'about' });
     buildDateShowing = false;
     const rvlMatch = BUILD.match(/^(R\w+)\s/);
     const epochMatch = BUILD.match(/\((\d+)\s+(\w+)([+-]\d{4})\)/);
@@ -1204,9 +1194,8 @@ function confirmAction(confirmed) {
   }
 }
 
-function setSearchMode(mode, fireEvent = true) {
+function setSearchMode(mode) {
   searchMode = mode;
-  if (fireEvent) knEvent('KN_control_change', { control: 'mode', value: mode });
   document.getElementById('btnMic').classList.toggle('active', mode === 'karaoke');
   document.getElementById('btnNote').classList.toggle('active', mode === 'music');
   document.getElementById('btnYT').classList.toggle('active', mode === 'youtube');
@@ -1251,7 +1240,6 @@ function navigateSearch(q) {
 function goYT() {
   var val = document.getElementById('ytInput').value;
   if (val.trim()) {
-    knEvent('KN_control_change', { control: 'find' });
     addSearchHistory('karaokeYTHistory', val.trim());
     sessionStorage.setItem('karaokeYT', val);
     navigateSearch(val);
@@ -1373,7 +1361,6 @@ function makeCard(song, si, ci, soi) {
   card.onclick = function(e) {
     if (e.target.closest('.edit-btn') || e.target.closest('.edit-input') || e.target.closest('.song-meta-icon')) return;
     e.preventDefault();
-    knEvent('KN_card_pick');
     const c = document.getElementById('main-container');
     if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
     saveState();
@@ -2361,7 +2348,6 @@ function confirmDirty(msg, onProceed) {
 }
 
 function buildDOM(singers) {
-  knEvent('KN_ui_activity');   // generic sign-of-life on any DOM redraw — unfiltered for now, segment in GA later
   currentSingers = singers;
   ensureIds(singers);   // mint _id / init open for any new or rehydrated nodes
   const container = document.getElementById('main-container');
@@ -2450,7 +2436,6 @@ function buildDOM(singers) {
 // ---- OPEN SAMPLE ----
 function sampleLoad() {
   closeAllRibbons();
-  knEvent('KN_menu_action', { menu: 'session', action: 'open_sample' });
   confirmDirty('Load sample session without saving? Unsaved changes will be lost.', () => {
     fetch('cfg/sample.csv')
       .then(r => {
@@ -2473,7 +2458,6 @@ function sampleLoad() {
 // Download a file from the app to the user's device
 function downloadFile(path, filename) {
   closeAllRibbons();
-  knEvent('KN_menu_action', { menu: 'session', action: 'download' });
   const a = document.createElement('a');
   a.href = path;
   a.download = filename;
@@ -2500,7 +2484,6 @@ function updateNewEditLabel() {
 function ribbonNew() {
   if (document.getElementById('ribbonNewBtn').classList.contains('disabled')) return;
   closeAllRibbons();
-  knEvent('KN_menu_action', { menu: 'session', action: 'new' });
   document.getElementById('newSingerInput').value = '';
   document.getElementById('newCatInput').value = '';
   document.getElementById('newSongInput').value = '';
@@ -2637,7 +2620,6 @@ function setupNewEntryListeners() {
 function ribbonSaveAs() {
   if (document.getElementById('ribbonSaveAsBtn').classList.contains('disabled')) return;
   closeAllRibbons();
-  knEvent('KN_menu_action', { menu: 'session', action: 'save_as' });
   // Suggest a default filename
   const suggested = sessionStorage.getItem('karaokeName') || ('session_' + Math.floor(Date.now() / 1000));
   document.getElementById('saveAsFilename').value = suggested;
@@ -2696,14 +2678,12 @@ function csvField(val) {
 
 function ribbonOpen() {
   closeAllRibbons();
-  knEvent('KN_menu_action', { menu: 'session', action: 'open' });
   confirmDirty('Open new session without saving? Unsaved changes will be lost.', () => {
     document.getElementById('fileInput').click();
   });
 }
 function ribbonClose() {
   if (document.getElementById('ribbonCloseBtn').classList.contains('disabled')) return;
-  knEvent('KN_menu_action', { menu: 'session', action: 'close' });
   confirmDirty('Close without saving? Unsaved changes will be lost.', () => {
     closeAllRibbons();
     flushSession();
@@ -2732,12 +2712,9 @@ function ribbonClose() {
     updateFooterTip();
   });
 }
-let appExiting = false;   // suppresses the pagehide exit event when Exit already fired one
 function ribbonExit() {
   closeAllRibbons();
   confirmDirty('Exit without saving? Unsaved changes will be lost.', () => {
-    knEvent('KN_menu_action', { menu: 'session', action: 'exit' });   // fires whether clean (immediate) or dirty-confirmed — never on cancel
-    appExiting = true;   // this navigation is our own Exit redirect, not a real close — don't double-fire
     markClean();     // user accepted leaving — suppress the beforeunload native prompt
     flushSession();  // clear state so returning via "Let's Sing" shows the welcome screen
     window.location.href = 'index.html';
@@ -2949,7 +2926,6 @@ function toggleSection(si, ci) {
 let isDark = false;
 function toggleMode() {
   isDark = !isDark;
-  knEvent('KN_control_change', { control: 'theme', value: isDark ? 'dark' : 'light' });
   document.body.classList.toggle('light', !isDark);
   document.getElementById('modeBtn').textContent = isDark ? '☀️' : '🌙';
   saveState();
@@ -2976,7 +2952,7 @@ function restoreState() {
 
   // Restore search mode (karaoke/music)
   const savedMode = sessionStorage.getItem('karaokeMode');
-  if (savedMode) setSearchMode(savedMode, false);   // restore only — not a user-initiated change
+  if (savedMode) setSearchMode(savedMode);
 
   // Restore YT input value, clear button and arrow visibility
   const savedYT = sessionStorage.getItem('karaokeYT');
@@ -3077,14 +3053,6 @@ window.addEventListener('beforeunload', (e) => {
   if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
   if (ytNavigating) return;
   if (sessionDirty) { e.preventDefault(); e.returnValue = ''; }
-});
-// Exit via window/tab close (the X) — pagehide only fires on an actual unload,
-// so it naturally rides the same dirty check as beforeunload above: if the
-// user cancels that native prompt, no unload happens and this never fires.
-// transport_type:'beacon' keeps the request alive past page teardown.
-window.addEventListener('pagehide', () => {
-  if (ytNavigating || appExiting) return;
-  knEvent('KN_menu_action', { menu: 'session', action: 'exit', transport_type: 'beacon' });
 });
 // ---- ABOUT BUILD DATE TOGGLE ----
 let buildDateShowing = false;
