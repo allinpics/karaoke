@@ -144,7 +144,7 @@
     a.addEventListener('click', function () {
       if (!window.gtag) return;
       var t = a.querySelector('.link-title');
-      gtag('event', 'app_select', {
+      gtag('event', 'KN_app_select', {
         app: a.getAttribute('href'),
         app_name: t ? t.textContent.trim() : a.getAttribute('href')
       });

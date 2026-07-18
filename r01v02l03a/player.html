@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V02L04b (1784334171 EDT-0400) -->
+<!-- Karaoke Night | R01V02L03a (1783262627 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
@@ -355,27 +355,6 @@
   }
   .clear-btn:hover { color: var(--accent); }
   .clear-btn.visible { display: block; }
-
-  /* ---- Filter mode (R01V02L04b) — the filter owns the view while active ---- */
-  /* Prominence: the filter box glows; the ✕ reads stronger */
-  body.filter-mode #searchWrap input { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
-  body.filter-mode #clearSearch { color: var(--accent); }
-  /* Blocked-before-attempt: show/hide affordances dim while the filter is active */
-  body.filter-mode .singer-collapse-indicator,
-  body.filter-mode .collapse-indicator { opacity: 0.3; }
-  /* Dimmed-but-tappable: tap still lands so the gate can nudge (no pointer-events:none) */
-  .pencil-menu-item.disabled { opacity: 0.4; color: var(--muted); }
-  /* v3: non-matching sections are hidden entirely — invalid targets prevented by absence */
-  .filter-hidden { display: none; }
-  /* Feedback-if-attempted: re-triggerable shake on the filter box */
-  @keyframes filter-nudge {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-5px); }
-    40% { transform: translateX(5px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-  }
-  #searchWrap.nudge { animation: filter-nudge 0.4s; }
   /* yt go button sits left of the clear btn */
   .yt-go-btn {
     position: absolute;
@@ -1105,7 +1084,7 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V02L04b (1784334171 EDT-0400)';
+const BUILD = 'R01V02L03a (1783262627 EDT-0400)';
 
 // ---- GA4 EVENT HELPER ----
 // All custom events prefixed KN_ to avoid colliding with GA4's own reserved/
@@ -1196,9 +1175,6 @@ function toggleRibbon(btnId, ddId) {
   const isOpen = document.getElementById(ddId).classList.contains('open');
   closeAllRibbons();
   if (!isOpen) {
-    // View enablement recomputed at menu-open — always live-DOM truth at the
-    // moment the menu becomes visible; kills the staleness class (L04b Part A)
-    if (ddId === 'ddView') updateViewMenuState();
     btn.classList.add('open');
     document.getElementById(ddId).classList.add('open');
   }
@@ -1551,21 +1527,18 @@ function updateViewMenuState() {
   const inEditMode = document.querySelector(
     '#main-container .new-entry-input, #main-container .edit-input'
   ) !== null;
-  // Filter-mode lockdown (L04b): View mutations are blocked while a filter owns
-  // the view — same disable treatment as edit mode.
-  const inFilter = filterActive();
   const hasSingers = document.querySelectorAll('.singer-body').length > 0;
   const hasExpandedSinger = document.querySelectorAll('.singer-body:not(.collapsed)').length > 0;
   const sb = document.getElementById('viewSingersBtn');
   const cb = document.getElementById('viewCatsBtn');
-  if (sb) sb.classList.toggle('disabled', !hasSingers || inEditMode || inFilter);
-  if (cb) cb.classList.toggle('disabled', !hasExpandedSinger || inEditMode || inFilter);
+  if (sb) sb.classList.toggle('disabled', !hasSingers || inEditMode);
+  if (cb) cb.classList.toggle('disabled', !hasExpandedSinger || inEditMode);
 
   // All › button: enabled if any singer or cat exists and not in edit mode
   const hasCats = document.querySelectorAll('.grid').length > 0;
   const hasAny = hasSingers || hasCats;
   const ab = document.getElementById('viewAllBtn');
-  if (ab) ab.classList.toggle('disabled', !hasAny || inEditMode || inFilter);
+  if (ab) ab.classList.toggle('disabled', !hasAny || inEditMode);
 
   // All → Expand: active if any singer or cat grid is collapsed
   const anyCollapsed = document.querySelectorAll('.singer-body.collapsed, .grid.collapsed').length > 0;
@@ -1573,8 +1546,8 @@ function updateViewMenuState() {
   const anyExpanded  = document.querySelectorAll('.singer-body:not(.collapsed), .grid:not(.collapsed)').length > 0;
   const aeb = document.getElementById('viewAllExpandBtn');
   const acb = document.getElementById('viewAllCollapseBtn');
-  if (aeb) aeb.classList.toggle('disabled', !anyCollapsed || inEditMode || inFilter);
-  if (acb) acb.classList.toggle('disabled', !anyExpanded  || inEditMode || inFilter);
+  if (aeb) aeb.classList.toggle('disabled', !anyCollapsed || inEditMode);
+  if (acb) acb.classList.toggle('disabled', !anyExpanded  || inEditMode);
 }
 
 function viewExpandAll() {
@@ -1631,9 +1604,6 @@ function showPencilMenu(e, type, si, ci, soi) {
   document.getElementById('pmDelete').textContent   = '🗑️ Delete ' + label;
   document.getElementById('pmAddAbove').textContent = '＋ Add ' + label + ' ' + aboveLabel;
   document.getElementById('pmAddBelow').textContent = '＋ Add ' + label + ' ' + belowLabel;
-  // L04b: Add items dim during filter (still tappable — the gate nudges on tap)
-  document.getElementById('pmAddAbove').classList.toggle('disabled', filterActive());
-  document.getElementById('pmAddBelow').classList.toggle('disabled', filterActive());
   document.getElementById('pmEditArtistUrl').style.display = type === 'song' ? '' : 'none';
   const menu = document.getElementById('pencilMenu');
   menu.classList.add('open');
@@ -1781,10 +1751,6 @@ document.getElementById('pmEditArtistUrl').onclick = function() {
 };
 
 function promptInlineAdd(type, si, ci, soi, direction) {
-  // Filter-mode lockdown (L04b): structural adds fight the re-filter tail (a new
-  // empty singer/cat is instantly a non-match — collapsed shell around the cascade
-  // input). Menu items are dimmed-but-tappable so the block explains itself here.
-  if (filterActive()) { filterNudge(); return; }
   const insertIdx = direction === 'above'
     ? (type === 'singer' ? si : type === 'cat' ? ci : soi)
     : (type === 'singer' ? si + 1 : type === 'cat' ? ci + 1 : soi + 1);
@@ -1837,24 +1803,21 @@ function promptInlineAdd(type, si, ci, soi, direction) {
       const node = { _id: uid(), open: true, name, cats: [] };
       currentSingers.splice(insertIdx, 0, node);
       buildDOM(currentSingers);
-      // cascade: prompt cats inside the new singer, then loop singers.
-      // Direct calls, no setTimeout — buildDOM is synchronous, and iOS only
-      // raises the keyboard for focus() inside a user-gesture call stack.
-      cascadeCats(insertIdx, function() {
+      // cascade: prompt cats inside the new singer, then loop singers
+      setTimeout(() => cascadeCats(insertIdx, function() {
         // blank cat = prompt next singer below current insertIdx
-        promptInlineAdd('singer', insertIdx, -1, -1, 'below');
-      });
+        setTimeout(() => promptInlineAdd('singer', insertIdx, -1, -1, 'below'), 50);
+      }), 50);
 
     } else if (type === 'cat') {
       const node = { _id: uid(), open: true, name, songs: [] };
       currentSingers[si].cats.splice(insertIdx, 0, node);
       buildDOM(currentSingers);
       // cascade: prompt songs inside the new cat, then loop cats in same singer
-      // (direct calls — keeps the iOS gesture chain, see singer branch above)
-      cascadeSongs(si, insertIdx, function() {
+      setTimeout(() => cascadeSongs(si, insertIdx, function() {
         // blank song = prompt next cat below current insertIdx in same singer
-        cascadeCats(si, null, insertIdx);
-      });
+        setTimeout(() => cascadeCats(si, null, insertIdx), 50);
+      }), 50);
 
     } else {
       currentSingers[si].cats[ci].songs.splice(insertIdx, 0, { title: name, artist: '', url: '' });
@@ -1870,10 +1833,10 @@ function promptInlineAdd(type, si, ci, soi, direction) {
             markDirty();
             buildDOM(currentSingers);
           }
-          promptInlineAdd('song', si, ci, insertIdx, 'below');
+          setTimeout(() => promptInlineAdd('song', si, ci, insertIdx, 'below'), 50);
         });
       } else {
-        promptInlineAdd('song', si, ci, insertIdx, 'below');
+        setTimeout(() => promptInlineAdd('song', si, ci, insertIdx, 'below'), 50);
       }
     }
   };
@@ -1928,10 +1891,9 @@ function cascadeCats(singerIdx, onBlank, startCatIdx) {
     currentSingers[singerIdx].cats.splice(catIdx, 0, cat);
     buildDOM(currentSingers);
     // cascade to songs, then loop back to cats
-    // (direct calls — keeps the iOS gesture chain)
-    cascadeSongs(singerIdx, catIdx, function() {
-      cascadeCats(singerIdx, onBlank, catIdx);
-    });
+    setTimeout(() => cascadeSongs(singerIdx, catIdx, function() {
+      setTimeout(() => cascadeCats(singerIdx, onBlank, catIdx), 50);
+    }), 50);
   };
 }
 
@@ -1986,10 +1948,10 @@ function cascadeSongs(singerIdx, catIdx, onBlank) {
           markDirty();
           buildDOM(currentSingers);
         }
-        cascadeSongs(singerIdx, catIdx, onBlank);
+        setTimeout(() => cascadeSongs(singerIdx, catIdx, onBlank), 50);
       });
     } else {
-      cascadeSongs(singerIdx, catIdx, onBlank);
+      setTimeout(() => cascadeSongs(singerIdx, catIdx, onBlank), 50);
     }
   };
 }
@@ -2012,7 +1974,6 @@ function startInlineRename(spanId, type, si, ci) {
     span.textContent = val;
     if (type === 'singer') currentSingers[si].name = val;
     else if (type === 'cat') currentSingers[si].cats[ci].name = val;
-    if (val !== old) saveCurrentState();   // in-place edit — no buildDOM, persist here
     updateViewMenuState();
   };
   input.onblur = commit;
@@ -2044,17 +2005,11 @@ function startInlineSongRename(si, ci, soi) {
     const val = input.value.trim() || old;
     if (val !== old) markDirty();
     titleEl.textContent = val;
-    card.dataset.title = val.toLowerCase();   // keep the filter index current (B2)
     if (currentSingers[si] && currentSingers[si].cats[ci]) {
       const s = currentSingers[si].cats[ci].songs[soi];
       if (typeof s === 'string') currentSingers[si].cats[ci].songs[soi] = { title: val, artist: '', url: '' };
       else s.title = val;
     }
-    if (val !== old) saveCurrentState();   // in-place edit — no buildDOM, persist here
-    // B5: in-place rename skips buildDOM's re-filter tail — re-apply here so a
-    // rename to a non-match vanishes (and to a match appears) immediately
-    const fq = document.getElementById('searchInput').value;
-    if (fq.trim()) filterSongs(fq);
     updateViewMenuState();
     card.onclick = function(ev) {
       if (ev.target.closest('.edit-btn') || ev.target.closest('.song-meta-icon')) return;
@@ -2064,9 +2019,8 @@ function startInlineSongRename(si, ci, soi) {
       saveState();
       const songObj = currentSingers[si]?.cats[ci]?.songs[soi];
       const u = (typeof songObj === 'object') ? songObj.url : '';
-      const artist = (typeof songObj === 'object' && songObj.artist) ? ' ' + songObj.artist : '';
       if (u) window.location.href = u;
-      else navigateSearch(val + artist);   // title + artist, matching makeCard (B2)
+      else navigateSearch(val);
     };
   };
   input.onblur = commit;
@@ -2077,25 +2031,128 @@ function startInlineSongRename(si, ci, soi) {
   };
 }
 
+// ---- INLINE EDIT ----
+function startEdit(e, spanId, type, si, ci) {
+  e.preventDefault();
+  e.stopPropagation();
+  const span = document.getElementById(spanId);
+  if (!span || span.querySelector('input')) return;
+  const btn = e.currentTarget;
+  const oldName = span.textContent.trim();
+  span.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'edit-input';
+  input.type = 'text';
+  input.value = oldName;
+  span.appendChild(input);
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  updateViewMenuState();
+  // Switch pencil to trash
+  btn.textContent = '🗑️';
+  btn.title = type === 'singer' ? 'Delete singer' : 'Delete category';
+  let deleting = false;
+  btn.onmousedown = function(ev) { ev.preventDefault(); deleting = true; };
+  btn.onclick = function(ev) {
+    ev.preventDefault(); ev.stopPropagation();
+    deleting = true;
+    input.onblur = null; // prevent commit
+    if (type === 'singer') currentSingers.splice(si, 1);
+    else if (type === 'cat') currentSingers[si].cats.splice(ci, 1);
+    buildDOM(currentSingers);
+  };
+  const restore = () => {
+    btn.textContent = '✏️';
+    btn.onmousedown = null;
+    btn.title = type === 'singer' ? 'Rename singer' : 'Rename category';
+    btn.onclick = function(ev) { startEdit(ev, spanId, type, si, ci); };
+  };
+  const commit = () => {
+    if (deleting) return;
+    const newName = input.value.trim() || oldName;
+    span.textContent = newName;
+    if (type === 'singer') currentSingers[si].name = newName;
+    if (type === 'cat') currentSingers[si].cats[ci].name = newName;
+    restore();
+    updateViewMenuState();
+  };
+  input.onblur = commit;
+  input.onkeydown = (ev) => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') { input.blur(); }
+    if (ev.key === 'Escape') { input.value = oldName; span.textContent = oldName; restore(); }
+  };
+}
+
+function startEditSong(e, card, titleEl, si, ci, soi) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (titleEl.querySelector('input')) return;
+  const btn = e.currentTarget;
+  const oldTitle = titleEl.textContent.trim();
+  titleEl.textContent = '';
+  const input = document.createElement('input');
+  input.className = 'edit-input';
+  input.type = 'text';
+  input.value = oldTitle;
+  titleEl.appendChild(input);
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  updateViewMenuState();
+  // Switch pencil to trash
+  btn.textContent = '🗑️';
+  btn.title = 'Delete song';
+  let deleting = false;
+  btn.onmousedown = function(ev) { ev.preventDefault(); deleting = true; };
+  btn.onclick = function(ev) {
+    ev.preventDefault(); ev.stopPropagation();
+    deleting = true;
+    input.onblur = null;
+    if (currentSingers[si] && currentSingers[si].cats[ci]) {
+      currentSingers[si].cats[ci].songs.splice(soi, 1);
+    }
+    buildDOM(currentSingers);
+  };
+  const restore = () => {
+    btn.textContent = '✏️';
+    btn.onmousedown = null;
+    btn.title = 'Rename song';
+    btn.onclick = function(ev) { startEditSong(ev, card, titleEl, si, ci, soi); };
+  };
+  const commit = () => {
+    if (deleting) return;
+    const newTitle = input.value.trim() || oldTitle;
+    titleEl.textContent = newTitle;
+    card.dataset.title = newTitle.toLowerCase();
+    if (currentSingers[si] && currentSingers[si].cats[ci]) {
+      const s = currentSingers[si].cats[ci].songs[soi];
+      if (typeof s === 'string') currentSingers[si].cats[ci].songs[soi] = { title: newTitle, artist: '', url: '' };
+      else s.title = newTitle;
+    }
+    card.onclick = function(ev) {
+      if (ev.target.closest('.edit-btn') || ev.target.closest('.song-meta-icon') || ev.target.closest('.edit-input')) return;
+      ev.preventDefault();
+      const c = document.getElementById('main-container');
+      if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
+      saveState();
+      const songObj = currentSingers[si]?.cats[ci]?.songs[soi];
+      const u = (typeof songObj === 'object') ? songObj.url : '';
+      if (u) window.location.href = u;
+      else navigateSearch(newTitle);
+    };
+    restore();
+    updateViewMenuState();
+  };
+  input.onblur = commit;
+  input.onkeydown = (ev) => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter') { input.blur(); }
+    if (ev.key === 'Escape') { input.value = oldTitle; titleEl.textContent = oldTitle; restore(); }
+  };
+}
+
 // ---- COLLAPSE STATE SNAPSHOT (for filter) ----
 let collapseSnapshot = null;
-// Filter-mode lockdown (L04b): while a filter is active the filter owns the view.
-// collapseSnapshot is the single source of truth for "filter active" — set on the
-// first non-empty filter, re-taken by the B5 rebuild tail, nulled on clear/close.
-function filterActive() { return collapseSnapshot !== null; }
-// Feedback for a blocked action: shake the filter box (re-triggerable), vibrate
-// where supported (no-op on iOS — accepted platform limit), and focus-return on
-// DESKTOP only — on touch, raising the iOS keyboard would be worse than the block.
-let _lastTouchTs = 0;
-window.addEventListener('touchstart', () => { _lastTouchTs = Date.now(); }, { passive: true, capture: true });
-function filterNudge() {
-  const wrap = document.getElementById('searchWrap');
-  wrap.classList.remove('nudge');
-  void wrap.offsetWidth;   // restart the CSS animation
-  wrap.classList.add('nudge');
-  if (navigator.vibrate) navigator.vibrate(40);
-  if (Date.now() - _lastTouchTs > 800) document.getElementById('searchInput').focus();
-}
 let currentSingers = [];
 
 // ── Node identity (R01V02L02 — Stage 1 of the SessionState rework) ──────────
@@ -2168,16 +2225,11 @@ function restoreSnapshot(snapshot) {
 
 // ---- FILTER ----
 function filterSongs(query) {
-  const qDisplay = query.trim();   // as-typed, for the no-matches line (v3)
   query = query.toLowerCase().trim();
   document.getElementById('clearSearch').classList.toggle('visible', query.length > 0);
-  document.body.classList.toggle('filter-mode', query.length > 0);   // prominence + dimming (L04b)
 
   if (query.length === 0) {
     document.querySelectorAll('.song-card').forEach(c => c.classList.remove('hidden'));
-    document.querySelectorAll('.filter-hidden').forEach(el => el.classList.remove('filter-hidden'));   // v3
-    const nmOld = document.getElementById('noMatchesLine');
-    if (nmOld) nmOld.remove();
     if (collapseSnapshot) {
       restoreSnapshot(collapseSnapshot);
       collapseSnapshot = null;
@@ -2198,7 +2250,6 @@ function filterSongs(query) {
     body.classList.toggle('collapsed', !hasMatch);
     header.classList.toggle('collapsed', !hasMatch);
     header.querySelector('.singer-hide-show').textContent = hasMatch ? 'Hide' : 'Show';
-    body.closest('.singer-block').classList.toggle('filter-hidden', !hasMatch);   // v3: gone, not collapsed
   });
 
   document.querySelectorAll('.grid').forEach(grid => {
@@ -2207,23 +2258,7 @@ function filterSongs(query) {
     grid.classList.toggle('collapsed', !hasMatch);
     header.classList.toggle('collapsed', !hasMatch);
     header.querySelector('.hide-show').textContent = hasMatch ? 'Hide' : 'Show';
-    grid.closest('.section').classList.toggle('filter-hidden', !hasMatch);   // v3
   });
-
-  // v3: zero matches must never read as a broken blank screen
-  const anyMatch = document.querySelectorAll('.song-card:not(.hidden)').length > 0;
-  let nm = document.getElementById('noMatchesLine');
-  if (!anyMatch) {
-    if (!nm) {
-      nm = document.createElement('div');
-      nm.id = 'noMatchesLine';
-      nm.className = 'no-session';
-      document.getElementById('main-container').appendChild(nm);
-    }
-    nm.textContent = 'No matches for “' + qDisplay + '”';
-  } else if (nm) {
-    nm.remove();
-  }
 }
 
 function clearFilter() {
@@ -2245,17 +2280,11 @@ function parseSession(text) {
   let lineNum = 0;
 
   const rows = text.split('\n').map(line => {
-    // Simple CSV split respecting quoted fields; "" inside quotes = literal "
-    // (indexed loop — the escape needs one-char lookahead, B4)
+    // Simple CSV split respecting quoted fields
     const cols = [];
-    const chars = line.replace(/\r/, '');
     let cur = '', inQ = false;
-    for (let i = 0; i < chars.length; i++) {
-      const c = chars[i];
-      if (c === '"') {
-        if (inQ && chars[i + 1] === '"') { cur += '"'; i++; }
-        else inQ = !inQ;
-      }
+    for (let c of line.replace(/\r/, '')) {
+      if (c === '"') { inQ = !inQ; }
       else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
       else { cur += c; }
     }
@@ -2317,7 +2346,7 @@ function flushHistory() {
 }
 function flushSession() {
   ['karaokeSession','karaokeState','karaokeNodeSeq','karaokeName','karaokeFilter',
-   'karaokeYT','karaokeScroll','karaokeCsvErrors']
+   'karaokeYT','karaokeScroll']
     .forEach(k => sessionStorage.removeItem(k));
   nodeSeq = 1;   // fresh session = fresh id space
   flushHistory();
@@ -2335,8 +2364,6 @@ function buildDOM(singers) {
   knEvent('KN_ui_activity');   // generic sign-of-life on any DOM redraw — unfiltered for now, segment in GA later
   currentSingers = singers;
   ensureIds(singers);   // mint _id / init open for any new or rehydrated nodes
-  saveCurrentState();   // persist every mutation that rebuilds — placed above the
-                        // empty-tree early return so delete-last-singer clears too
   const container = document.getElementById('main-container');
   container.innerHTML = '';
   collapseSnapshot = null;
@@ -2417,12 +2444,6 @@ function buildDOM(singers) {
   updateNewEditLabel();
   updateFooterTip();
   updateCsvErrorWarn();
-  // B5 (option a): an edit-rebuild renders everything unfiltered while the filter
-  // field still holds text — re-apply so the view matches the field. filterSongs
-  // takes a FRESH collapseSnapshot of the rebuilt (model-truth) state: clearing
-  // the filter after an edit restores model open-state, not the pre-filter view.
-  const fq = document.getElementById('searchInput').value;
-  if (fq.trim()) filterSongs(fq);
 }
 
 // ---- LOAD SESSION ----
@@ -2692,10 +2713,6 @@ function ribbonClose() {
     document.getElementById('searchInput').value = '';
     document.getElementById('searchInput').disabled = true;
     document.getElementById('clearSearch').classList.remove('visible');
-    // L04b: Close renders the welcome directly (no buildDOM/filterSongs pass) —
-    // drop filter mode explicitly or its class + snapshot would outlive the session
-    document.body.classList.remove('filter-mode');
-    collapseSnapshot = null;
     document.getElementById('ytInput').value = '';
     document.getElementById('clearYT').classList.remove('visible');
     document.getElementById('ytGoBtn').classList.remove('visible');
@@ -2713,7 +2730,6 @@ function ribbonClose() {
     markClean();
     updateNewEditLabel();
     updateFooterTip();
-    updateCsvErrorWarn();   // clear the ⚠️ from the closed session (B3)
   });
 }
 let appExiting = false;   // suppresses the pagehide exit event when Exit already fired one
@@ -2857,6 +2873,11 @@ function renderWelcome() {
   return panel;
 }
 
+// ---- LOAD SESSION ----
+function loadSession() {
+  document.getElementById('fileInput').click();
+}
+
 // Unified file ingest — the one load/parse/merge/render path for Open & Add.
 //   clear=true  → Open (>)  : discard the current session, then load the file(s)
 //   clear=false → Add  (>>) : append the file(s)' singers to the current session
@@ -2900,7 +2921,6 @@ function loadFiles(input, clear) {
 
 // ---- SINGER TOGGLE ----
 function toggleSinger(singerId) {
-  if (filterActive()) { filterNudge(); return; }   // filter owns the view (L04b)
   const body = document.getElementById('body-' + singerId);
   if (!body) return;
   const header = body.previousElementSibling;
@@ -2915,7 +2935,6 @@ function toggleSinger(singerId) {
 
 // ---- SECTION TOGGLE ----
 function toggleSection(si, ci) {
-  if (filterActive()) { filterNudge(); return; }   // filter owns the view (L04b)
   const grid = document.getElementById(getGridId(si, ci));
   if (!grid) return;
   const header = grid.previousElementSibling;
@@ -2924,7 +2943,6 @@ function toggleSection(si, ci) {
   header.querySelector('.hide-show').textContent = isCollapsed ? 'Show' : 'Hide';
   if (currentSingers[si] && currentSingers[si].cats[ci]) currentSingers[si].cats[ci].open = !isCollapsed;
   saveCurrentState();
-  updateViewMenuState();   // parity with toggleSinger (L04b Part A)
 }
 
 // ---- DARK/LIGHT TOGGLE ----
