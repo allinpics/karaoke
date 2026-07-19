@@ -6,5 +6,6 @@ Disallow: /r01v01l09d/
 Disallow: /r01v01l10a/
 Disallow: /r01v02l03/
 Disallow: /r01v02l03a/
+Disallow: /r01v02l04b/
 
 Sitemap: https://allinpics.com/sitemap.xml

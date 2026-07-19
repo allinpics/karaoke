@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V02L05 (1784487090 EDT-0400) -->
+<!-- Karaoke Night | R01V02L04b (1784334171 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
@@ -911,7 +911,6 @@
       <button class="ribbon-item" onclick="ribbonOpen()">Open</button>
       <button class="ribbon-item" id="ribbonNewBtn" onclick="ribbonNew()">New</button>
       <button class="ribbon-item disabled" id="ribbonAddBtn" onclick="ribbonAdd()">Add</button>
-      <button class="ribbon-item disabled" id="ribbonAddSearchesBtn" onclick="ribbonAddSearches()">Add Searches</button>
       <button class="ribbon-item disabled" id="ribbonReopenBtn" onclick="ribbonReopen()">Reopen</button>
       <button class="ribbon-item disabled" id="ribbonSaveAsBtn" onclick="ribbonSaveAs()">Save As...</button>
       <button class="ribbon-item disabled" id="ribbonCloseBtn" onclick="ribbonClose()">Close</button>
@@ -1106,7 +1105,7 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V02L05 (1784487090 EDT-0400)';
+const BUILD = 'R01V02L04b (1784334171 EDT-0400)';
 
 // ---- GA4 EVENT HELPER ----
 // All custom events prefixed KN_ to avoid colliding with GA4's own reserved/
@@ -1200,9 +1199,6 @@ function toggleRibbon(btnId, ddId) {
     // View enablement recomputed at menu-open — always live-DOM truth at the
     // moment the menu becomes visible; kills the staleness class (L04b Part A)
     if (ddId === 'ddView') updateViewMenuState();
-    // Add Searches enablement recomputed at Session-menu open — same choke-point
-    // pattern; live truth the moment the menu becomes visible (L05)
-    if (ddId === 'ddSession') updateAddSearchesState();
     btn.classList.add('open');
     document.getElementById(ddId).classList.add('open');
   }
@@ -1281,8 +1277,6 @@ function goYT() {
   if (val.trim()) {
     knEvent('KN_control_change', { control: 'find' });
     addSearchHistory('karaokeYTHistory', val.trim());
-    addSearchLog(val.trim());   // uncapped save-source log (L05) — dropdown stays capped at 10
-    updateAddSearchesState();
     sessionStorage.setItem('karaokeYT', val);
     navigateSearch(val);
   }
@@ -1317,34 +1311,6 @@ function addSearchHistory(key, val) {
   let h = JSON.parse(sessionStorage.getItem(key) || '[]');
   h = [val, ...h.filter(v => v !== val)].slice(0, 10);
   sessionStorage.setItem(key, JSON.stringify(h));
-}
-// ---- SEARCH LOG (L05 — Save Ad Hoc Searches) ----
-// karaokeYTSearchLog: UNCAPPED, deduped-keep-first, chronological log of every
-// Find submit — the save source; nothing is ever evicted out of saveability.
-// The ▾ dropdown keeps reading capped karaokeYTHistory, untouched.
-// karaokeSearchesAdded: queries already harvested into the session this
-// browser-session. Both keys ride flushHistory (same ephemeral lifecycle as recents).
-function addSearchLog(val) {
-  val = val.trim();
-  if (!val) return;
-  const log = JSON.parse(sessionStorage.getItem('karaokeYTSearchLog') || '[]');
-  if (!log.includes(val)) {
-    log.push(val);
-    sessionStorage.setItem('karaokeYTSearchLog', JSON.stringify(log));
-  }
-}
-function pendingSearches() {
-  const log = JSON.parse(sessionStorage.getItem('karaokeYTSearchLog') || '[]');
-  const added = new Set(JSON.parse(sessionStorage.getItem('karaokeSearchesAdded') || '[]'));
-  return log.filter(v => !added.has(v));
-}
-// Enablement — the L04b menu-open pattern: recomputed at ddSession open (choke
-// point), after goYT, after apply, and in buildDOM's enable/disable block.
-function updateAddSearchesState() {
-  const btn = document.getElementById('ribbonAddSearchesBtn');
-  if (!btn) return;
-  const enabled = currentSingers.length > 0 && pendingSearches().length > 0;
-  btn.classList.toggle('disabled', !enabled);
 }
 function showSearchHistory(historyId, storageKey, onPick) {
   const h = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
@@ -2347,8 +2313,7 @@ function markClean() { sessionDirty = false; }
 // Called by both flushSession() and init() (fresh, non-back nav), so a new history
 // key only needs adding in one place to stay consistent across both paths.
 function flushHistory() {
-  ['karaokeFilterHistory','karaokeYTHistory','karaokeYTSearchLog','karaokeSearchesAdded']
-    .forEach(k => sessionStorage.removeItem(k));
+  ['karaokeFilterHistory','karaokeYTHistory'].forEach(k => sessionStorage.removeItem(k));
 }
 function flushSession() {
   ['karaokeSession','karaokeState','karaokeNodeSeq','karaokeName','karaokeFilter',
@@ -2392,7 +2357,6 @@ function buildDOM(singers) {
   document.getElementById('ribbonSaveAsBtn').classList.remove('disabled');
   ['viewSingersBtn','viewCatsBtn','viewAllBtn']
     .forEach(id => document.getElementById(id).classList.remove('disabled'));
-  updateAddSearchesState();   // session exists — enablement now rides log ∖ added (L05)
 
   singers.forEach((singer, si) => {
     const singerId = 'singer' + si;
@@ -2875,52 +2839,6 @@ function ribbonAdd() {
   if (document.getElementById('ribbonAddBtn').classList.contains('disabled')) return;
   closeAllRibbons();
   document.getElementById('fileInputAdd').click();
-}
-// L05: on explicit request, append this browser-session's Find searches to the
-// session as ordinary songs under Ad Hoc → [yyyy-mm-dd]. Nothing is saved
-// unless asked; recents stay ephemeral. Saved cards have no URL, so they replay
-// via navigateSearch in whatever mode is active at tap time.
-function ribbonAddSearches() {
-  if (document.getElementById('ribbonAddSearchesBtn').classList.contains('disabled')) return;
-  closeAllRibbons();
-  knEvent('KN_menu_action', { menu: 'session', action: 'add_searches' });
-  const pending = pendingSearches();   // chronological (log order)
-  if (!pending.length) return;
-  // Find-or-create Ad Hoc singer + [date] cat — created nodes default collapsed;
-  // an existing node's open state is respected untouched (appends never yank the view)
-  let singer = currentSingers.find(s => s.name === 'Ad Hoc');
-  if (!singer) {
-    singer = { _id: uid(), open: false, name: 'Ad Hoc', cats: [] };
-    currentSingers.push(singer);
-  }
-  const d = new Date();
-  const dateName = '[' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-                 + '-' + String(d.getDate()).padStart(2, '0') + ']';
-  let cat = singer.cats.find(c => c.name === dateName);
-  if (!cat) {
-    cat = { _id: uid(), open: false, name: dateName, songs: [] };
-    singer.cats.push(cat);
-  }
-  // De-dupe against the cat's existing titles — covers same-day re-adds across
-  // reloads that the session-scoped added set can't see
-  const have = new Set(cat.songs.map(s => (typeof s === 'string' ? s : s.title)));
-  let appended = 0;
-  pending.forEach(q => {
-    if (!have.has(q)) {
-      cat.songs.push({ title: q, artist: '', url: '' });
-      have.add(q);
-      appended++;
-    }
-  });
-  if (appended) {
-    markDirty();
-    buildDOM(currentSingers);   // persistence (B1) + active-filter re-apply (B5) ride the choke point
-  }
-  // Zero appends (all dupes): no dirty, no rebuild — but the queries are still
-  // harvested either way (already in the session), so the item disables.
-  const added = JSON.parse(sessionStorage.getItem('karaokeSearchesAdded') || '[]');
-  sessionStorage.setItem('karaokeSearchesAdded', JSON.stringify([...new Set([...added, ...pending])]));
-  updateAddSearchesState();
 }
 // Render welcome panel — single source of truth for welcome UI
 function renderWelcome() {
