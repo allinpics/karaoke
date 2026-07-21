@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V02L05a (1784657719 EDT-0400) -->
+<!-- Karaoke Night | R01V02L05 (1784487090 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
@@ -421,7 +421,6 @@
 
   /* --- scrolling content area --- */
   .container {
-    position: relative;   /* onboarding narrative anchors here (L05a) */
     flex: 1;
     overflow-y: auto;
     padding: calc(var(--base) * 0.6) calc(var(--base) * 1) calc(var(--base) * 0.6);
@@ -758,59 +757,12 @@
     font-size: 1.8rem;
     color: var(--accent);
     letter-spacing: 0.06em;
-    margin-bottom: calc(var(--base) * 0.5);
+    margin-bottom: calc(var(--base) * 1);
   }
   .welcome-intro {
     color: var(--muted);
     font-size: 0.95rem;
     margin-bottom: calc(var(--base) * 1.5);
-  }
-  .welcome-quickstart-label {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-    margin-bottom: calc(var(--base) * 0.35);
-  }
-  .welcome-quickstart {
-    display: flex;
-    gap: calc(var(--base) * 0.5);
-    align-items: center;
-  }
-  /* same look/feel as the Find field (.input-wrap input) */
-  .welcome-quickstart input {
-    flex: 1;
-    min-width: 0;
-    background: var(--card);
-    border: 2px solid var(--border);
-    color: var(--text);
-    padding: calc(var(--base) * 0.3) calc(var(--base) * 0.6);
-    border-radius: 6px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .welcome-quickstart input:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
-  .welcome-quickstart input::placeholder { color: var(--muted); font-weight: 500; }
-  /* same look/feel as the splash "Let's Sing!" .cta button, scaled to fit inline */
-  .welcome-quickstart button {
-    padding: calc(var(--base) * 0.4) calc(var(--base) * 1.1);
-    background: var(--accent);
-    color: var(--bg);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 0.08em;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: opacity 0.2s, transform 0.15s;
-  }
-  .welcome-quickstart button:hover:not(:disabled) { opacity: 0.88; transform: translateY(-2px); }
-  .welcome-quickstart button:disabled {
-    opacity: 0.4;
-    cursor: default;
   }
   .welcome-item {
     text-align: left;
@@ -900,109 +852,6 @@
     font-weight: 700;
   }
 
-  /* --- auto-add toggle (L05a) — small, embedded in the Find field next to ▼,
-       same treatment as .hist-btn/.clear-btn (absolute, borderless, color-state) --- */
-  #ytInput { padding-left: calc(var(--base) * 2.4); }
-  .auto-add-toggle {
-    position: absolute;
-    left: 24px;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 1;
-  }
-  .auto-add-toggle:hover { color: var(--accent); }
-  .auto-add-toggle.on { color: var(--accent); }
-
-  /* --- Quick Start onboarding (L05a) — thought bubbles + narrative, brand-new
-       zero-prep users only; shown while karaokeOnboarding + song count < 3 --- */
-  .thought-bubble {
-    position: absolute;
-    z-index: 50;   /* .ribbon has its own position:relative+z-index:100 stacking context,
-                      so its dropdown's internal 200 is capped at 100 from outside — must
-                      stay below THAT, not below the dropdown's own (context-local) value */
-    max-width: 150px;
-    background: var(--card);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    padding: 0.2rem 0.4rem;
-    font-size: 0.78rem;
-    color: var(--text);
-    line-height: 1.25;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    cursor: pointer;
-  }
-  /* pointer — same two-layer border-triangle technique as .search-history's arrow */
-  .thought-bubble::before, .thought-bubble::after {
-    content: '';
-    position: absolute;
-    left: 16px;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-  }
-  .tb-down::before { top: 100%; border-top: 8px solid var(--accent); }
-  .tb-down::after  { top: calc(100% - 1px); left: 17px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 7px solid var(--card); }
-  .tb-up::before { bottom: 100%; border-bottom: 8px solid var(--accent); }
-  .tb-up::after  { bottom: calc(100% - 1px); left: 17px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 7px solid var(--card); }
-  #tbFind { bottom: calc(100% + 10px); left: 0; }
-  #tbMode { top: calc(100% + 8px); right: 0; }
-  #tbMode::before, #tbMode::after { left: auto; right: 16px; }
-  #tbMode::after { right: 17px; }
-  /* #tbEdit's top/left are set inline in JS (positionTbEdit) — positioned
-     relative to #main-container, just below the bottom-most visible pencil,
-     so it isn't clipped by .grid/.singer-body's overflow:hidden (only the
-     anchor's own box would be). Anchor is the pencil itself now, so the
-     pointer needs only a small inset to land right on it. */
-  #tbEdit::before, #tbEdit::after { left: 4px; }
-  #tbEdit::after { left: 5px; }
-  /* Floating dialog — same visual language as .modal-box/.modal-body (the dirty-
-     warning dialog). Positioned dynamically in JS (updateOnboardingUI): 2x the
-     pencil bubble's height below the last song's bubble, so it tracks the list
-     as it grows and scrolls with #main-container (it's a child of it). */
-  #onboardingNarrative {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 320px;
-    z-index: 50;   /* see .thought-bubble — must clear .ribbon's own stacking-context z-index (100), not its dropdown's local 200 */
-    text-align: center;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-    padding: 18px 24px;
-    color: var(--muted);
-    font-size: 0.88rem;
-    line-height: 1.6;
-  }
-  #onboardingNarrative .ob-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    color: var(--accent);
-    letter-spacing: 0.06em;
-    margin-bottom: 8px;
-  }
-  #onboardingNarrative .ob-dismiss {
-    display: block;
-    margin: 14px auto 0;
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: 6px;
-    padding: 8px 28px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  #onboardingNarrative .ob-dismiss:hover { opacity: 0.85; }
-
   /* --- long-press tooltip (DEFERRED — see initLongPressTooltip for details) --- */
   #lp-tooltip {
     position: fixed;
@@ -1045,14 +894,12 @@
   </div>
   <div class="input-wrap">
     <button class="hist-btn" id="ytHistBtn" onmousedown="event.preventDefault()" onclick="toggleYTHistory()" title="Recent searches">▼</button>
-    <button class="auto-add-toggle" id="autoAddToggle" onclick="toggleAutoAdd()" title="Auto-add searches to session">+</button>
     <input type="text" id="ytInput" placeholder="Find on YouTube..." onkeydown="if(event.key==='Enter') goYT()" oninput="toggleYTClear()" onfocus="hideHistory(); selectYTInput()" onblur="hideHistory()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <button class="yt-go-btn" id="ytGoBtn" onclick="goYT()" title="Search YouTube">▶</button>
     <button class="clear-btn" id="clearYT" onclick="clearYT()" title="Clear">✕</button>
     <div class="search-history" id="ytHistory"></div>
-    <div class="thought-bubble tb-down" id="tbFind" style="display:none" onclick="dismissOnboarding()">Adds more songs</div>
   </div>
-  <div style="display:inline-flex; align-items:center; position:relative"><button class="search-mode-btn active" id="btnMic" onclick="setSearchMode('karaoke')" title="Karaoke Mode">🎤</button><button class="search-mode-btn" id="btnNote" onclick="setSearchMode('music')" title="Music Video Mode">🎵</button><button class="search-mode-btn" id="btnYT" onclick="setSearchMode('youtube')" title="YouTube Search">▶</button><button class="search-mode-btn" id="btnWeb" onclick="setSearchMode('web')" title="Google Search"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:1.15rem;">G</span></button><div class="thought-bubble tb-up" id="tbMode" style="display:none" onclick="dismissOnboarding()">Change search modes</div></div>
+  <div style="display:inline-flex"><button class="search-mode-btn active" id="btnMic" onclick="setSearchMode('karaoke')" title="Karaoke Mode">🎤</button><button class="search-mode-btn" id="btnNote" onclick="setSearchMode('music')" title="Music Video Mode">🎵</button><button class="search-mode-btn" id="btnYT" onclick="setSearchMode('youtube')" title="YouTube Search">▶</button><button class="search-mode-btn" id="btnWeb" onclick="setSearchMode('web')" title="Google Search"><span style="font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:1.15rem;">G</span></button></div>
 </div>
 
 <!-- Tool ribbon — stub menus, functionality wired in r01v01l03 -->
@@ -1259,7 +1106,7 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V02L05a (1784657719 EDT-0400)';
+const BUILD = 'R01V02L05 (1784487090 EDT-0400)';
 
 // ---- GA4 EVENT HELPER ----
 // All custom events prefixed KN_ to avoid colliding with GA4's own reserved/
@@ -1435,7 +1282,6 @@ function goYT() {
     knEvent('KN_control_change', { control: 'find' });
     addSearchHistory('karaokeYTHistory', val.trim());
     addSearchLog(val.trim());   // uncapped save-source log (L05) — dropdown stays capped at 10
-    if (isAutoAddOn()) autoAddSearch(val.trim());   // L05a — zero-prep auto-harvest
     updateAddSearchesState();
     sessionStorage.setItem('karaokeYT', val);
     navigateSearch(val);
@@ -1492,89 +1338,6 @@ function pendingSearches() {
   const added = new Set(JSON.parse(sessionStorage.getItem('karaokeSearchesAdded') || '[]'));
   return log.filter(v => !added.has(v));
 }
-// Records a query as already-harvested (single-title version of ribbonAddSearches'
-// bulk merge) — shared by autoAddSearch and quickStartGo.
-function markSearchAdded(title) {
-  const added = JSON.parse(sessionStorage.getItem('karaokeSearchesAdded') || '[]');
-  if (!added.includes(title)) {
-    added.push(title);
-    sessionStorage.setItem('karaokeSearchesAdded', JSON.stringify(added));
-  }
-}
-
-// ---- QUICK START ONBOARDING (L05a) ----
-// karaokeOnboarding: set true only by quickStartGo(). Visible while the flag is
-// true AND total song count < 3 AND not dismissed. Single shared dismiss for all
-// 3 bubbles + the narrative (no per-bubble state). Rides flushHistory/flushSession
-// like karaokeAutoAdd.
-function totalSongCount() {
-  return currentSingers.reduce((n, s) => n + s.cats.reduce((m, c) => m + c.songs.length, 0), 0);
-}
-function dismissOnboarding() {
-  sessionStorage.removeItem('karaokeOnboarding');
-  ['tbFind', 'tbMode', 'tbEdit'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  const nar = document.getElementById('onboardingNarrative');
-  if (nar) nar.remove();   // fully removed, not just hidden — normal-flow element must not linger
-}
-// #tbEdit anchor — the bottom-most VISIBLE pencil in the DOM (skips any inside
-// a collapsed .grid/.singer-body), so it tracks live as the user collapses/
-// expands singers and cats. Structural only — display is set by the caller
-// (dismissOnboarding/updateOnboardingUI); called from buildDOM AND from
-// toggleSinger/toggleSection so a live collapse/expand repositions it too.
-function positionTbEdit() {
-  const container = document.getElementById('main-container');
-  if (!container) return;
-  const btns = container.querySelectorAll('.edit-btn');
-  let anchor = null;
-  for (let i = btns.length - 1; i >= 0; i--) {
-    if (!btns[i].closest('.singer-body.collapsed') && !btns[i].closest('.grid.collapsed')) { anchor = btns[i]; break; }
-  }
-  let tbEdit = document.getElementById('tbEdit');
-  if (!anchor) { if (tbEdit) tbEdit.remove(); return; }
-  if (!tbEdit) {
-    tbEdit = document.createElement('div');
-    tbEdit.className = 'thought-bubble tb-up';
-    tbEdit.id = 'tbEdit';
-    tbEdit.style.display = 'none';
-    tbEdit.textContent = 'Make edit';
-    tbEdit.onclick = dismissOnboarding;
-    container.appendChild(tbEdit);
-  }
-  const anchorRect = anchor.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-  tbEdit.style.left = (anchorRect.left - containerRect.left) + 'px';
-  tbEdit.style.top = (anchorRect.bottom - containerRect.top + container.scrollTop + 8) + 'px';
-}
-function updateOnboardingUI() {
-  const active = sessionStorage.getItem('karaokeOnboarding') === 'true' && totalSongCount() < 3;
-  if (!active) { dismissOnboarding(); return; }
-  positionTbEdit();
-  ['tbFind', 'tbMode', 'tbEdit'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = '';
-  });
-  const container = document.getElementById('main-container');
-  let nar = document.getElementById('onboardingNarrative');
-  if (!nar) {
-    nar = document.createElement('div');
-    nar.id = 'onboardingNarrative';
-    nar.innerHTML = '<div class="ob-title">Tip</div>'
-      + 'Tapping a song opens YouTube — tap Back to return to your Karaoke Night session.'
-      + '<button class="ob-dismiss" onclick="dismissOnboarding()">Dismiss</button>';
-    container.appendChild(nar);   // child of #main-container — scrolls with the list
-  }
-  // Float it 2x the pencil bubble's own height below the pencil bubble itself.
-  const tbEdit = document.getElementById('tbEdit');
-  if (tbEdit) {
-    const bubbleH = tbEdit.offsetHeight || 24;
-    const cardRect = tbEdit.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    nar.style.top = (cardRect.bottom - containerRect.top + container.scrollTop + 2 * bubbleH) + 'px';
-  }
-}
 // Enablement — the L04b menu-open pattern: recomputed at ddSession open (choke
 // point), after goYT, after apply, and in buildDOM's enable/disable block.
 function updateAddSearchesState() {
@@ -1582,97 +1345,6 @@ function updateAddSearchesState() {
   if (!btn) return;
   const enabled = currentSingers.length > 0 && pendingSearches().length > 0;
   btn.classList.toggle('disabled', !enabled);
-}
-
-// ---- ZERO-PREP ENTRY (L05a) ----
-// Find-or-create SINGER [AD HOC] singer + CATEGORY [yyyy-mm-dd] cat — shared by ribbonAddSearches,
-// auto-add, and Quick Start. Created nodes default collapsed; an existing node's
-// open state is respected untouched (appends never yank the view).
-// openOnCreate only affects nodes minted THIS call — an existing node's open
-// state is always respected untouched (find-or-create never yanks the view).
-function findOrCreateAdHocCat(openOnCreate) {
-  let singer = currentSingers.find(s => s.name === 'SINGER [AD HOC]');
-  if (!singer) {
-    singer = { _id: uid(), open: !!openOnCreate, name: 'SINGER [AD HOC]', cats: [] };
-    currentSingers.push(singer);
-  }
-  const d = new Date();
-  const dateName = 'CATEGORY [' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-                 + '-' + String(d.getDate()).padStart(2, '0') + ']';
-  let cat = singer.cats.find(c => c.name === dateName);
-  if (!cat) {
-    cat = { _id: uid(), open: !!openOnCreate, name: dateName, songs: [] };
-    singer.cats.push(cat);
-  }
-  return cat;
-}
-// Auto-add branch of goYT — same find-or-create + dedupe as ribbonAddSearches,
-// applied immediately to the one query just searched (no menu visit needed).
-// openOnCreate=true — zero-prep entry expands the new node so the user sees
-// their song land, instead of the from-menu default of collapsed.
-function autoAddSearch(title) {
-  const cat = findOrCreateAdHocCat(true);
-  const have = cat.songs.map(s => (typeof s === 'string' ? s : s.title));
-  if (!have.includes(title)) {
-    cat.songs.push({ title: title, artist: '', url: '' });
-    markDirty();
-    buildDOM(currentSingers);
-  }
-  markSearchAdded(title);
-  updateOnboardingUI();
-}
-// karaokeAutoAdd: sessionStorage bool, default OFF (unset = OFF). Rides flushHistory
-// (same ephemeral lifecycle as recents); survives back-nav so it stays on through a cast.
-function isAutoAddOn() {
-  return sessionStorage.getItem('karaokeAutoAdd') === 'true';
-}
-function syncAutoAddToggle() {
-  const btn = document.getElementById('autoAddToggle');
-  if (!btn) return;
-  const on = isAutoAddOn();
-  btn.classList.toggle('on', on);
-  btn.textContent = on ? '+' : '−';
-}
-function setAutoAdd(on) {
-  sessionStorage.setItem('karaokeAutoAdd', on ? 'true' : 'false');
-  syncAutoAddToggle();
-}
-function toggleAutoAdd() {
-  const next = !isAutoAddOn();
-  knEvent('KN_control_change', { control: 'auto_add', value: next ? 'on' : 'off' });
-  setAutoAdd(next);
-}
-// Quick Start — welcome-panel zero-prep entry: append the typed song directly,
-// no YouTube search fired, and arm auto-add for everything that follows.
-// setTimeout(0) — same iOS-safe deferral as selectYTInput; the element isn't
-// focusable until the append that put it in the DOM has actually painted.
-function focusQuickStart() {
-  setTimeout(() => { const el = document.getElementById('quickStartInput'); if (el) el.focus(); }, 0);
-}
-function updateQuickStartState() {
-  const input = document.getElementById('quickStartInput');
-  const btn = document.getElementById('quickStartBtn');
-  if (!input || !btn) return;
-  btn.disabled = !input.value.trim();
-}
-function quickStartGo() {
-  const input = document.getElementById('quickStartInput');
-  const title = input && input.value.trim();
-  if (!title) return;
-  knEvent('KN_menu_action', { menu: 'welcome', action: 'quick_start' });
-  const cat = findOrCreateAdHocCat(true);   // expand on entry (zero-prep)
-  cat.songs.push({ title: title, artist: '', url: '' });
-  markDirty();
-  // Quick Start bypasses goYT/Find entirely — mirror its bookkeeping so the
-  // typed song shows under the Find field's ▾ recents and doesn't later read
-  // as a false-pending item under Session → Add Searches.
-  addSearchHistory('karaokeYTHistory', title);
-  addSearchLog(title);
-  markSearchAdded(title);
-  setAutoAdd(true);
-  sessionStorage.setItem('karaokeOnboarding', 'true');   // Quick Start only — not Add Searches CTA / Session entries
-  buildDOM(currentSingers);
-  updateOnboardingUI();
 }
 function showSearchHistory(historyId, storageKey, onPick) {
   const h = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
@@ -2667,25 +2339,20 @@ function saveCurrentState() {
     sessionStorage.removeItem('karaokeNodeSeq');
   }
 }
-// karaokeDirty mirrors sessionDirty into sessionStorage (L05a fix) — sessionDirty
-// alone is in-memory only and resets to false on every page load, including the
-// back-nav reload that follows every auto-add search (navigateSearch always fires
-// right after). Without the mirror, a session made dirty by auto-add's first
-// search reports clean the moment YouTube sends the user back.
-function markDirty() { sessionDirty = true; sessionStorage.setItem('karaokeDirty', 'true'); }
-function markClean() { sessionDirty = false; sessionStorage.removeItem('karaokeDirty'); }
+function markDirty() { sessionDirty = true; }
+function markClean() { sessionDirty = false; }
 // Clear all persisted session state — used by every in-app exit point (Close, Exit)
 // so returning to player.html lands on the welcome screen, not the stale session.
 // A5: single source of truth for clearing recent-search history (user-pref keys).
 // Called by both flushSession() and init() (fresh, non-back nav), so a new history
 // key only needs adding in one place to stay consistent across both paths.
 function flushHistory() {
-  ['karaokeFilterHistory','karaokeYTHistory','karaokeYTSearchLog','karaokeSearchesAdded','karaokeAutoAdd','karaokeOnboarding']
+  ['karaokeFilterHistory','karaokeYTHistory','karaokeYTSearchLog','karaokeSearchesAdded']
     .forEach(k => sessionStorage.removeItem(k));
 }
 function flushSession() {
   ['karaokeSession','karaokeState','karaokeNodeSeq','karaokeName','karaokeFilter',
-   'karaokeYT','karaokeScroll','karaokeCsvErrors','karaokeDirty']
+   'karaokeYT','karaokeScroll','karaokeCsvErrors']
     .forEach(k => sessionStorage.removeItem(k));
   nodeSeq = 1;   // fresh session = fresh id space
   flushHistory();
@@ -2712,8 +2379,6 @@ function buildDOM(singers) {
   if (!singers.length) {
     container.appendChild(renderWelcome());
     document.getElementById('searchInput').disabled = true;
-    setAutoAdd(true);   // welcome screen always shows auto-add ON (L05a)
-    focusQuickStart();
     return;
   }
 
@@ -2794,7 +2459,6 @@ function buildDOM(singers) {
   // the filter after an edit restores model open-state, not the pre-filter view.
   const fq = document.getElementById('searchInput').value;
   if (fq.trim()) filterSongs(fq);
-  updateOnboardingUI();
 }
 
 // ---- LOAD SESSION ----
@@ -2815,7 +2479,6 @@ function sampleLoad() {
         if (errors.length) sessionStorage.setItem('karaokeCsvErrors', JSON.stringify(errors));
         else sessionStorage.removeItem('karaokeCsvErrors');
         buildDOM(singers);
-        setAutoAdd(false);   // Open Sample enters the app — auto-add off (L05a)
         markClean();
       })
       .catch(() => alert('Could not load sample.csv — make sure cfg/sample.csv exists in the app folder.'));
@@ -2853,7 +2516,6 @@ function ribbonNew() {
   if (document.getElementById('ribbonNewBtn').classList.contains('disabled')) return;
   closeAllRibbons();
   knEvent('KN_menu_action', { menu: 'session', action: 'new' });
-  setAutoAdd(false);   // New enters the app — auto-add off (L05a)
   document.getElementById('newSingerInput').value = '';
   document.getElementById('newCatInput').value = '';
   document.getElementById('newSongInput').value = '';
@@ -3063,8 +2725,6 @@ function ribbonClose() {
     const container = document.getElementById('main-container');
     container.innerHTML = '';
     container.appendChild(renderWelcome());
-    setAutoAdd(true);   // welcome screen always shows auto-add ON (L05a)
-    focusQuickStart();
     document.getElementById('searchInput').value = '';
     document.getElementById('searchInput').disabled = true;
     document.getElementById('clearSearch').classList.remove('visible');
@@ -3217,7 +2877,7 @@ function ribbonAdd() {
   document.getElementById('fileInputAdd').click();
 }
 // L05: on explicit request, append this browser-session's Find searches to the
-// session as ordinary songs under SINGER [AD HOC] → CATEGORY [yyyy-mm-dd]. Nothing is saved
+// session as ordinary songs under Ad Hoc → [yyyy-mm-dd]. Nothing is saved
 // unless asked; recents stay ephemeral. Saved cards have no URL, so they replay
 // via navigateSearch in whatever mode is active at tap time.
 function ribbonAddSearches() {
@@ -3226,7 +2886,21 @@ function ribbonAddSearches() {
   knEvent('KN_menu_action', { menu: 'session', action: 'add_searches' });
   const pending = pendingSearches();   // chronological (log order)
   if (!pending.length) return;
-  const cat = findOrCreateAdHocCat();   // shared with auto-add + Quick Start (L05a)
+  // Find-or-create Ad Hoc singer + [date] cat — created nodes default collapsed;
+  // an existing node's open state is respected untouched (appends never yank the view)
+  let singer = currentSingers.find(s => s.name === 'Ad Hoc');
+  if (!singer) {
+    singer = { _id: uid(), open: false, name: 'Ad Hoc', cats: [] };
+    currentSingers.push(singer);
+  }
+  const d = new Date();
+  const dateName = '[' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+                 + '-' + String(d.getDate()).padStart(2, '0') + ']';
+  let cat = singer.cats.find(c => c.name === dateName);
+  if (!cat) {
+    cat = { _id: uid(), open: false, name: dateName, songs: [] };
+    singer.cats.push(cat);
+  }
   // De-dupe against the cat's existing titles — covers same-day re-adds across
   // reloads that the session-scoped added set can't see
   const have = new Set(cat.songs.map(s => (typeof s === 'string' ? s : s.title)));
@@ -3255,12 +2929,7 @@ function renderWelcome() {
   panel.id = 'welcomePanel';
   panel.innerHTML = `
     <div class="welcome-title">Karaoke Night 🎤</div>
-    <div class="welcome-intro">Search. Sing. Repeat. — Save your set</div>
-    <div class="welcome-quickstart-label">Quick Start</div>
-    <div class="welcome-item welcome-quickstart">
-      <input type="text" id="quickStartInput" placeholder="Enter title - Press GO" oninput="updateQuickStartState()" onkeydown="if(event.key==='Enter'){event.preventDefault(); quickStartGo();}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      <button id="quickStartBtn" onclick="quickStartGo()" disabled>GO</button>
-    </div>
+    <div class="welcome-intro">Find and play songs for group singing</div>
     <div class="welcome-item"><strong>[Session→New]</strong> <span>starts a new session</span></div>
     <div class="welcome-item"><strong>[Session→Open]</strong> <span>open saved session file(s)</span></div>
     <div class="welcome-item"><strong>[Session→Open Sample]</strong> <span>try out the app/easy to edit</span></div>
@@ -3298,7 +2967,6 @@ function loadFiles(input, clear) {
       sessionStorage.setItem('karaokeName', files[0].name.replace(/\.csv$/i, ''));
       sessionStorage.setItem('karaokeSession', texts.join('\n'));
       buildDOM(incoming);
-      setAutoAdd(false);   // Open enters the app — auto-add off (L05a)
       markClean();
     } else {
       const c = document.getElementById('main-container');
@@ -3325,7 +2993,6 @@ function toggleSinger(singerId) {
   if (currentSingers[si]) currentSingers[si].open = !isCollapsed;
   saveCurrentState();
   updateViewMenuState();
-  updateOnboardingUI();   // #tbEdit anchor tracks collapse/expand live (L05a)
 }
 
 // ---- SECTION TOGGLE ----
@@ -3340,7 +3007,6 @@ function toggleSection(si, ci) {
   if (currentSingers[si] && currentSingers[si].cats[ci]) currentSingers[si].cats[ci].open = !isCollapsed;
   saveCurrentState();
   updateViewMenuState();   // parity with toggleSinger (L04b Part A)
-  updateOnboardingUI();   // #tbEdit anchor tracks collapse/expand live (L05a)
 }
 
 // ---- DARK/LIGHT TOGGLE ----
@@ -3371,8 +3037,6 @@ function restoreState() {
     document.body.classList.remove('light');
     document.getElementById('modeBtn').textContent = '☀️';
   }
-
-  syncAutoAddToggle();   // L05a — reflect karaokeAutoAdd on load/back-nav (read-only)
 
   // Restore search mode (karaoke/music)
   const savedMode = sessionStorage.getItem('karaokeMode');
@@ -3451,10 +3115,6 @@ function init() {
   }
   // No session to restore → render the welcome screen (fresh visit or post-exit return)
   if (!rendered) buildDOM([]);
-  // Reload wipes the in-memory sessionDirty flag — restore it from the mirror so a
-  // session that was dirty before navigating away (e.g. auto-add's first search,
-  // which always fires navigateSearch right after) still reports dirty on return.
-  if (rendered) sessionDirty = sessionStorage.getItem('karaokeDirty') === 'true';
   // Only restore open/scroll state if returning via back button
   const isBackNav = performance.getEntriesByType('navigation')[0]?.type === 'back_forward';
   if (isBackNav) {
@@ -3467,9 +3127,6 @@ function init() {
     // and are also cleared on Session→Close/Exit. Future: opt-in to persist (localStorage).
     flushHistory();
   }
-  // flushHistory (fresh-load branch above) wipes karaokeAutoAdd along with the other
-  // recents keys — re-affirm ON for a fresh visit landing on welcome (L05a).
-  if (!rendered) setAutoAdd(true);
 }
 
 window.addEventListener('scroll', () => {
