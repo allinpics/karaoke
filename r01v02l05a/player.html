@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V02L06 (1785078448 EDT-0400) -->
+<!-- Karaoke Night | R01V02L05a (1784657719 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
@@ -223,17 +223,10 @@
     padding: 4px 0;
   }
   .ribbon-flyout:hover .ribbon-submenu { display: block; }
-  /* Prevent flyout opening when parent item is disabled — L06: broadened to
-     .pencil-menu-item so pencil-menu Paste's clipboard-gated disabled state
-     suppresses its flyout the same way ribbon flyouts already do */
+  /* Prevent flyout opening when parent item is disabled */
   .ribbon-item.disabled ~ .ribbon-submenu,
-  .ribbon-item.disabled:hover ~ .ribbon-submenu,
-  .pencil-menu-item.disabled ~ .ribbon-submenu,
-  .pencil-menu-item.disabled:hover ~ .ribbon-submenu { display: none !important; }
-  .ribbon-flyout .ribbon-item.disabled,
-  .ribbon-flyout .pencil-menu-item.disabled { pointer-events: none; }
-  /* L06: right-edge overflow — showPencilMenu flips nested submenus to the left */
-  #pencilMenu.flyout-left .ribbon-submenu { left: auto; right: 100%; }
+  .ribbon-item.disabled:hover ~ .ribbon-submenu { display: none !important; }
+  .ribbon-flyout .ribbon-item.disabled { pointer-events: none; }
 
   /* --- modals --- */
   .modal-overlay {
@@ -370,11 +363,8 @@
   /* Blocked-before-attempt: show/hide affordances dim while the filter is active */
   body.filter-mode .singer-collapse-indicator,
   body.filter-mode .collapse-indicator { opacity: 0.3; }
-  /* Dimmed-but-tappable: tap still lands so the gate can nudge (no pointer-events:none).
-     L06: kept as its own class (not .disabled) — Add's flyout leaf items live inside
-     .ribbon-flyout now, and .disabled there gets pointer-events:none (see Paste, ~line 227) */
-  .pencil-menu-item.disabled,
-  .pencil-menu-item.filter-dim { opacity: 0.4; color: var(--muted); }
+  /* Dimmed-but-tappable: tap still lands so the gate can nudge (no pointer-events:none) */
+  .pencil-menu-item.disabled { opacity: 0.4; color: var(--muted); }
   /* v3: non-matching sections are hidden entirely — invalid targets prevented by absence */
   .filter-hidden { display: none; }
   /* Feedback-if-attempted: re-triggerable shake on the filter box */
@@ -457,11 +447,7 @@
     border: none;
     cursor: pointer;
     font-size: 1rem;
-    /* L06: forgiving hit zone — margin-left/padding-left grow the tap target
-       ~0.5em leftward without moving the glyph (padding-left absorbs the
-       margin's leftward shift). em-relative so it scales with font-size. */
-    padding: 2px 4px 2px calc(4px + 0.5em);
-    margin-left: -0.5em;
+    padding: 2px 4px;
     opacity: 0.45;
     transition: opacity 0.15s;
     color: var(--bg);
@@ -596,16 +582,10 @@
     max-height: 0;
     opacity: 0;
     pointer-events: none;
-    padding-top: 0;   /* L06: same fix as .grid.collapsed's margin-top:0 — otherwise the
-                         normal padding-top persists as a small gap even at max-height:0 */
   }
 
   /* --- category section --- */
   .section { margin-bottom: var(--gap-section); }
-  /* L06: trailing margin on the last cat in a singer never served a visual
-     purpose (nothing below it to space from) — was invisible until the L06
-     cut-pending border on .singer-block revealed it as a bottom gap. */
-  .singer-body .section:last-child { margin-bottom: 0; }
   .section-header {
     display: flex;
     align-items: center;
@@ -706,74 +686,13 @@
     flex-shrink: 0;
     display: inline-block;
     color: var(--muted);
-    /* L06: dropped the 0.75rem override — now matches the base 1rem singer/cat
-       pencil (bigger, easier target). margin-top may need re-tuning by eye at
-       the new size (expected follow-up, not a regression). */
+    font-size: 0.75rem;
     opacity: 0.5;
-    /* L06: hit-zone pair restated here — this rule already zeroes padding for
-       layout reasons, which would otherwise cancel the base .edit-btn rule's
-       compensating padding-left */
-    padding: 0 0 0 0.5em;
-    margin-left: -0.5em;
+    padding: 0;
     margin-top: 1px;
   }
   .song-card { position: relative; }
   .song-card:hover .edit-btn { opacity: 0.9; }
-  /* L06: Excel-style pending-cut marker — cleared on paste/re-cut/re-copy elsewhere.
-     Item 11: border-based instead of outline (kept opacity, dropped the outside ring) —
-     each element type gets its own rule since the marker class sits on a wrapper,
-     not always the element that actually has a visible border.
-     Local-test fixes (Jul 24): cat border moved from .section-header only to the
-     whole .section — bounds header+songs together when expanded, still visible
-     when collapsed (the section itself is never hidden, only the grid inside is;
-     a collapsed grid has zero height so the box just shrinks to the header).
-     Singer border also moved from .singer-header only to the whole .singer-block
-     (same fix as cat, same reason) — bounds header+cats+songs together when
-     expanded instead of just the header row. Color corrected var(--bg) → var(--accent)
-     (still invisible after the .singer-block move) — var(--bg) is also the page's own
-     background, so the border vanished everywhere except the small strip over the
-     gold header; var(--accent) contrasts against the dark page background on 3 of
-     4 sides (only the header-overlap edge blends slightly, an acceptable tradeoff).
-     Pulse (Jul 24, user ask, softer than Excel's marching ants) — kept scoped to the
-     BORDER only per user's request ("dim stays static, only the bound breathes"):
-     .cut-pending's opacity is a plain static dim, no animation on it.
-     Corrected again same day: user wants a hard on/off blink, not a size change —
-     border-width stays fixed at 2px throughout; border-color hard-toggles between
-     the visible color and transparent (abrupt jumps at 0/50%, not an eased fade —
-     each half of the cycle holds steady so it reads as blinking, not pulsing).
-     prefers-reduced-motion users get a static visible border, no animation. */
-  .cut-pending { opacity: 0.5; }
-  @keyframes cut-pending-blink-accent {
-    0%, 49% { border-color: var(--accent); }
-    50%, 100% { border-color: transparent; }
-  }
-  .song-card.cut-pending,
-  .section.cut-pending,
-  .singer-block.cut-pending { animation: cut-pending-blink-accent 1.6s linear infinite; }
-  @media (prefers-reduced-motion: reduce) {
-    .song-card.cut-pending,
-    .section.cut-pending,
-    .singer-block.cut-pending { animation: none; }
-  }
-  .song-card.cut-pending { border-style: dashed; border-color: var(--accent); }
-  .section.cut-pending { border: 2px dashed var(--accent); border-radius: 8px; }
-  .singer-block.cut-pending { border: 2px dashed var(--accent); border-radius: 8px; }
-  /* L06: empty-cat / empty-singer dead-end fix — an empty cat has no song
-     pencil to Add from, an empty singer has no cat pencil to Add from; both
-     get a standing affordance instead. .add-cat-hint reuses this look as-is. */
-  .add-song-hint {
-    display: block;
-    width: 100%;
-    background: none;
-    border: 1px dashed var(--border);
-    border-radius: 6px;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    padding: calc(var(--sz-song) * 0.5);
-    cursor: pointer;
-  }
-  .add-song-hint:hover { border-color: var(--accent); color: var(--accent); }
   /* New entry panel */
   .new-entry-panel {
     padding: calc(var(--base) * 0.75) calc(var(--base) * 1);
@@ -1030,7 +949,7 @@
   .tb-up::before { bottom: 100%; border-bottom: 8px solid var(--accent); }
   .tb-up::after  { bottom: calc(100% - 1px); left: 17px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 7px solid var(--card); }
   #tbFind { bottom: calc(100% + 10px); left: 0; }
-  #tbMode { top: calc(100% + 8px); right: 0; z-index: 101; }   /* clears .ribbon's z-index:100 (L06 fix) — see dd scope */
+  #tbMode { top: calc(100% + 8px); right: 0; }
   #tbMode::before, #tbMode::after { left: auto; right: 16px; }
   #tbMode::after { right: 17px; }
   /* #tbEdit's top/left are set inline in JS (positionTbEdit) — positioned
@@ -1292,26 +1211,12 @@
 
 <!-- Pencil context menu -->
 <div class="pencil-menu" id="pencilMenu">
-  <div class="ribbon-flyout">
-    <button class="pencil-menu-item" id="pmAdd">＋ Add ›</button>
-    <div class="ribbon-submenu">
-      <button class="pencil-menu-item" id="pmAddA">Above</button>
-      <button class="pencil-menu-item" id="pmAddB">Below</button>
-    </div>
-  </div>
-  <hr>
   <button class="pencil-menu-item" id="pmRename">✏️ Rename</button>
   <button class="pencil-menu-item" id="pmEditArtistUrl">🎼 Edit Artist / URL</button>
-  <button class="pencil-menu-item" id="pmCut">✂️ Cut</button>
-  <button class="pencil-menu-item" id="pmCopy">📋 Copy</button>
-  <div class="ribbon-flyout">
-    <button class="pencil-menu-item" id="pmPaste">📌 Paste ›</button>
-    <div class="ribbon-submenu">
-      <button class="pencil-menu-item" id="pmPasteA">Above</button>
-      <button class="pencil-menu-item" id="pmPasteB">Below</button>
-    </div>
-  </div>
   <button class="pencil-menu-item danger" id="pmDelete">🗑️ Delete</button>
+  <hr>
+  <button class="pencil-menu-item" id="pmAddAbove">＋ Add Above</button>
+  <button class="pencil-menu-item" id="pmAddBelow">＋ Add Below</button>
 </div>
 
 <!-- Save As modal -->
@@ -1354,7 +1259,7 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V02L06 (1785078448 EDT-0400)';
+const BUILD = 'R01V02L05a (1784657719 EDT-0400)';
 
 // ---- GA4 EVENT HELPER ----
 // All custom events prefixed KN_ to avoid colliding with GA4's own reserved/
@@ -2077,120 +1982,6 @@ const PencilMenuManager = {
   }
 };
 
-// karaokeClipboard (L06) — plain sessionStorage, read fresh at menu-open (gating)
-// and at paste, no in-memory mirror (avoids the karaokeDirty-class staleness bug
-// from L05a). Excluded from flushHistory (not privacy-sensitive recents data) —
-// L06 Item 5: clipboard now survives Close/Exit (tab-lifetime key, NOT in
-// flushSession's list) — replaced only by a new Cut/Copy, or dies with the tab.
-// Excel-style Cut: the source node is NOT removed at cut time. It stays in the
-// tree (visually marked .cut-pending) until a successful Paste actually moves
-// it; a later Cut/Copy elsewhere, or never pasting at all, leaves it untouched.
-// {type, id, node, wasCut, sessionToken} — id is the source node's real _id
-// (for locating it again at paste time); node is the stripped (_id-less) deep
-// copy that gets inserted at the destination; sessionToken guards against a
-// cross-session id collision (see getSessionToken() below).
-function getClipboard() {
-  try { return JSON.parse(sessionStorage.getItem('karaokeClipboard')); } catch (e) { return null; }
-}
-function setClipboard(type, id, node, wasCut) {
-  sessionStorage.setItem('karaokeClipboard', JSON.stringify({ type, id, node, wasCut: !!wasCut, sessionToken: getSessionToken() }));
-}
-// `_id`s are minted from nodeSeq, a small counter that resets to 1 on every
-// flushSession. Now that the clipboard survives flushSession (Item 5), a
-// stale cut's `id` from a closed session could coincidentally match an
-// unrelated node's freshly-minted `_id` in the next session — same type,
-// same small integer, wrong node. karaokeSessionToken changes every time
-// nodeSeq resets, so a Paste can tell "still the same session" from
-// "different session, this id means nothing here" instead of guessing.
-function getSessionToken() {
-  let t = sessionStorage.getItem('karaokeSessionToken');
-  if (!t) { t = Date.now() + '-' + Math.random().toString(36).slice(2); sessionStorage.setItem('karaokeSessionToken', t); }
-  return t;
-}
-// Deep clone for clipboard storage, _id stripped at every level — ensureIds()
-// mints fresh ids for the whole subtree at the buildDOM choke point on paste,
-// so a cut/copied node never carries its source _id back in.
-function cloneForClipboard(node, type) {
-  const copy = JSON.parse(JSON.stringify(node));
-  delete copy._id;
-  if (type === 'singer') (copy.cats || []).forEach(c => { delete c._id; (c.songs || []).forEach(s => { if (s && typeof s === 'object') delete s._id; }); });
-  else if (type === 'cat') (copy.songs || []).forEach(s => { if (s && typeof s === 'object') delete s._id; });
-  return copy;
-}
-// Locate a node's live array + current index by type+_id — indices captured
-// at cut time can go stale if the tree changes before paste, so paste-time
-// removal always re-finds the source fresh rather than trusting stored indices.
-function findNodeById(type, id) {
-  if (type === 'singer') {
-    const idx = currentSingers.findIndex(s => s._id === id);
-    return idx < 0 ? null : { arr: currentSingers, idx };
-  }
-  for (let si = 0; si < currentSingers.length; si++) {
-    if (type === 'cat') {
-      const idx = currentSingers[si].cats.findIndex(c => c._id === id);
-      if (idx >= 0) return { arr: currentSingers[si].cats, idx };
-    } else if (type === 'song') {
-      for (let ci = 0; ci < currentSingers[si].cats.length; ci++) {
-        const songs = currentSingers[si].cats[ci].songs;
-        const idx = songs.findIndex(s => s && typeof s === 'object' && s._id === id);
-        if (idx >= 0) return { arr: songs, idx };
-      }
-    }
-  }
-  return null;
-}
-function markCutPending(type, id) {
-  // L06 Items 9/10: cat marker targets .section (header+grid together, never
-  // hidden by the grid's own .collapsed) instead of .grid (was invisible when
-  // collapsed, and too narrow — songs only — when expanded).
-  const sel = type === 'singer' ? '.singer-block' : type === 'cat' ? '.section' : '.song-card';
-  const el = document.querySelector(sel + '[data-id="' + id + '"]');
-  if (el) el.classList.add('cut-pending');
-}
-function clearCutMarker() {
-  document.querySelectorAll('.cut-pending').forEach(el => el.classList.remove('cut-pending'));
-}
-// buildDOM rebuilds the DOM from scratch, so a pending cut's visual marker
-// has to be reapplied after every rebuild that isn't the paste itself.
-// Token-gated (Item 5) — a cut surviving from a closed session must not mark
-// some unrelated node in the current one that happens to share its old _id.
-function restoreCutMarker() {
-  const cb = getClipboard();
-  if (cb && cb.wasCut && cb.sessionToken === getSessionToken()) markCutPending(cb.type, cb.id);
-}
-
-// L06 Item 7 — Escape cancels a pending Cut (Excel-style marching-ants cancel).
-// Clears the clipboard + visual marker only; tree is untouched. Gated so it
-// doesn't fire while the user is typing (rename/inline-add inputs, search
-// fields) — Escape there already has its own meaning (revert/blur).
-document.addEventListener('keydown', function(e) {
-  if (e.key !== 'Escape') return;
-  const cb = getClipboard();
-  if (!cb || !cb.wasCut) return;
-  const ae = document.activeElement;
-  if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;
-  sessionStorage.removeItem('karaokeClipboard');
-  clearCutMarker();
-});
-
-// L06 Item 7 (iOS follow-up) — tap-to-cancel, the touch equivalent of Escape
-// (no hardware Escape on iOS). Capture-phase + stopPropagation() so this runs
-// BEFORE the tapped element's own onclick (song nav, singer/cat collapse) —
-// bubble-phase would let both fire (cancel the cut AND still navigate/toggle).
-// Delegated on #main-container rather than patched into each handler because
-// a song card's onclick is rebound in more than one place (makeCard AND
-// startInlineSongRename's post-rename rebind) — a per-handler patch would be
-// an easy site to miss now and on every future rebind site.
-document.getElementById('main-container').addEventListener('click', function(e) {
-  if (!getClipboard()?.wasCut) return;
-  const hit = e.target.closest('.cut-pending');
-  if (!hit) return;
-  e.preventDefault();
-  e.stopPropagation();
-  sessionStorage.removeItem('karaokeClipboard');
-  clearCutMarker();
-}, true);
-
 function showPencilMenu(e, type, si, ci, soi) {
   e.preventDefault();
   e.stopPropagation();
@@ -2198,28 +1989,16 @@ function showPencilMenu(e, type, si, ci, soi) {
   const label = type === 'singer' ? 'Singer' : type === 'cat' ? 'Category' : 'Song';
   const aboveLabel = type === 'song' ? 'Before' : 'Above';
   const belowLabel = type === 'song' ? 'After'  : 'Below';
-  document.getElementById('pmRename').textContent = '✏️ Rename ' + label;
-  document.getElementById('pmDelete').textContent = '🗑️ Delete ' + label;
+  document.getElementById('pmRename').textContent   = '✏️ Rename ' + label;
+  document.getElementById('pmDelete').textContent   = '🗑️ Delete ' + label;
+  document.getElementById('pmAddAbove').textContent = '＋ Add ' + label + ' ' + aboveLabel;
+  document.getElementById('pmAddBelow').textContent = '＋ Add ' + label + ' ' + belowLabel;
+  // L04b: Add items dim during filter (still tappable — the gate nudges on tap)
+  document.getElementById('pmAddAbove').classList.toggle('disabled', filterActive());
+  document.getElementById('pmAddBelow').classList.toggle('disabled', filterActive());
   document.getElementById('pmEditArtistUrl').style.display = type === 'song' ? '' : 'none';
-
-  // Add flyout — trigger label + Above/Below|Before/After submenu, dimmed-but-
-  // tappable during filter lockdown (L04b behavior preserved on the leaf items)
-  document.getElementById('pmAdd').textContent   = '＋ Add ' + label + ' ›';
-  document.getElementById('pmAddA').textContent  = aboveLabel;
-  document.getElementById('pmAddB').textContent  = belowLabel;
-  document.getElementById('pmAddA').classList.toggle('filter-dim', filterActive());
-  document.getElementById('pmAddB').classList.toggle('filter-dim', filterActive());
-
-  // Paste flyout — disabled when clipboard empty or type doesn't match this context
-  const cb = getClipboard();
-  const pasteDisabled = !cb || cb.type !== type;
-  document.getElementById('pmPaste').classList.toggle('disabled', pasteDisabled);
-  document.getElementById('pmPasteA').textContent = aboveLabel;
-  document.getElementById('pmPasteB').textContent = belowLabel;
-
   const menu = document.getElementById('pencilMenu');
   menu.classList.add('open');
-  menu.classList.remove('flyout-left');
   // Position near click — clamp to viewport, keep whole menu above the sticky footer
   const gap = 6;
   const footer = document.getElementById('footerTip');
@@ -2232,10 +2011,6 @@ function showPencilMenu(e, type, si, ci, soi) {
   y = Math.max(gap, y);
   menu.style.left = x + 'px';
   menu.style.top  = y + 'px';
-  // Right-edge overflow — flip nested flyout submenus to the left if there's
-  // no room to the right of the menu (2-item submenu width, ~140px min-width)
-  const submenuW = 140;
-  if (x + menuW + submenuW > window.innerWidth) menu.classList.add('flyout-left');
 }
 
 function closePencilMenu() {
@@ -2252,113 +2027,18 @@ document.getElementById('pmRename').onclick = function() {
   const ctx = PencilMenuManager.getContext();
   if (!ctx) return;
   const { type, si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'rename', item_type: type });
   closePencilMenu();
   if (type === 'singer') startInlineRename('stitle-singer' + si, 'singer', si, -1);
   else if (type === 'cat') startInlineRename('ctitle-singer' + si + '-cat' + ci, 'cat', si, ci);
   else startInlineSongRename(si, ci, soi);
 };
 
-// Cut (Excel-style) — does NOT remove the node here. It stays in place,
-// marked .cut-pending, until a Paste actually moves it. A later Cut/Copy
-// elsewhere cancels the pending marker (last clipboard write wins); never
-// pasting at all leaves the original untouched, same as Excel's Ctrl+X.
-document.getElementById('pmCut').onclick = function() {
-  const ctx = PencilMenuManager.getContext();
-  if (!ctx) return;
-  const { type, si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'cut', item_type: type });
-  closePencilMenu();
-  let node;
-  if (type === 'singer') node = currentSingers[si];
-  else if (type === 'cat') node = currentSingers[si].cats[ci];
-  else node = currentSingers[si].cats[ci].songs[soi];
-  clearCutMarker();
-  setClipboard(type, node._id, cloneForClipboard(node, type), true);
-  markCutPending(type, node._id);
-};
-
-// Copy — source node untouched, no markDirty/buildDOM. Also cancels any
-// pending Cut elsewhere (a fresh Copy replaces the clipboard, same as Excel).
-document.getElementById('pmCopy').onclick = function() {
-  const ctx = PencilMenuManager.getContext();
-  if (!ctx) return;
-  const { type, si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'copy', item_type: type });
-  closePencilMenu();
-  let node;
-  if (type === 'singer') node = currentSingers[si];
-  else if (type === 'cat') node = currentSingers[si].cats[ci];
-  else node = currentSingers[si].cats[ci].songs[soi];
-  clearCutMarker();
-  setClipboard(type, node._id, cloneForClipboard(node, type), false);
-};
-
-// Paste — inserts the clipboard subtree as-is, no cascade entry flow. If the
-// clipboard came from a Cut, the source is located fresh by _id (its stored
-// index may be stale) and spliced out now — this is the only point a Cut
-// actually removes anything — and the clipboard is cleared (a completed
-// cut+paste can't be re-pasted, matching Excel). A Copy's clipboard is left
-// intact so the same item can be pasted multiple times.
-function pasteClipboard(direction) {
-  const ctx = PencilMenuManager.getContext();
-  if (!ctx) return;
-  const { type, si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'paste', item_type: type });
-  closePencilMenu();
-  const cb = getClipboard();
-  if (!cb || cb.type !== type) return;   // belt-and-suspenders — trigger is disabled in this case
-
-  let destArr, insertIdx;
-  if (type === 'singer') { destArr = currentSingers; insertIdx = direction === 'above' ? si : si + 1; }
-  else if (type === 'cat') { destArr = currentSingers[si].cats; insertIdx = direction === 'above' ? ci : ci + 1; }
-  else { destArr = currentSingers[si].cats[ci].songs; insertIdx = direction === 'above' ? soi : soi + 1; }
-
-  // Item 5: only attempt to locate+remove the cut source when the clipboard's
-  // sessionToken matches the live one. A mismatch means the cut survived from
-  // a since-closed session — nodeSeq reset, so cb.id could coincidentally
-  // match an unrelated node's freshly-minted _id here. Treat as "not found":
-  // skip removal, fall through to a normal insert (the correct cross-session
-  // cut result — the node just gets pasted in, nothing gets removed).
-  if (cb.wasCut && cb.sessionToken === getSessionToken()) {
-    const found = findNodeById(cb.type, cb.id);
-    if (found) {
-      found.arr.splice(found.idx, 1);
-      if (found.arr === destArr && found.idx < insertIdx) insertIdx--;   // removal shifted the destination
-    }
-  }
-
-  destArr.splice(insertIdx, 0, cb.node);
-
-  if (cb.wasCut) sessionStorage.removeItem('karaokeClipboard');   // cut consumed by paste — no re-paste
-  clearCutMarker();
-  markDirty();
-  buildDOM(currentSingers);
-}
-document.getElementById('pmPasteA').onclick = function() { pasteClipboard('above'); };
-document.getElementById('pmPasteB').onclick = function() { pasteClipboard('below'); };
-
-// Delete — if the deleted node is the source of a pending Cut, clear the
-// clipboard too. Otherwise a later Paste still inserts the stale clipboard
-// clone: findNodeById() finding no live match only skips the removal step
-// in pasteClipboard, not the insert, so a deleted item would silently come
-// back via Paste (dd-found bug, L06). Matched by _id — deleting something
-// unrelated while a DIFFERENT cut is pending must not cancel that cut.
+// Delete
 document.getElementById('pmDelete').onclick = function() {
   const ctx = PencilMenuManager.getContext();
   if (!ctx) return;
   const { type, si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'delete', item_type: type });
   closePencilMenu();
-  let node;
-  if (type === 'singer') node = currentSingers[si];
-  else if (type === 'cat') node = currentSingers[si].cats[ci];
-  else node = currentSingers[si].cats[ci].songs[soi];
-  const cb = getClipboard();
-  if (cb && cb.wasCut && cb.type === type && cb.id === node._id) {
-    sessionStorage.removeItem('karaokeClipboard');
-    clearCutMarker();
-  }
   markDirty();
   if (type === 'singer') currentSingers.splice(si, 1);
   else if (type === 'cat') currentSingers[si].cats.splice(ci, 1);
@@ -2367,21 +2047,19 @@ document.getElementById('pmDelete').onclick = function() {
 };
 
 // Add Above / Before
-document.getElementById('pmAddA').onclick = function() {
+document.getElementById('pmAddAbove').onclick = function() {
   const ctx = PencilMenuManager.getContext();
   if (!ctx) return;
   const { type, si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'add', item_type: type });
   closePencilMenu();
   promptInlineAdd(type, si, ci, soi, 'above');
 };
 
 // Add Below / After
-document.getElementById('pmAddB').onclick = function() {
+document.getElementById('pmAddBelow').onclick = function() {
   const ctx = PencilMenuManager.getContext();
   if (!ctx) return;
   const { type, si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'add', item_type: type });
   closePencilMenu();
   promptInlineAdd(type, si, ci, soi, 'below');
 };
@@ -2444,7 +2122,6 @@ document.getElementById('pmEditArtistUrl').onclick = function() {
   const ctx = PencilMenuManager.getContext();
   if (!ctx || ctx.type !== 'song') return;
   const { si, ci, soi } = ctx;
-  knEvent('KN_menu_action', { menu: 'pencil', action: 'edit_artist_url', item_type: 'song' });
   closePencilMenu();
   let songObj = currentSingers[si]?.cats[ci]?.songs[soi];
   if (!songObj) return;
@@ -2578,12 +2255,6 @@ function cascadeCats(singerIdx, onBlank, startCatIdx) {
   body.classList.remove('collapsed');
   if (sHeader) { sHeader.classList.remove('collapsed'); if (sHeader.querySelector('.singer-hide-show')) sHeader.querySelector('.singer-hide-show').textContent = 'Hide'; }
 
-  // L06: an empty singer shows a standing "+Add Category" hint \u2014 hide it while
-  // the cascade input itself is open (no need for both at once), restore it
-  // only if the user blank-Enters out with nothing else queued to render it away
-  const hint = body.querySelector('.add-cat-hint');
-  if (hint) hint.style.display = 'none';
-
   const wrap = document.createElement('div');
   wrap.style.cssText = 'padding:4px 8px;';
   const input = document.createElement('input');
@@ -2607,7 +2278,6 @@ function cascadeCats(singerIdx, onBlank, startCatIdx) {
     updateViewMenuState();
     if (!name) {
       if (onBlank) onBlank();
-      else if (hint) hint.style.display = '';
       return;
     }
     markDirty();
@@ -2640,12 +2310,6 @@ function cascadeSongs(singerIdx, catIdx, onBlank) {
   grid.classList.remove('collapsed');
   if (cHeader) { cHeader.classList.remove('collapsed'); if (cHeader.querySelector('.hide-show')) cHeader.querySelector('.hide-show').textContent = 'Hide'; }
 
-  // L06: an empty cat shows a standing "+Add Song" hint \u2014 hide it while the
-  // cascade input itself is open, restore it only if the user blank-Enters
-  // out with nothing else queued to render it away
-  const hint = grid.querySelector('.add-song-hint');
-  if (hint) hint.style.display = 'none';
-
   const wrap = document.createElement('div');
   wrap.style.cssText = 'padding:4px 8px;';
   const input = document.createElement('input');
@@ -2665,7 +2329,6 @@ function cascadeSongs(singerIdx, catIdx, onBlank) {
     updateViewMenuState();
     if (!name) {
       if (onBlank) onBlank();
-      else if (hint) hint.style.display = '';
       return;
     }
     markDirty();
@@ -3025,11 +2688,6 @@ function flushSession() {
    'karaokeYT','karaokeScroll','karaokeCsvErrors','karaokeDirty']
     .forEach(k => sessionStorage.removeItem(k));
   nodeSeq = 1;   // fresh session = fresh id space
-  // L06 Item 5: karaokeClipboard deliberately NOT flushed here — it's a
-  // tab-lifetime key now (survives Close/Exit, replaced only by a new Cut/
-  // Copy or tab close). New session token minted so a surviving clipboard's
-  // id can't collide with this session's freshly-reset nodeSeq space.
-  sessionStorage.setItem('karaokeSessionToken', Date.now() + '-' + Math.random().toString(36).slice(2));
   flushHistory();
 }
 // Dirty guard — proceeds immediately when clean; when dirty, shows our custom
@@ -3097,7 +2755,6 @@ function buildDOM(singers) {
       const catId = singerId + '-cat' + ci;
       const section = document.createElement('div');
       section.className = 'section';
-      section.dataset.id = cat._id;   // L06 Items 9/10: cut-pending marker target for cats (see markCutPending)
 
       const secHeader = document.createElement('div');
       secHeader.className = 'section-header' + (cat.open ? '' : ' collapsed');
@@ -3117,33 +2774,11 @@ function buildDOM(singers) {
       grid.dataset.id = cat._id;
 
       cat.songs.forEach((song, soi) => grid.appendChild(makeCard(song, si, ci, soi)));
-      if (!cat.songs.length) {
-        const addHint = document.createElement('button');
-        addHint.className = 'add-song-hint';
-        addHint.textContent = '＋ Add Song';
-        addHint.onclick = (e) => {
-          e.stopPropagation();
-          if (filterActive()) { filterNudge(); return; }
-          cascadeSongs(si, ci, null);
-        };
-        grid.appendChild(addHint);
-      }
 
       section.appendChild(secHeader);
       section.appendChild(grid);
       body.appendChild(section);
     });
-    if (!singer.cats.length) {
-      const addCatHint = document.createElement('button');
-      addCatHint.className = 'add-song-hint add-cat-hint';
-      addCatHint.textContent = '＋ Add Category';
-      addCatHint.onclick = (e) => {
-        e.stopPropagation();
-        if (filterActive()) { filterNudge(); return; }
-        cascadeCats(si, null);
-      };
-      body.appendChild(addCatHint);
-    }
 
     block.appendChild(header);
     block.appendChild(body);
@@ -3160,7 +2795,6 @@ function buildDOM(singers) {
   const fq = document.getElementById('searchInput').value;
   if (fq.trim()) filterSongs(fq);
   updateOnboardingUI();
-  restoreCutMarker();   // rebuild wipes the DOM — reapply any pending-cut visual (L06)
 }
 
 // ---- LOAD SESSION ----
