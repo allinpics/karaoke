@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | Virtual Participant Guide | R01V02L07a (1786283901 EDT-0400) -->
+<!-- Karaoke Night | Virtual Participant Guide | DRAFT v0.1 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -377,7 +377,7 @@
   <a href="#join">Join the Session</a>
   <a href="#your-turn">Your Turn to Sing</a>
   <a href="#audio">Audio Tips</a>
-  <a href="#browsers">Backing Tracks</a>
+  <a href="#browsers">Browser Guide</a>
   <a href="#trouble">Troubleshooting</a>
 </nav>
 
@@ -393,95 +393,85 @@
   <!-- What You Need -->
   <section class="section" id="what-you-need">
     <div class="section-title">What You Need</div>
-    <p class="section-body"><strong>Already enjoying KARAOKE NIGHT in person?</strong> Inviting singers who can't be in the room is easier than you might think. If you can make a video call and play a video, you already have everything you need.</p>
+    <p class="section-body">If you can watch a video on your device you're ready to sing — That's it!</p>
     <div class="check-grid">
       <div class="check-item"><span class="check-icon">📱</span><span>Smartphone, tablet, or laptop</span></div>
-      <div class="check-item"><span class="check-icon">📶</span><span>Wi-Fi — strongly recommended over cellular</span></div>
-      <div class="check-item"><span class="check-icon">🔊</span><span>Something to play sound through — your TV speakers, a Bluetooth speaker, a soundbar, or the home stereo</span></div>
-      <div class="check-item"><span class="check-icon">🎵</span><span>Your backing track ready to go in <span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span></span></div>
+      <div class="check-item"><span class="check-icon">📶</span><span>WiFi connection (recommended over cellular)</span></div>
+      <div class="check-item"><span class="check-icon">🔊</span><span>Speaker or TV for the backing track</span></div>
+      <div class="check-item"><span class="check-icon">🎵</span><span>Your backing track ready to go (<span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span>, YouTube, or whatever you use)</span></div>
       <div class="check-item"><span class="check-icon">🎤</span><span>Your voice — no experience required!</span></div>
     </div>
-    <div class="tip"><strong>💡 Tip:</strong> Get on Wi-Fi before joining. Cellular can work, but it's far more likely to give you audio or video interruptions partway through a song.</div>
+    <div class="tip"><strong>💡 Tip:</strong> Connect to WiFi before joining — it gives you a much more stable connection than cellular during a video call.</div>
   </section>
 
   <!-- Join the Session -->
   <section class="section" id="join">
     <div class="section-title">Join the Session</div>
-    <p class="section-body">Your host picks the meeting app and sends you a link before the event. Tap the link and you're in — the steps below work whichever app they chose.</p>
+    <p class="section-body">Your host will send you a link before the event — Zoom, WhatsApp, or whatever platform the group is using. Just tap the link and you're in.</p>
 
     <div class="platform-tabs">
-      <button class="tab-btn active" onclick="showTab('other')">Any App</button>
-      <button class="tab-btn" onclick="showTab('zoom')">Zoom</button>
+      <button class="tab-btn active" onclick="showTab('zoom')">Zoom</button>
       <button class="tab-btn" onclick="showTab('whatsapp')">WhatsApp</button>
-      <button class="tab-btn" onclick="showTab('facetime')">FaceTime</button>
+      <button class="tab-btn" onclick="showTab('other')">Other / General</button>
     </div>
 
-    <div id="tab-zoom" class="tab-panel">
+    <div id="tab-zoom" class="tab-panel active">
       <div class="platform-grid">
         <div class="platform-card">
           <h3>📱 iPhone / iPad</h3>
-          <ul>
-            <li>Install <strong>Zoom</strong> from the App Store if you don't have it</li>
-            <li>Tap the link, then follow the prompts</li>
-          </ul>
+          <ol>
+            <li>Install <strong>Zoom</strong> from the App Store if needed</li>
+            <li>Tap the link your host sent</li>
+            <li>Tap <strong>Join with Video</strong></li>
+            <li>Tap <strong>Join with Computer Audio</strong></li>
+            <li>Allow mic and camera when prompted</li>
+          </ol>
         </div>
         <div class="platform-card">
           <h3>🤖 Android</h3>
-          <ul>
-            <li>Install <strong>Zoom</strong> from Google Play if you don't have it</li>
-            <li>Tap the link, then follow the prompts</li>
-          </ul>
+          <ol>
+            <li>Install <strong>Zoom</strong> from Google Play if needed</li>
+            <li>Tap the link your host sent</li>
+            <li>Tap <strong>Join with Video</strong></li>
+            <li>Tap <strong>Join with Device Audio</strong></li>
+            <li>Allow mic and camera when prompted</li>
+          </ol>
         </div>
       </div>
-      <div class="tip"><strong>💡 Tip:</strong> No Zoom account needed to join — just tap the link and go. If Zoom is already installed, updating it first avoids surprises. <em>Zoom is only an example — your host may well use something else.</em></div>
+      <div class="tip"><strong>💡 Tip:</strong> No Zoom account needed to join — just tap the link and go. If Zoom is already installed, make sure it is updated first.</div>
     </div>
 
     <div id="tab-whatsapp" class="tab-panel">
       <div class="platform-grid">
         <div class="platform-card">
           <h3>📱 iPhone / iPad</h3>
-          <ul>
+          <ol>
             <li>Make sure <strong>WhatsApp</strong> is installed and updated</li>
-            <li>Tap the video call link, or just answer the group call</li>
-          </ul>
+            <li>Tap the video call link or answer the group call</li>
+            <li>Allow mic and camera when prompted</li>
+            <li>You're in — no extra steps needed</li>
+          </ol>
         </div>
         <div class="platform-card">
           <h3>🤖 Android</h3>
-          <ul>
+          <ol>
             <li>Make sure <strong>WhatsApp</strong> is installed and updated</li>
-            <li>Tap the video call link, or just answer the group call</li>
-          </ul>
+            <li>Tap the video call link or answer the group call</li>
+            <li>Allow mic and camera when prompted</li>
+            <li>You're in — no extra steps needed</li>
+          </ol>
         </div>
       </div>
-      <div class="tip"><strong>💡 Tip:</strong> WhatsApp works well on mobile. For larger groups, your host will want to use its Group Video Call feature.</div>
+      <div class="tip"><strong>💡 Tip:</strong> WhatsApp video calls work great on mobile. For larger groups, make sure your host uses the Group Video Call feature.</div>
     </div>
 
-    <div id="tab-facetime" class="tab-panel">
-      <div class="platform-grid">
-        <div class="platform-card">
-          <h3>📱 iPhone / iPad / Mac</h3>
-          <ul>
-            <li>Tap the link and join — nothing to install</li>
-          </ul>
-        </div>
-        <div class="platform-card">
-          <h3>🤖 Android / Windows</h3>
-          <ul>
-            <li>Tap the link — it opens in your <strong>browser</strong></li>
-            <li>No app and no Apple account needed</li>
-          </ul>
-        </div>
-      </div>
-      <div class="tip"><strong>💡 Tip:</strong> Only the host needs an Apple device — everyone else can join from a browser. The invite walks you through the rest.</div>
-    </div>
-
-    <div id="tab-other" class="tab-panel active">
+    <div id="tab-other" class="tab-panel">
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-content">
             <div class="step-label">Tap the link your host sends</div>
-            <div class="step-detail">It opens in the right app automatically — whatever the group is using. If the app isn't installed yet, the link will offer to install it.</div>
+            <div class="step-detail">It will open in the right app automatically — FaceTime, Google Meet, or whatever the group is using.</div>
           </div>
         </div>
         <div class="step">
@@ -494,22 +484,12 @@
         <div class="step">
           <div class="step-num">3</div>
           <div class="step-content">
-            <div class="step-label">If it asks about audio, say yes</div>
-            <div class="step-detail">Some apps ask whether to join with audio, or show a speaker icon to tap. Choose the option that turns sound on — otherwise you won't hear anyone and they won't hear you.</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-content">
             <div class="step-label">Turn your volume up</div>
             <div class="step-detail">Max device volume so everyone in your room can hear the backing track.</div>
           </div>
         </div>
       </div>
-      <div class="tip"><strong>💡 Tip:</strong> Most apps don't need an account just to join — the link is usually enough. If the app is already installed, updating it first avoids surprises.</div>
     </div>
-
-    <div class="tip" style="margin-top:1rem"><strong>💡 You're the host?</strong> Pick an app everyone can join whatever device they're on, and send the link out ahead of time. That's really all there is to it.</div>
   </section>
 
   <!-- Your Turn to Sing -->
@@ -528,15 +508,15 @@
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-content">
-          <div class="step-label">Check you're unmuted</div>
-          <div class="step-detail">If you muted for any reason, tap the microphone icon to come back. Make sure your device mic can pick up your voice.</div>
+          <div class="step-label">Unmute yourself</div>
+          <div class="step-detail">Tap the microphone icon to unmute. Make sure your device mic can pick up your voice.</div>
         </div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-content">
           <div class="step-label">Start your backing track</div>
-          <div class="step-detail">Play it from <span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span>. Crank the volume so it fills your room and carries through your mic to everyone else.</div>
+          <div class="step-detail">Play from <span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span>, YouTube, or whatever source you use. Crank the volume so it fills your room and carries through your mic to everyone else.</div>
         </div>
       </div>
       <div class="step">
@@ -549,52 +529,71 @@
       <div class="step">
         <div class="step-num">5</div>
         <div class="step-content">
-          <div class="step-label">Stop your backing track when done</div>
-          <div class="step-detail">That's the important one — only the current singer's track should be playing. Stay unmuted and enjoy the show.</div>
+          <div class="step-label">Mute yourself when done</div>
+          <div class="step-detail">Tap the microphone icon again. This keeps background noise down while others are singing.</div>
         </div>
       </div>
     </div>
-    <div class="tip"><strong>💡 Tip:</strong> Set your phone or tablet somewhere it can see the singer — remote friends are watching through it. Your room's sound comes along with it.</div>
+    <div class="tip"><strong>💡 Tip:</strong> Prop your phone or tablet up so your hands are free. Position it close enough that your voice comes through clearly over the backing track.</div>
   </section>
 
   <!-- Audio Tips -->
   <section class="section" id="audio">
     <div class="section-title">Audio Tips</div>
-    <p class="section-body">One simple rule keeps it all working: <strong>only one backing track plays at a time</strong> — the current singer's. Everything else stays live, just like being in the room together.</p>
+    <p class="section-body">A little setup goes a long way. These tips make a big difference for everyone on the call.</p>
 
     <div class="role-grid">
       <div class="role-card">
         <h3>🎤 When Singing</h3>
         <ul>
-          <li>Check you're unmuted before you start</li>
-          <li>Point a device at the singer — that's the camera your remote friends are watching</li>
-          <li>Backing track volume up — let it fill the room</li>
-          <li>Stop your track when you're done</li>
+          <li>Unmute before you start</li>
+          <li>Back track volume up — let it fill the room</li>
+          <li>Hold or prop device at voice height</li>
+          <li>Minimize background noise in your space</li>
+          <li>Mute again when done</li>
         </ul>
       </div>
       <div class="role-card">
-        <h3>🎉 When Someone Else Is Singing</h3>
+        <h3>👂 When Listening</h3>
         <ul>
-          <li>Stop your own backing track — theirs is the only one that should be playing</li>
-          <li>Cheer, clap, sing along — be the audience you'd be in the room</li>
-          <li>Reactions (👏 🎉) are great too, on top of the noise</li>
-          <li>Only mute for genuine racket — a barking dog, a TV in the next room</li>
+          <li>Stay muted — it helps everyone</li>
+          <li>Use reactions to cheer (👏 🎉)</li>
+          <li>Keep your own background noise low</li>
+          <li>Unmute briefly to clap or cheer between songs</li>
         </ul>
       </div>
     </div>
 
-    <div class="tip"><strong>💡 Echo?</strong> Usually it means a backing track is still playing somewhere it shouldn't be — check yours is stopped. If it persists, turn your speaker down a little or use headphones; the mic is catching your speakers and sending it back out.</div>
-    <div class="tip" style="margin-top:0.5rem"><strong>💡 Backing track sounding thin?</strong> Most meeting apps have a noise-suppression setting that treats music as background noise and filters it out. Look in the app's audio settings and turn it down or off. (In Zoom it's Settings → Audio → Noise Suppression → <strong>Low</strong> or <strong>Off</strong>.)</div>
+    <div class="tip"><strong>💡 Echo?</strong> If others hear an echo from your room, lower your speaker volume slightly or use headphones. The mic is picking up the audio from your speakers and sending it back out.</div>
+    <div class="tip" style="margin-top:0.5rem"><strong>💡 Zoom users:</strong> Go to Settings → Audio and set Noise Suppression to <strong>Low</strong> or <strong>Off</strong> — this keeps the backing track from being filtered out.</div>
   </section>
 
   <!-- Browser Compatibility -->
   <section class="section" id="browsers">
-    <div class="section-title">Playing Backing Tracks</div>
-    <p class="section-body">Any current browser will play your backing track just fine — Chrome, Edge, Firefox, or Safari. Open <span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span>, find your song, and tap to play.</p>
+    <div class="section-title">Playing Backing Tracks — Browser Guide</div>
+    <p class="section-body">If you are playing your backing track from a laptop browser and want to cast or share it to a TV or bigger screen, browser choice matters.</p>
 
-    <div class="tip"><strong>💡 Our pick:</strong> If you'd like a recommendation, we find <strong>Chrome</strong> gives the smoothest playback — especially if you want to send the video to a TV. Not a requirement, just what's worked best for us.</div>
-    <div class="tip" style="margin-top: 0.5rem"><strong>💡 Want it on the TV?</strong> Use whatever method you normally use to show videos from your phone, tablet, or computer. <span style="color:var(--accent);font-weight:600;">KARAOKE NIGHT</span> works with your existing setup — there's nothing extra to install or configure.</div>
-    <div class="tip" style="margin-top: 0.5rem"><strong>💡 Just singing along?</strong> If you're playing sound through your device or a speaker and not sending anything to a TV, none of this matters — any browser is fine.</div>
+    <div class="check-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); margin-bottom: 0.75rem;">
+      <div class="check-item" style="border-color: #4a8a4a;">
+        <span class="check-icon">✅</span>
+        <div><strong>Chrome</strong><br><span style="font-size:0.8rem; color: var(--muted);">Best — native Chromecast support built in</span></div>
+      </div>
+      <div class="check-item" style="border-color: #4a8a4a;">
+        <span class="check-icon">✅</span>
+        <div><strong>Edge</strong><br><span style="font-size:0.8rem; color: var(--muted);">Works — Chromecast via menu → More Tools → Cast</span></div>
+      </div>
+      <div class="check-item" style="border-color: #8a4a4a;">
+        <span class="check-icon">❌</span>
+        <div><strong>Firefox</strong><br><span style="font-size:0.8rem; color: var(--muted);">No Chromecast on desktop — use Chrome or Edge instead. On iOS, Firefox can cast via AirPlay.</span></div>
+      </div>
+      <div class="check-item" style="border-color: #8a6a4a;">
+        <span class="check-icon">⚠️</span>
+        <div><strong>Safari</strong><br><span style="font-size:0.8rem; color: var(--muted);">AirPlay only — works with Apple TV, not Chromecast</span></div>
+      </div>
+    </div>
+
+    <div class="tip"><strong>💡 Mobile — <span style="color:var(--accent)">KARAOKE NIGHT</span>:</strong> Open <strong>KARAOKE NIGHT</strong> in your mobile browser — Chrome on Android, Safari or Firefox on iPhone all work great. Find your song and tap to play. To cast to a TV, use the Cast icon in Chrome (Android) or AirPlay (iPhone).</div>
+    <div class="tip" style="margin-top: 0.5rem"><strong>💡 Just singing along?</strong> If you are not casting to a TV and just playing audio through your device speakers, any browser works fine.</div>
     <div class="tip" style="margin-top: 0.5rem; border-left-color: #c06080;">❤️ <strong>Not using <span style="color:var(--accent)">KARAOKE NIGHT</span>?</strong> Sorry to hear that but you are always welcome at the party! Just use your preferred karaoke player and join in — we'd love to see you!</div>
   </section>
 
@@ -607,13 +606,13 @@
         <tr><th>Problem</th><th>Fix</th></tr>
       </thead>
       <tbody>
-        <tr><td>Can't hear anything</td><td>Check device volume. Look for a speaker or audio option in your app. Make sure you joined with audio turned on.</td></tr>
+        <tr><td>Can't hear anything</td><td>Check device volume. Tap the speaker icon in your app. Make sure you joined with audio enabled.</td></tr>
         <tr><td>Others can't hear me</td><td>Check you are not muted — tap the microphone icon. Check the app has microphone permission in your phone settings.</td></tr>
         <tr><td>Echo or feedback</td><td>Turn your volume down a bit or use headphones. Someone in the call has their speaker too loud near their mic.</td></tr>
         <tr><td>Video is frozen</td><td>Leave the meeting and rejoin using the same link from your host.</td></tr>
-        <tr><td>Call cuts off after a while</td><td>Some apps have a time limit on free accounts (Zoom's is 40 minutes). Your host will start a new meeting — watch for a new link in the group chat.</td></tr>
+        <tr><td>Call cuts off at 40 min</td><td>Normal on free Zoom. Your host will start a new meeting — watch for a new link in the group chat.</td></tr>
         <tr><td>Can't find the link</td><td>Check your texts and email. Ask your host to resend it in the group chat.</td></tr>
-        <tr><td>Backing track sounds muffled</td><td>Turn it up louder in your room. Then look in your meeting app's audio settings for noise suppression and turn it down or off — it can filter out music.</td></tr>
+        <tr><td>Backing track sounds muffled</td><td>Turn it up louder in your room. Try Zoom's Noise Suppression set to Low or Off in audio settings.</td></tr>
       </tbody>
     </table>
   </section>
@@ -621,7 +620,7 @@
 </main>
 
 <footer>
-  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; Virtual Setup Guide &nbsp;•&nbsp; R01V02L07a 🎤 &nbsp;•&nbsp; <span id="buildTag" data-build="R01V02L07a (1786283901 EDT-0400)" onclick="toggleBuild()" style="cursor:pointer;text-decoration:underline dotted;" title="Click for build date">1786283901</span><br>© 2026 AllinPics
+  <span style="color:var(--accent); font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em;">KARAOKE NIGHT</span> &nbsp;•&nbsp; Virtual Setup Guide &nbsp;•&nbsp; R01V01L10a 🎤 &nbsp;•&nbsp; <span id="buildTag" data-build="R01V01L10a (1782068226 EDT-0400)" onclick="toggleBuild()" style="cursor:pointer;text-decoration:underline dotted;" title="Click for build date">1782068226</span><br>© 2026 AllinPics
 </footer>
 
 <script>

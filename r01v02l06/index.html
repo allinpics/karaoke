@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V02L07a (1786128626 EDT-0400) -->
+<!-- Karaoke Night | R01V02L03 (1782926073 EDT-0400) -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -142,10 +142,7 @@
 // Cascading mics and musical notes background
 const symbols = ['🎤','🎵','🎶','🎼','🎤','🎵','🎶','🎤','🎵'];
 const canvas = document.getElementById('bgCanvas');
-// L07a: 28 → 36. Denser cascade, and a clean 4 cycles of the 9-symbol array
-// (i % 9), so the mix is even: 12 mics, 8 each of 🎵 🎶 🎼. At 28 the loop cut
-// mid-cycle and over-weighted the front of the array.
-const count = 36;
+const count = 28;
 
 for (let i = 0; i < count; i++) {
   const el = document.createElement('span');
@@ -155,11 +152,7 @@ for (let i = 0; i < count; i++) {
   const left = (i / count * 100) + (Math.random() * 4 - 2);
   const duration = 6 + Math.random() * 8;
   const delay = -(Math.random() * duration);
-  // L07a: mics get a raised floor so a low roll can't read as a note. Ceiling held
-  // at 2.6rem for both — the complaint was floor-only, and the ceiling is tuned.
-  const isMic = el.textContent === '🎤';
-  const size = isMic ? 1.8 + Math.random() * 0.8   // 1.8–2.6
-                     : 1.2 + Math.random() * 1.4;  // 1.2–2.6, unchanged
+  const size = 1.2 + Math.random() * 1.4;
 
   el.style.left = left + '%';
   el.style.fontSize = size + 'rem';

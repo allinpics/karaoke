@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Karaoke Night | R01V02L07a (1786128626 EDT-0400) -->
+<!-- Karaoke Night | R01V02L06 (1785078448 EDT-0400) -->
 <!-- Session file format: CSV — see sample.csv for template -->
 <html lang="en">
 <head>
@@ -13,39 +13,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <!-- Google Analytics (GA4) — env-specific single source: creds/gtag.js -->
 <script src="../creds/gtag.js"></script>
-<!-- L07: environment config — repo-root config/<env>.js, picked by URL path.
-     Equivalent of `. config/$ENV.cfg` in shell: document.write puts the tag in
-     the parser's path so it BLOCKS and completes before any app code runs —
-     window.KN_CFG is always present, never async, never a partial read.
-     A static src= tag can't do this because the path must be computed first;
-     this is the browser's one synchronous computed-source form. (Note: no
-     literal script tag in this comment — selfcheck's block extractor matches
-     tags anywhere in the file, comments included.)
-     Env comes from where the file actually IS, so a copied/snapshotted tree
-     reports itself honestly instead of inheriting a stale hardcoded value.
-     file:// (local testing) has no /sit/ segment — defaults to sit. -->
-<script>
-(function () {
-  var p = location.pathname;
-  // ARCHIVE is tested FIRST: a frozen snapshot lives at <repo>/r01v02l07/ in
-  // both repos, and in prod that path has no /karaoke_night/ segment at all —
-  // but a dev archive would otherwise be indistinguishable from a live env if
-  // the folder pattern were checked last. A snapshot must never claim to be
-  // SIT; it reports ARCHIVE and says so in About.
-  var env = /\/r\d{2}v\d{2}l\d{2}[a-z]?\//.test(p) ? 'archive'
-          : /\/test\//.test(p) ? 'test'
-          : /\/sit\//.test(p)  ? 'sit'
-          : /\/karaoke_night\//.test(p) ? 'prod'
-          : 'sit';   // file:// local testing + anything unrecognized (2.0-beta)
-  // The closing tag is assembled from parts, never written as a literal. Even
-  // backslash-escaped, a literal closing tag still reads as a real one to the
-  // HTML parser and to selfcheck's block extractor (which stops at the first
-  // match and then sees a truncated, unparseable block). Concatenation avoids
-  // both. Same reason this comment describes the tag instead of showing it.
-  var TAG = 'script';
-  document.write('<' + TAG + ' src="../config/' + env + '.js"></' + TAG + '>');
-})();
-</script>
 <style>
   :root {
     /* --- theme colors --- */
@@ -752,25 +719,6 @@
   }
   .song-card { position: relative; }
   .song-card:hover .edit-btn { opacity: 0.9; }
-  /* L07: song glyph — sits left of the pencil. Inert this release (no handler,
-     and INCLUDED in isCardChromeTap's bail-out list — inclusion is what makes a
-     tap on it do nothing instead of firing a search); reserved as the
-     multi-select affordance in a later L07a. Sizing/opacity
-     deliberately mirror .song-card .edit-btn so the pair reads as one control
-     group. No negative margin — the pencil's own hit-zone carve-out already
-     starts at the card's left edge, and a second one would overlap it. */
-  .song-glyph {
-    flex-shrink: 0;
-    display: inline-block;
-    font-size: 1rem;
-    color: var(--muted);
-    opacity: 0.5;
-    padding: 0 0.15em 0 0;
-    margin-top: 1px;
-    line-height: 1;
-    user-select: none;
-  }
-  .song-card:hover .song-glyph { opacity: 0.9; }
   /* L06: Excel-style pending-cut marker — cleared on paste/re-cut/re-copy elsewhere.
      Item 11: border-based instead of outline (kept opacity, dropped the outside ring) —
      each element type gets its own rule since the marker class sits on a wrapper,
@@ -1389,9 +1337,8 @@
     <div class="modal-body">
       Open a session file to get started. Filter your song list, find tracks on YouTube, and switch between Karaoke and Music Video search modes.<br><br>
       <strong>Build:</strong> <span id="aboutRVL"></span><br>
-      <strong>Environment:</strong> <span id="aboutEnv"></span><br>
       <span id="aboutBuild" onclick="toggleBuildDate()" style="cursor:pointer;text-decoration:underline dotted;font-size:0.9em;" title="Click to toggle date"></span><br>
-      <strong>Feedback:</strong> <a id="aboutMailto" href="mailto:KaraokeNight@AllinPics.com" onclick="mailtoClicked()">KaraokeNight@AllinPics.com</a>
+      <strong>Feedback:</strong> <a id="aboutMailto" href="mailto:KaraokeNight@AllinPics.com">KaraokeNight@AllinPics.com</a>
       <div style="margin-top:1em;color:var(--muted);font-size:0.8rem;">© 2026 AllinPics</div>
     </div>
     <button class="modal-ok" onclick="closeModal('modalAbout')">OK</button>
@@ -1407,7 +1354,7 @@
 
 <script>
 // ---- BUILD TAG — single source of truth for version display ----
-const BUILD = 'R01V02L07a (1786128626 EDT-0400)';
+const BUILD = 'R01V02L06 (1785078448 EDT-0400)';
 
 // ---- GA4 EVENT HELPER ----
 // All custom events prefixed KN_ to avoid colliding with GA4's own reserved/
@@ -1419,89 +1366,6 @@ function knEvent(name, params) {
 }
 
 // ---- YOUTUBE ----
-// ---- FEEDBACK DIAGNOSTICS (L07) ----
-// Environment + client facts pre-filled into the About panel's feedback mailto,
-// so a bug report arrives with the context that's otherwise a back-and-forth.
-// NEVER include session content (singer/category/song names) or counts — same
-// rule as the GA riders: this is diagnostics, not telemetry about what a user
-// put in their list. The whole body is visible in the user's compose window
-// before they send, which is the point: nothing goes out they can't see.
-function envName() {
-  return (window.KN_CFG && window.KN_CFG.env) ? window.KN_CFG.env : '—';
-}
-// Best-effort browser guess. Deliberately paired with the raw (trimmed) UA in
-// the body rather than replacing it: modern browsers freeze and spoof the UA
-// string (Chromium claims both Chrome and Safari; iPadOS Safari claims macOS),
-// so this is a convenience label, never authoritative.
-//
-// Tokens are tested IN ORDER, one regex each — NOT as a single alternation.
-// A derived browser puts its own token LAST: Edge's UA reads
-// "...Chrome/126... Safari/537.36 Edg/126", so an alternation would match the
-// leftmost occurrence (Chrome) regardless of how the alternatives are ordered,
-// and Edge/Opera would both report as Chrome. Most-specific first is only
-// meaningful if each is a separate test.
-function browserGuess() {
-  const ua = navigator.userAgent || '';
-  const order = [
-    ['Edg',     'Edge'],
-    ['OPR',     'Opera'],
-    ['CriOS',   'Chrome iOS'],
-    ['FxiOS',   'Firefox iOS'],
-    ['Firefox', 'Firefox'],
-    ['Chrome',  'Chrome'],
-    ['Safari',  'Safari']
-  ];
-  for (const [token, label] of order) {
-    const m = new RegExp(token + '\\/(\\d+)').exec(ua);
-    if (!m) continue;
-    // A real Safari UA also carries Version/x — prefer that over the WebKit
-    // build number that Safari/x actually reports (605.1.15 → "Safari 605").
-    if (label === 'Safari') {
-      const v = /Version\/(\d+)/.exec(ua);
-      return 'Safari ' + (v ? v[1] : m[1]);
-    }
-    return label + ' ' + m[1];
-  }
-  return 'unknown';
-}
-// L07 Item 4 — see the mailNavigating declaration for why this exists.
-// The reset is setTimeout(0), not a delay: beforeunload fires synchronously
-// while this click is still being handled, so the 0-callback runs after it and
-// the guard is live again immediately. There is no hand-off to wait out — the
-// page never navigates. A longer delay would only widen the window in which a
-// real tab-close goes unwarned.
-function mailtoClicked() {
-  mailNavigating = true;
-  setTimeout(() => { mailNavigating = false; }, 0);
-}
-function feedbackBody() {
-  const L = [];
-  L.push('');
-  L.push('');
-  L.push('--- please describe the issue above this line ---');
-  L.push('');
-  L.push('Build:       ' + BUILD);
-  L.push('Environment: ' + envName());
-  // Which screen they were on, not the URL — the URL is always player.html and
-  // told us nothing. .welcome-panel exists in the DOM only while the welcome
-  // screen is up, so this is an exact test with no new state to keep in sync.
-  L.push('Showing:     ' + (document.querySelector('.welcome-panel') ? 'welcome' : 'session'));
-  const dpr = window.devicePixelRatio || 1;
-  L.push('Screen:      ' + screen.width + 'x' + screen.height +
-         (dpr !== 1 ? ' @' + dpr + 'x' : ''));
-  L.push('Viewport:    ' + window.innerWidth + 'x' + window.innerHeight);
-  L.push('Theme:       ' + (document.body.classList.contains('light') ? 'light' : 'dark'));
-  let tz = '';
-  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
-  L.push('Language:    ' + (navigator.language || '?') + (tz ? '   TZ: ' + tz : ''));
-  // Raw UA dropped (user call, L07) — this guess is now the ONLY browser signal
-  // in the report, so "(best guess)" stays on the line. Browsers freeze/spoof
-  // the UA, so an exact answer was never available anyway; if a report ever
-  // hinges on the real string, ask the reporter directly.
-  L.push('Browser:     ' + browserGuess() + ' (best guess)');
-  return L.join('\n');
-}
-
 // ---- MODALS ----
 function openModal(id) {
   closeAllRibbons();
@@ -1512,18 +1376,10 @@ function openModal(id) {
     const epochMatch = BUILD.match(/\((\d+)\s+(\w+)([+-]\d{4})\)/);
     // Line 1: RVL tag only
     document.getElementById('aboutRVL').textContent = rvlMatch ? rvlMatch[1] : BUILD;
-    // L07: environment from repo-root config/<env>.js (sourced in <head>).
-    // Falls back to '—' rather than guessing, so a missing/blocked config file
-    // is visible instead of silently reporting the wrong environment.
-    document.getElementById('aboutEnv').textContent = envName();
-    // Feedback mailto — subject carries RVL + epoch + env; body carries the
-    // client diagnostics (see feedbackBody). Both are built at open time, not
-    // page load, so viewport/theme reflect the moment the user asked to write.
+    // Feedback mailto — subject pre-filled with RVL + epoch
     const rvlEpoch = rvlMatch && epochMatch ? rvlMatch[1] + ' (' + epochMatch[1] + ')' : BUILD;
-    const subject = encodeURIComponent('Feedback: Karaoke Night ' + rvlEpoch + ' [' + envName() + ']');
-    const body = encodeURIComponent(feedbackBody());
-    document.getElementById('aboutMailto').href =
-      'mailto:KaraokeNight@AllinPics.com?subject=' + subject + '&body=' + body;
+    const subject = encodeURIComponent('Feedback: Karaoke Night ' + rvlEpoch);
+    document.getElementById('aboutMailto').href = 'mailto:KaraokeNight@AllinPics.com?subject=' + subject;
     // Line 2: epoch portion clickable, defaults to epoch
     if (epochMatch) {
       const epochStr = '(' + epochMatch[1] + ')';   // build number only; TZ kept in BUILD, used only for the readable-date toggle
@@ -1640,7 +1496,7 @@ function updateFooterTip() {
   if (!el) return;
   const hasSession = currentSingers.length > 0;
   if (!hasSession) {
-    el.innerHTML = '🎤 YOU ARE NOW IN THE ZONE 🎤';
+    el.innerHTML = 'Open a session file to get started &nbsp;·&nbsp; Use Session &rarr; Open';
     return;
   }
   const edit = '✏️ edit';
@@ -1663,18 +1519,6 @@ function ytSearch(q) {
   return 'https://www.google.com/search?q=' + encodeURIComponent(q);
 }
 let ytNavigating = false;
-// L07 Item 4: suppresses ONE spurious beforeunload from the About panel's
-// mailto: link. Clicking a mailto is a navigation *attempt* — the browser fires
-// beforeunload on intent, then discovers the scheme is an OS hand-off and
-// abandons the navigation. The page never unloads (the mail client opens in its
-// own window), so the dirty prompt that fires is always a false alarm.
-//
-// Deliberately NOT markClean(): the user clicked Feedback, they did not agree to
-// discard anything. Their edits are still unsaved and the next real tab-close
-// must still warn. This flag gates the guard; sessionDirty is never touched.
-// Pre-existing since R01V02L03a — not an L07 regression, fixed here because L07
-// was already in this code.
-let mailNavigating = false;
 function navigateSearch(q) {
   const url = ytSearch(q);
   if (searchMode === 'web') { window.open(url, '_blank'); }
@@ -1997,20 +1841,6 @@ function onFilterBlur() {
 }
 
 // ---- SONG CARD ----
-// Card chrome = the controls that live ON a song card but are not the card itself.
-// A tap landing on any of them must NOT fire a search. Single source of truth for
-// BOTH card-tap handlers: makeCard's, and the one startInlineSongRename rebinds
-// after an in-place rename. Keeping the list in one place is the point — the rebind
-// site previously carried a hand-copied subset and drifted (missing .song-glyph and
-// .edit-input). Do not inline this check at either site.
-// NOTE: the header/pencil-menu bail-outs elsewhere are deliberately NOT this predicate —
-// different elements, different sets. Do not fold them in.
-function isCardChromeTap(target) {
-  return !!(target.closest('.edit-btn') ||
-            target.closest('.edit-input') ||
-            target.closest('.song-meta-icon') ||
-            target.closest('.song-glyph'));
-}
 function makeCard(song, si, ci, soi) {
   // song is always {title, artist, url}
   const { title = '', artist = '', url = '' } = song;
@@ -2022,7 +1852,7 @@ function makeCard(song, si, ci, soi) {
   card.href = '#';
   card.target = '_self';
   card.onclick = function(e) {
-    if (isCardChromeTap(e.target)) return;
+    if (e.target.closest('.edit-btn') || e.target.closest('.edit-input') || e.target.closest('.song-meta-icon')) return;
     e.preventDefault();
     knEvent('KN_card_pick');
     const c = document.getElementById('main-container');
@@ -2035,12 +1865,6 @@ function makeCard(song, si, ci, soi) {
       navigateSearch(title + (artist ? ' ' + artist : ''));
     }
   };
-  // L07: song glyph — decorative this release, reserved for multi-select (L07x).
-  // A <span>, not a <button>: nothing to focus or tab to until it does something.
-  const glyph = document.createElement('span');
-  glyph.className = 'song-glyph';
-  glyph.textContent = '📜';
-
   const editBtn = document.createElement('button');
   editBtn.className = 'edit-btn';
   editBtn.title = 'Edit song';
@@ -2054,7 +1878,6 @@ function makeCard(song, si, ci, soi) {
   t.className = 'song-title';
   t.textContent = title;
 
-  card.appendChild(glyph);   // L07: left of the pencil
   card.appendChild(editBtn);
   card.appendChild(t);
 
@@ -2933,7 +2756,7 @@ function startInlineSongRename(si, ci, soi) {
     if (fq.trim()) filterSongs(fq);
     updateViewMenuState();
     card.onclick = function(ev) {
-      if (isCardChromeTap(ev.target)) return;
+      if (ev.target.closest('.edit-btn') || ev.target.closest('.song-meta-icon')) return;
       ev.preventDefault();
       const c = document.getElementById('main-container');
       if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
@@ -4026,7 +3849,6 @@ window.addEventListener('beforeunload', (e) => {
   const c = document.getElementById('main-container');
   if (c) sessionStorage.setItem('karaokeScroll', c.scrollTop);
   if (ytNavigating) return;
-  if (mailNavigating) return;   // L07 Item 4 — mailto never unloads; false alarm
   if (sessionDirty) { e.preventDefault(); e.returnValue = ''; }
 });
 // Exit via window/tab close (the X) — pagehide only fires on an actual unload,
