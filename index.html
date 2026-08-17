@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- allinpics.com | Landing Pad -->
+<!-- allinpics.com | Landing Pad (1786966868 EDT-0400) -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -116,23 +116,21 @@
     letter-spacing: 0.08em;
     text-align: center;
   }
-  .theme-btn {
+  .teaser-btn {
     position: fixed;
     top: 14px;
     right: 14px;
     background: none;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    padding: 4px 10px;
-    border-radius: 6px;
+    border: none;
+    font-size: 1.1rem;
+    line-height: 1;
     cursor: pointer;
+    text-decoration: none;
   }
 </style>
 </head>
 <body class="light">
-  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+  <a id="teaserLink" class="teaser-btn" href="https://karaoke.allinpics.com/">🎁</a>
 
   <h1>allinpics</h1>
   <p class="tagline">Apps for friends &amp; family</p>
@@ -147,18 +145,6 @@
   <footer>allinpics.com</footer>
 
 <script>
-  function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('themeBtn');
-    if (body.classList.contains('light')) {
-      body.classList.remove('light');
-      btn.textContent = '☀️ Light';
-    } else {
-      body.classList.add('light');
-      btn.textContent = '🌙 Dark';
-    }
-  }
-
   // Track which app a visitor clicks through to (GA4 portal property).
   // Generic: applies to every .link-card, so new app cards are tracked automatically.
   document.querySelectorAll('.link-card').forEach(function (a) {
